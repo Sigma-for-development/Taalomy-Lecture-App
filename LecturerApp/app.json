@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "Taalomy Lecturer",
+    "slug": "Taalomy-lecturer",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/taalomy-dark-back.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/taalomy-splash-padded.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1b1b1b"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.Taalomy.lecturer",
+      "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        }
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/taalomy-dark-back.png",
+        "backgroundColor": "#1b1b1b"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.Taalomy.lecturer",
+      "usesCleartextTraffic": true,
+      "googleServicesFile": "./google-services.json"
+    },
+    "web": {
+      "favicon": "./assets/taalomy-dark-back.png",
+      "bundler": "metro"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "28163952-6467-4279-8806-c0c47b52de36"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-notifications",
+      "expo-video"
+    ],
+    "scheme": "AcadeX-lecturer",
+    "sdkVersion": "54.0.0"
+  }
+}
