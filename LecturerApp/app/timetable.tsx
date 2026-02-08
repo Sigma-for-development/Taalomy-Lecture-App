@@ -16,6 +16,7 @@ import { tokenStorage } from '../utils/tokenStorage';
 const AsyncStorage = tokenStorage;
 import { lecturerAPI } from '../src/utils/api';
 import { useTranslation } from 'react-i18next';
+import { useResponsive } from '../src/hooks/useResponsive';
 
 // Unified interface for display
 interface ScheduleItem {
@@ -60,7 +61,10 @@ interface Group {
 }
 
 const TimetableScreen = () => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const { isDesktop } = useResponsive();
+    const isWeb = Platform.OS === 'web';
+    const isRTL = i18n.dir() === 'rtl';
     const [scheduleItems, setScheduleItems] = useState<ScheduleItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -169,15 +173,51 @@ const TimetableScreen = () => {
     const groupedSchedule = getGroupedSchedule();
     const daysWithItems = Object.keys(groupedSchedule).filter(day => groupedSchedule[day].length > 0);
 
+    // Calculate statistics
+    const totalClasses = scheduleItems.filter(item => item.type === 'class').length;
+    const totalGroups = scheduleItems.filter(item => item.type === 'group').length;
+
+    // Calculate total teaching hours
+    const calculateTotalHours = () => {
+        let totalMinutes = 0;
+        scheduleItems.forEach(item => {
+            if (item.start_time && item.end_time) {
+                const [startHour, startMin] = item.start_time.split(':').map(Number);
+                const [endHour, endMin] = item.end_time.split(':').map(Number);
+                const duration = (endHour * 60 + endMin) - (startHour * 60 + startMin);
+                totalMinutes += duration;
+            }
+        });
+        return (totalMinutes / 60).toFixed(1);
+    };
+
+    // Find busiest day
+    const getBusiestDay = () => {
+        let maxCount = 0;
+        let busiest = t('none');
+        Object.keys(groupedSchedule).forEach(day => {
+            if (groupedSchedule[day].length > maxCount) {
+                maxCount = groupedSchedule[day].length;
+                busiest = t(day.toLowerCase());
+            }
+        });
+        return busiest;
+    };
+
+    const totalHours = calculateTotalHours();
+    const busiestDay = getBusiestDay();
+
     if (loading) {
         return (
             <View style={styles.container}>
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                        <Ionicons name="arrow-back" size={24} color="#fff" />
-                    </TouchableOpacity>
-                    <Text style={styles.headerTitle}>{t('my_timetable_title')}</Text>
-                    <View style={{ width: 40 }} />
+                <View style={[styles.header, isWeb && { paddingHorizontal: 24 }]}>
+                    {!isWeb && (
+                        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                            <Ionicons name="arrow-back" size={24} color="#fff" />
+                        </TouchableOpacity>
+                    )}
+                    <Text style={[styles.headerTitle, isWeb && { marginLeft: 0 }]}>{t('my_timetable_title')}</Text>
+                    {!isWeb && <View style={{ width: 40 }} />}
                 </View>
                 <View style={styles.centered}>
                     <ActivityIndicator size="large" color="#3498db" />
@@ -190,17 +230,22 @@ const TimetableScreen = () => {
         <View style={styles.container}>
             <StatusBar barStyle="light-content" backgroundColor="#1a1a1a" />
 
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={22} color="#fff" />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>{t('my_timetable_title')}</Text>
-                <View style={{ width: 40 }} />
+            <View style={[styles.header, isWeb && { paddingHorizontal: 24, justifyContent: 'flex-start' }]}>
+                {!isWeb && (
+                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                        <Ionicons name="arrow-back" size={22} color="#fff" />
+                    </TouchableOpacity>
+                )}
+                <Text style={[styles.headerTitle, isWeb && { marginLeft: 0 }]}>{t('my_timetable_title')}</Text>
+                {!isWeb && <View style={{ width: 40 }} />}
             </View>
 
             <ScrollView
                 style={styles.content}
-                contentContainerStyle={styles.scrollContent}
+                contentContainerStyle={[
+                    styles.scrollContent,
+                    isDesktop && { paddingHorizontal: 24, maxWidth: 1400, alignSelf: 'center', width: '100%' }
+                ]}
                 showsVerticalScrollIndicator={false}
                 refreshControl={
                     <RefreshControl
@@ -211,8 +256,103 @@ const TimetableScreen = () => {
                     />
                 }
             >
+                {/* Statistics Cards */}
+                <View style={[styles.statsContainer, isDesktop && { flexDirection: 'row', flexWrap: 'wrap' }]}>
+                    <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 200, marginRight: 12 }]}>
+                        <View style={[styles.statIconContainer, { backgroundColor: 'rgba(52, 152, 219, 0.15)' }]}>
+                            <Ionicons name="book" size={24} color="#3498db" />
+                        </View>
+                        <View style={styles.statInfo}>
+                            <Text style={styles.statValue}>{totalClasses}</Text>
+                            <Text style={styles.statLabel}>{t('total_classes')}</Text>
+                        </View>
+                    </View>
+
+                    <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 200, marginRight: 12 }]}>
+                        <View style={[styles.statIconContainer, { backgroundColor: 'rgba(155, 89, 182, 0.15)' }]}>
+                            <Ionicons name="people" size={24} color="#9b59b6" />
+                        </View>
+                        <View style={styles.statInfo}>
+                            <Text style={styles.statValue}>{totalGroups}</Text>
+                            <Text style={styles.statLabel}>{t('active_groups')}</Text>
+                        </View>
+                    </View>
+
+                    <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 200, marginRight: 12 }]}>
+                        <View style={[styles.statIconContainer, { backgroundColor: 'rgba(46, 204, 113, 0.15)' }]}>
+                            <Ionicons name="time" size={24} color="#2ecc71" />
+                        </View>
+                        <View style={styles.statInfo}>
+                            <Text style={styles.statValue}>{totalHours}h</Text>
+                            <Text style={styles.statLabel}>{t('teaching_hours')}</Text>
+                        </View>
+                    </View>
+
+                    <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 200 }]}>
+                        <View style={[styles.statIconContainer, { backgroundColor: 'rgba(231, 76, 60, 0.15)' }]}>
+                            <Ionicons name="trending-up" size={24} color="#e74c3c" />
+                        </View>
+                        <View style={styles.statInfo}>
+                            <Text style={styles.statValue}>{busiestDay}</Text>
+                            <Text style={styles.statLabel}>{t('busiest_day')}</Text>
+                        </View>
+                    </View>
+                </View>
+
+                {/* Legend Section */}
+                <View style={styles.legendContainer}>
+                    <View style={styles.legendHeader}>
+                        <Ionicons name="information-circle" size={20} color="#3498db" />
+                        <Text style={styles.legendTitle}>{t('legend')}</Text>
+                    </View>
+
+                    <View style={[styles.legendGrid, isDesktop && { flexDirection: 'row', gap: 24 }]}>
+                        {/* Class Types */}
+                        <View style={[styles.legendSection, isDesktop && { flex: 1 }]}>
+                            <Text style={styles.legendSectionTitle}>{t('legend_class_types')}</Text>
+                            <View style={styles.legendItems}>
+                                <View style={styles.legendItem}>
+                                    <View style={[styles.legendDot, { backgroundColor: '#3498db' }]} />
+                                    <View style={styles.legendTextContainer}>
+                                        <Text style={styles.legendItemLabel}>{t('type_class')}</Text>
+                                        <Text style={styles.legendItemDesc}>{t('legend_class_desc')}</Text>
+                                    </View>
+                                </View>
+                                <View style={styles.legendItem}>
+                                    <View style={[styles.legendDot, { backgroundColor: '#9b59b6' }]} />
+                                    <View style={styles.legendTextContainer}>
+                                        <Text style={styles.legendItemLabel}>{t('type_group')}</Text>
+                                        <Text style={styles.legendItemDesc}>{t('legend_group_desc')}</Text>
+                                    </View>
+                                </View>
+                            </View>
+                        </View>
+
+                        {/* Venue Types */}
+                        <View style={[styles.legendSection, isDesktop && { flex: 1 }]}>
+                            <Text style={styles.legendSectionTitle}>{t('legend_venue_types')}</Text>
+                            <View style={styles.legendItems}>
+                                <View style={styles.legendItem}>
+                                    <Ionicons name="videocam" size={14} color="#2ecc71" style={{ marginRight: 12, width: 14 }} />
+                                    <View style={styles.legendTextContainer}>
+                                        <Text style={styles.legendItemLabel}>{t('venue_online')}</Text>
+                                        <Text style={styles.legendItemDesc}>{t('legend_online_desc')}</Text>
+                                    </View>
+                                </View>
+                                <View style={styles.legendItem}>
+                                    <Ionicons name="business" size={14} color="#e67e22" style={{ marginRight: 12, width: 14 }} />
+                                    <View style={styles.legendTextContainer}>
+                                        <Text style={styles.legendItemLabel}>{t('venue_conference')}</Text>
+                                        <Text style={styles.legendItemDesc}>{t('legend_conference_desc')}</Text>
+                                    </View>
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+                </View>
+
                 {daysWithItems.length === 0 ? (
-                    <View style={styles.emptyContainer}>
+                    <View style={[styles.emptyContainer, isDesktop && { paddingTop: 150 }]}>
                         <View style={{
                             width: 100,
                             height: 100,
@@ -231,7 +371,7 @@ const TimetableScreen = () => {
                     </View>
                 ) : (
                     daysWithItems.map((day) => (
-                        <View key={day} style={styles.daySection}>
+                        <View key={day} style={[styles.daySection, isDesktop && { marginBottom: 40 }]}>
                             <View style={styles.dayHeaderContainer}>
                                 <View style={styles.dayIndicator}>
                                     <Text style={styles.dayIndicatorText}>{t(day.toLowerCase() + '_short')}</Text>
@@ -332,8 +472,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: 20,
-        paddingTop: 60,
-        paddingBottom: 20,
+        height: 80,
         backgroundColor: '#1a1a1a',
         borderBottomWidth: 1,
         borderBottomColor: '#2c2c2c',
@@ -350,7 +489,7 @@ const styles = StyleSheet.create({
         borderColor: '#333',
     },
     headerTitle: {
-        fontSize: 18,
+        fontSize: 24,
         fontWeight: '700',
         color: '#fff',
     },
@@ -366,6 +505,100 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#1a1a1a',
+    },
+    statsContainer: {
+        marginBottom: 24,
+        gap: 12,
+    },
+    statCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#252525',
+        borderRadius: 16,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: '#333',
+    },
+    statIconContainer: {
+        width: 50,
+        height: 50,
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 14,
+    },
+    statInfo: {
+        flex: 1,
+    },
+    statValue: {
+        fontSize: 24,
+        fontWeight: '800',
+        color: '#fff',
+        marginBottom: 2,
+    },
+    statLabel: {
+        fontSize: 13,
+        color: '#7f8c8d',
+        fontWeight: '600',
+    },
+    legendContainer: {
+        backgroundColor: 'rgba(52, 152, 219, 0.05)',
+        borderRadius: 16,
+        padding: 16,
+        marginBottom: 24,
+        borderWidth: 1,
+        borderColor: 'rgba(52, 152, 219, 0.1)',
+    },
+    legendHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+    legendTitle: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#fff',
+        marginLeft: 8,
+    },
+    legendSectionTitle: {
+        fontSize: 13,
+        fontWeight: '700',
+        color: '#95a5a6',
+        textTransform: 'uppercase',
+        marginBottom: 10,
+        letterSpacing: 0.5,
+    },
+    legendGrid: {
+        gap: 16,
+    },
+    legendSection: {
+        flex: 1,
+    },
+    legendItems: {
+        gap: 12,
+    },
+    legendItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    legendDot: {
+        width: 12,
+        height: 12,
+        borderRadius: 6,
+        marginRight: 12,
+    },
+    legendTextContainer: {
+        flex: 1,
+    },
+    legendItemLabel: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: '#fff',
+        marginBottom: 2,
+    },
+    legendItemDesc: {
+        fontSize: 12,
+        color: '#95a5a6',
     },
     emptyContainer: {
         flex: 1,
