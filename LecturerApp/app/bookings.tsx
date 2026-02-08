@@ -26,6 +26,7 @@ import axios from 'axios';
 import Toast from 'react-native-toast-message';
 import { useLocalization } from '../src/context/LocalizationContext';
 import { useTranslation } from 'react-i18next';
+import { useResponsive } from '../src/hooks/useResponsive';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -63,6 +64,8 @@ interface Intake {
 const BookingsScreen = () => {
   const { formatPrice } = useLocalization();
   const { t } = useTranslation();
+  const { isDesktop } = useResponsive();
+  const isWeb = Platform.OS === 'web';
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'confirmed' | 'completed'>('all');
@@ -263,82 +266,84 @@ const BookingsScreen = () => {
   };
 
   const renderBookingCard = ({ item }: { item: Booking }) => (
-    <View style={styles.bookingCard}>
-      <View style={styles.bookingHeader}>
-        <View style={styles.studentInfo}>
-          <Text style={styles.studentName}>{item.student_name}</Text>
-          <Text style={styles.studentEmail}>{item.student.email}</Text>
+    <View style={[styles.bookingCardWrapper, isDesktop && { width: '33.33%', paddingHorizontal: 6 }]}>
+      <View style={styles.bookingCard}>
+        <View style={styles.bookingHeader}>
+          <View style={styles.studentInfo}>
+            <Text style={styles.studentName}>{item.student_name}</Text>
+            <Text style={styles.studentEmail}>{item.student.email}</Text>
+          </View>
+          <View style={[styles.statusBadge, { backgroundColor: `${getStatusColor(item.status)}20` }]}>
+            <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>
+              {getStatusText(item.status)}
+            </Text>
+          </View>
         </View>
-        <View style={[styles.statusBadge, { backgroundColor: `${getStatusColor(item.status)}20` }]}>
-          <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>
-            {getStatusText(item.status)}
-          </Text>
+
+        <View style={styles.bookingDetails}>
+          <View style={styles.detailRow}>
+            <Ionicons name="calendar-outline" size={16} color="#95a5a6" />
+            <Text style={styles.detailText}>
+              {new Date(item.booking_date).toLocaleDateString()}
+            </Text>
+          </View>
+
+          <View style={styles.detailRow}>
+            <Ionicons name="time-outline" size={16} color="#95a5a6" />
+            <Text style={styles.detailText}>
+              {item.start_time} - {item.end_time} ({item.duration_hours}h)
+            </Text>
+          </View>
+
+          <View style={styles.detailRow}>
+            <Ionicons name="book-outline" size={16} color="#95a5a6" />
+            <Text style={styles.detailText}>{item.subject}</Text>
+          </View>
+
+          <View style={styles.detailRow}>
+            <Ionicons name="cash-outline" size={16} color="#95a5a6" />
+            <Text style={styles.detailText}>{formatPrice(item.total_amount)}</Text>
+          </View>
         </View>
+
+        {item.notes && (
+          <View style={styles.notesContainer}>
+            <Text style={styles.notesLabel}>{t('notes_label')}</Text>
+            <Text style={styles.notesText}>{item.notes}</Text>
+          </View>
+        )}
+
+        {item.status === 'pending' && (
+          <View style={styles.actionButtons}>
+            <TouchableOpacity
+              style={[styles.actionButton, styles.confirmButton]}
+              onPress={() => handleBookingAction(item.id, 'confirm')}
+            >
+              <Ionicons name="checkmark" size={16} color="#fff" />
+              <Text style={styles.actionButtonText}>{t('action_confirm')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.actionButton, styles.cancelButton]}
+              onPress={() => handleBookingAction(item.id, 'cancel')}
+            >
+              <Ionicons name="close" size={16} color="#fff" />
+              <Text style={styles.actionButtonText}>{t('action_cancel')}</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {item.status === 'confirmed' && (
+          <View style={styles.actionButtons}>
+            <TouchableOpacity
+              style={[styles.actionButton, styles.completeButton]}
+              onPress={() => handleBookingAction(item.id, 'complete')}
+            >
+              <Ionicons name="checkmark-circle" size={16} color="#fff" />
+              <Text style={styles.actionButtonText}>{t('action_mark_complete')}</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
-
-      <View style={styles.bookingDetails}>
-        <View style={styles.detailRow}>
-          <Ionicons name="calendar-outline" size={16} color="#95a5a6" />
-          <Text style={styles.detailText}>
-            {new Date(item.booking_date).toLocaleDateString()}
-          </Text>
-        </View>
-
-        <View style={styles.detailRow}>
-          <Ionicons name="time-outline" size={16} color="#95a5a6" />
-          <Text style={styles.detailText}>
-            {item.start_time} - {item.end_time} ({item.duration_hours}h)
-          </Text>
-        </View>
-
-        <View style={styles.detailRow}>
-          <Ionicons name="book-outline" size={16} color="#95a5a6" />
-          <Text style={styles.detailText}>{item.subject}</Text>
-        </View>
-
-        <View style={styles.detailRow}>
-          <Ionicons name="cash-outline" size={16} color="#95a5a6" />
-          <Text style={styles.detailText}>{formatPrice(item.total_amount)}</Text>
-        </View>
-      </View>
-
-      {item.notes && (
-        <View style={styles.notesContainer}>
-          <Text style={styles.notesLabel}>{t('notes_label')}</Text>
-          <Text style={styles.notesText}>{item.notes}</Text>
-        </View>
-      )}
-
-      {item.status === 'pending' && (
-        <View style={styles.actionButtons}>
-          <TouchableOpacity
-            style={[styles.actionButton, styles.confirmButton]}
-            onPress={() => handleBookingAction(item.id, 'confirm')}
-          >
-            <Ionicons name="checkmark" size={16} color="#fff" />
-            <Text style={styles.actionButtonText}>{t('action_confirm')}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.actionButton, styles.cancelButton]}
-            onPress={() => handleBookingAction(item.id, 'cancel')}
-          >
-            <Ionicons name="close" size={16} color="#fff" />
-            <Text style={styles.actionButtonText}>{t('action_cancel')}</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {item.status === 'confirmed' && (
-        <View style={styles.actionButtons}>
-          <TouchableOpacity
-            style={[styles.actionButton, styles.completeButton]}
-            onPress={() => handleBookingAction(item.id, 'complete')}
-          >
-            <Ionicons name="checkmark-circle" size={16} color="#fff" />
-            <Text style={styles.actionButtonText}>{t('action_mark_complete')}</Text>
-          </TouchableOpacity>
-        </View>
-      )}
     </View>
   );
 
@@ -366,19 +371,66 @@ const BookingsScreen = () => {
       />
 
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={24} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('bookings_title')}</Text>
-        <View style={styles.placeholder} />
+      <View style={[styles.header, isWeb && { paddingHorizontal: 24, justifyContent: 'flex-start' }]}>
+        {!isWeb && (
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="arrow-back" size={22} color="#fff" />
+          </TouchableOpacity>
+        )}
+        <Text style={[styles.headerTitle, isWeb && { marginLeft: 0 }]}>{t('bookings_title')}</Text>
+        {!isWeb && <View style={styles.placeholder} />}
+      </View>
+
+      {/* Statistics Cards */}
+      <View style={[styles.statsContainer, isDesktop && { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 24, maxWidth: 1400, alignSelf: 'center', width: '100%' }]}>
+        <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 200, maxWidth: 300 }]}>
+          <View style={styles.statIconContainer}>
+            <Ionicons name="calendar" size={24} color="#3498db" />
+          </View>
+          <View style={styles.statContent}>
+            <Text style={styles.statValue}>{bookings?.length || 0}</Text>
+            <Text style={styles.statLabel}>{t('total_bookings')}</Text>
+          </View>
+        </View>
+
+        <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 200, maxWidth: 300 }]}>
+          <View style={styles.statIconContainer}>
+            <Ionicons name="time" size={24} color="#f39c12" />
+          </View>
+          <View style={styles.statContent}>
+            <Text style={styles.statValue}>{bookings?.filter(b => b.status === 'pending').length || 0}</Text>
+            <Text style={styles.statLabel}>{t('pending_requests')}</Text>
+          </View>
+        </View>
+
+        <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 200, maxWidth: 300 }]}>
+          <View style={styles.statIconContainer}>
+            <Ionicons name="checkmark-circle" size={24} color="#2ecc71" />
+          </View>
+          <View style={styles.statContent}>
+            <Text style={styles.statValue}>{bookings?.filter(b => b.status === 'confirmed').length || 0}</Text>
+            <Text style={styles.statLabel}>{t('confirmed_bookings')}</Text>
+          </View>
+        </View>
+
+        <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 200, maxWidth: 300 }]}>
+          <View style={styles.statIconContainer}>
+            <Ionicons name="cash" size={24} color="#9b59b6" />
+          </View>
+          <View style={styles.statContent}>
+            <Text style={styles.statValue}>
+              {formatPrice(bookings?.filter(b => b.status === 'confirmed' || b.status === 'completed').reduce((sum, b) => sum + (b.total_amount || 0), 0) || 0)}
+            </Text>
+            <Text style={styles.statLabel}>{t('total_revenue')}</Text>
+          </View>
+        </View>
       </View>
 
       {/* Tab Navigation */}
-      <View style={styles.tabContainer}>
+      <View style={[styles.tabContainer, isDesktop && { paddingHorizontal: 24, maxWidth: 1400, alignSelf: 'center', width: '100%' }]}>
         {[
           { key: 'all', label: t('tab_all'), count: bookings?.length || 0 },
           { key: 'pending', label: t('tab_pending'), count: bookings?.filter(b => b.status === 'pending').length || 0 },
@@ -407,7 +459,13 @@ const BookingsScreen = () => {
         data={filteredBookings}
         renderItem={renderBookingCard}
         keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.listContainer}
+        key={isDesktop ? 'desktop-3-col' : 'mobile-1-col'}
+        numColumns={isDesktop ? 3 : 1}
+        contentContainerStyle={[
+          styles.listContainer,
+          isDesktop && { paddingHorizontal: 18, maxWidth: 1400, alignSelf: 'center', width: '100%' }
+        ]}
+        columnWrapperStyle={isDesktop ? { marginBottom: 12 } : undefined}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
@@ -651,12 +709,14 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   header: {
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    height: 80,
+    paddingHorizontal: 20,
+    backgroundColor: '#1a1a1a',
+    borderBottomWidth: 1,
+    borderBottomColor: '#2c2c2c',
     zIndex: 10,
   },
   backButton: {
@@ -668,12 +728,53 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: '700',
     color: '#fff',
   },
   placeholder: {
     width: 40,
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    gap: 12,
+  },
+  statCard: {
+    flex: 1,
+    minWidth: 150,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 12,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  statIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  statContent: {
+    flex: 1,
+  },
+  statValue: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#fff',
+    marginBottom: 2,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: '#95a5a6',
+    fontWeight: '500',
   },
   tabContainer: {
     flexDirection: 'row',
@@ -725,10 +826,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 40,
   },
+  bookingCardWrapper: {
+    width: '100%',
+    marginBottom: 12,
+  },
   bookingCard: {
     backgroundColor: '#1e1e1e',
     borderRadius: 16,
-    marginBottom: 16,
     padding: 16,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.05)',
