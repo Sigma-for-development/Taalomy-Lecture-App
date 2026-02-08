@@ -311,6 +311,7 @@ const Dashboard = () => {
 
   // Add helper function to format time ago
   const formatTimeAgo = (dateString: string): string => {
+    // ... logic remains but unused or can be kept for other purposes
     const date = new Date(dateString);
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
@@ -327,6 +328,23 @@ const Dashboard = () => {
       const days = Math.floor(diffInSeconds / 86400);
       return t('days_ago', { count: days });
     }
+  };
+
+  const formatActivityDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+    });
+  };
+
+  const formatActivityTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString(i18n.language === 'ar' ? 'ar-EG' : 'en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
 
   // Add function to load unread messages count
@@ -1735,8 +1753,13 @@ const Dashboard = () => {
                           color: '#ffffff',
                           fontWeight: '600',
                           marginBottom: 4,
+                          textAlign: i18n.dir() === 'rtl' ? 'right' : 'left',
                         }}>
-                          {activity.title}
+                          {activity.title === 'Class Created'
+                            ? t('activity_class_created')
+                            : activity.title === 'New Booking Request'
+                              ? t('activity_booking_request')
+                              : activity.title}
                         </Text>
                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                           <Text style={{
@@ -1744,16 +1767,31 @@ const Dashboard = () => {
                             color: '#bdc3c7',
                             flex: 1,
                             marginRight: 8,
-                          }} numberOfLines={1}>
-                            {activity.description}
+                            textAlign: i18n.dir() === 'rtl' ? 'right' : 'left',
+                          }} numberOfLines={2}>
+                            {activity.title === 'Class Created'
+                              ? t('activity_class_created_desc', { className: activity.description.match(/"([^"]+)"/)?.[1] || activity.description })
+                              : activity.title === 'New Booking Request'
+                                ? t('activity_booking_request_desc', { studentName: activity.description.split(' ')[0] })
+                                : activity.description}
                           </Text>
-                          <Text style={{
-                            fontSize: 11,
-                            color: '#7f8c8d',
-                            fontWeight: '500',
-                          }}>
-                            {activity.time}
-                          </Text>
+                          <View style={{ alignItems: 'flex-end', marginLeft: 8 }}>
+                            <Text style={{
+                              fontSize: 11,
+                              color: '#7f8c8d',
+                              fontWeight: '600',
+                              marginBottom: 2,
+                            }}>
+                              {formatActivityDate(activity.time)}
+                            </Text>
+                            <Text style={{
+                              fontSize: 11,
+                              color: '#3498db',
+                              fontWeight: '500',
+                            }}>
+                              {formatActivityTime(activity.time)}
+                            </Text>
+                          </View>
                         </View>
                       </View>
                     </View>
