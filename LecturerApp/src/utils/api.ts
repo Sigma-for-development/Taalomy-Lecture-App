@@ -235,6 +235,10 @@ export const lecturerAPI = {
 
   // Grading
   getPendingGrades: () => api.get('/lecturer/pending-grades/'),
+
+  // Bookings
+  getBookings: () => api.get('lecturer/bookings/'),
+  bookingAction: (id: number, data: any) => api.patch(`lecturer/bookings/${id}/action/`, data),
 };
 
 export const chatAPI = {

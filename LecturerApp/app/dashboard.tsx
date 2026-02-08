@@ -66,9 +66,10 @@ interface Booking {
   booking_date: string;
   start_time: string;
   end_time: string;
-  status: string;
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
   subject: string;
   created_at: string;
+  total_amount: number;
 }
 
 interface Review {
@@ -97,6 +98,16 @@ interface Class {
   max_students: number;
   current_students: number;
   created_at: string;
+  venue?: string;
+  start_time?: string;
+  end_time?: string;
+  days_of_week?: string;
+}
+
+interface ScheduleItem {
+  id: number;
+  type: 'class' | 'group';
+  name: string;
   venue?: string;
   start_time?: string;
   end_time?: string;
@@ -180,11 +191,16 @@ const Dashboard = () => {
   // Add state for unread messages count
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [loadingUnreadMessages, setLoadingUnreadMessages] = useState(true);
+  const [todaySchedule, setTodaySchedule] = useState<ScheduleItem[]>([]);
+  const [loadingSchedule, setLoadingSchedule] = useState(true);
+  const [pendingBookings, setPendingBookings] = useState<Booking[]>([]);
+  const [loadingBookings, setLoadingBookings] = useState(true);
 
   useEffect(() => {
     loadUserData();
     loadDashboardStats();
-    // loadRecentActivities(); // Consolidated
+    loadTodaySchedule();
+    loadPendingBookings();
     loadUnreadMessages();
   }, []);
 
@@ -320,11 +336,101 @@ const Dashboard = () => {
     }
   };
 
+  const loadTodaySchedule = async () => {
+    try {
+      setLoadingSchedule(true);
+      const [classesRes, groupsRes] = await Promise.all([
+        lecturerAPI.getClasses(),
+        lecturerAPI.getGroups()
+      ]);
+
+      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const today = days[new Date().getDay()];
+
+      const classes: ScheduleItem[] = classesRes.data
+        .filter((c: any) => c.days_of_week?.split(',').map((d: string) => d.trim().toLowerCase()).includes(today.toLowerCase()))
+        .map((c: any) => ({ ...c, type: 'class' }));
+
+      const groups: ScheduleItem[] = groupsRes.data
+        .filter((g: any) => g.days_of_week?.split(',').map((d: string) => d.trim().toLowerCase()).includes(today.toLowerCase()))
+        .map((g: any) => ({ ...g, type: 'group' }));
+
+      const combined = [...classes, ...groups].sort((a, b) => {
+        if (!a.start_time) return 1;
+        if (!b.start_time) return -1;
+        return a.start_time.localeCompare(b.start_time);
+      });
+
+      setTodaySchedule(combined);
+    } catch (error) {
+      console.error('Error loading today schedule:', error);
+    } finally {
+      setLoadingSchedule(false);
+    }
+  };
+
+  const loadPendingBookings = async () => {
+    try {
+      setLoadingBookings(true);
+      const response = await lecturerAPI.getBookings();
+      if (response.status === 200) {
+        const pending = response.data
+          .filter((b: Booking) => b.status === 'pending')
+          .sort((a: Booking, b: Booking) => new Date(b.booking_date).getTime() - new Date(a.booking_date).getTime())
+          .slice(0, 3);
+        setPendingBookings(pending);
+      }
+    } catch (error) {
+      console.error('Error loading pending bookings:', error);
+    } finally {
+      setLoadingBookings(false);
+    }
+  };
+
+  const handleDashboardBookingAction = async (bookingId: number, action: string) => {
+    try {
+      const response = await lecturerAPI.bookingAction(bookingId, { action });
+      if (response.status === 200) {
+        Toast.show({
+          type: 'success',
+          text1: t('success'),
+          text2: t(`booking_${action}_success`, { defaultValue: `Booking ${action}ed successfully` })
+        });
+        loadPendingBookings();
+        loadDashboardStats(); // Refresh stats too
+      }
+    } catch (error) {
+      console.error('Error updating booking:', error);
+      Toast.show({
+        type: 'error',
+        text1: t('error'),
+        text2: t('update_failed')
+      });
+    }
+  };
+
+  const formatTimeSnippet = (timeString: string) => {
+    if (!timeString) return '';
+    try {
+      const [hours, minutes] = timeString.split(':');
+      const date = new Date();
+      date.setHours(parseInt(hours, 10));
+      date.setMinutes(parseInt(minutes, 10));
+      return date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+    } catch (e) {
+      return timeString;
+    }
+  };
+
   const onRefresh = async () => {
     setRefreshing(true);
     await loadUserData();
     await loadDashboardStats();
-    // await loadRecentActivities(); // Consolidated
+    await loadTodaySchedule();
     await loadUnreadMessages(); // Refresh unread messages
     setRefreshing(false);
     setRefreshing(false);
@@ -1245,73 +1351,368 @@ const Dashboard = () => {
           </View>
 
           <View style={{ flex: isDesktop ? 1 : 1, paddingTop: isDesktop ? 60 : 0 }}>
-            {/* Recent Activity */}
+            {/* Today's Schedule Snippet */}
             <View style={{ paddingHorizontal: 24, marginBottom: 30 }}>
-              <Text style={{
-                fontSize: 20,
-                fontWeight: 'bold',
-                color: '#ecf0f1',
-                marginBottom: 16,
-              }}>
-                {t('recent_activity')}
-              </Text>
-              <View style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: 16,
-                padding: 20,
-                borderWidth: 1,
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-              }}>
-                {loadingActivities ? (
-                  <View style={{ alignItems: 'center', paddingVertical: 20 }}>
-                    <Text style={{ color: '#bdc3c7' }}>{t('loading_activities')}</Text>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <View style={{ width: 4, height: 24, backgroundColor: '#3498db', borderRadius: 2, marginRight: 12 }} />
+                  <Text style={{
+                    fontSize: 22,
+                    fontWeight: '800',
+                    color: '#ffffff',
+                    letterSpacing: 0.5,
+                  }}>
+                    {t('today_schedule')}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => router.push('/timetable')}
+                  style={{
+                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                    paddingHorizontal: 12,
+                    paddingVertical: 6,
+                    borderRadius: 20,
+                  }}
+                >
+                  <Text style={{ color: '#3498db', fontSize: 13, fontWeight: '700' }}>{t('view_all')}</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={{ gap: 12 }}>
+                {loadingSchedule ? (
+                  <View style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                    borderRadius: 20,
+                    padding: 40,
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.05)',
+                  }}>
+                    <Text style={{ color: '#bdc3c7' }}>{t('loading')}</Text>
                   </View>
-                ) : recentActivities.length > 0 ? (
-                  recentActivities.map((activity, index) => (
-                    <View key={`${activity.type}-${activity.id}`} style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      marginBottom: index === recentActivities.length - 1 ? 0 : 16,
-                    }}>
+                ) : todaySchedule.length > 0 ? (
+                  todaySchedule.map((item) => (
+                    <TouchableOpacity
+                      key={`${item.type}-${item.id}`}
+                      onPress={() => router.push(item.type === 'class' ? `/class-details/${item.id}` : `/group-details/${item.id}`)}
+                      activeOpacity={0.7}
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        backgroundColor: 'rgba(255, 255, 255, 0.04)',
+                        borderRadius: 20,
+                        padding: 16,
+                        borderWidth: 1,
+                        borderColor: 'rgba(255, 255, 255, 0.08)',
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 4 },
+                        shadowOpacity: 0.2,
+                        shadowRadius: 8,
+                      }}
+                    >
+                      <LinearGradient
+                        colors={item.type === 'class' ? ['#3498db', '#2980b9'] : ['#9b59b6', '#8e44ad']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={{
+                          width: 60,
+                          height: 60,
+                          borderRadius: 15,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          marginRight: 16,
+                        }}
+                      >
+                        <Text style={{ fontSize: 14, fontWeight: '900', color: '#ffffff' }}>
+                          {item.start_time ? formatTimeSnippet(item.start_time).split(' ')[0] : 'TBA'}
+                        </Text>
+                        <Text style={{ fontSize: 10, color: '#ffffff', fontWeight: '700', opacity: 0.9 }}>
+                          {item.start_time ? formatTimeSnippet(item.start_time).split(' ')[1] : ''}
+                        </Text>
+                      </LinearGradient>
+
+                      <View style={{ flex: 1 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                          <View style={{
+                            paddingHorizontal: 8,
+                            paddingVertical: 2,
+                            borderRadius: 6,
+                            backgroundColor: item.type === 'class' ? 'rgba(52, 152, 219, 0.15)' : 'rgba(155, 89, 182, 0.15)',
+                            marginRight: 8,
+                          }}>
+                            <Text style={{
+                              fontSize: 10,
+                              fontWeight: '800',
+                              color: item.type === 'class' ? '#3498db' : '#9b59b6',
+                              textTransform: 'uppercase'
+                            }}>
+                              {t(item.type)}
+                            </Text>
+                          </View>
+                        </View>
+                        <Text style={{ fontSize: 17, color: '#ffffff', fontWeight: '700', marginBottom: 6 }} numberOfLines={1}>
+                          {item.name}
+                        </Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                          <Ionicons name="location-sharp" size={14} color="#95a5a6" style={{ marginRight: 6 }} />
+                          <Text style={{ fontSize: 13, color: '#95a5a6', fontWeight: '500' }} numberOfLines={1}>
+                            {item.venue || t('no_venue')}
+                          </Text>
+                        </View>
+                      </View>
+
                       <View style={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: 16,
-                        backgroundColor: `rgba(${hexToRgb(activity.iconColor)}, 0.2)`,
+                        width: 36,
+                        height: 36,
+                        borderRadius: 18,
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        marginEnd: 12,
                       }}>
-                        <Ionicons name={activity.icon} size={16} color={activity.iconColor} />
+                        <Ionicons name="chevron-forward" size={20} color="#ffffff" />
                       </View>
-                      <View style={{ flex: 1 }}>
-                        <Text style={{
-                          fontSize: 14,
-                          color: '#ecf0f1',
-                          marginBottom: 2,
-                        }}>
-                          {activity.title}
-                        </Text>
-                        <Text style={{
-                          fontSize: 12,
-                          color: '#95a5a6',
-                        }}>
-                          {activity.description}
-                        </Text>
-                        <Text style={{
-                          fontSize: 10,
-                          color: '#7f8c8d',
-                          marginTop: 2,
-                        }}>
-                          {activity.time}
-                        </Text>
+                    </TouchableOpacity>
+                  ))
+                ) : (
+                  <View style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                    borderRadius: 20,
+                    padding: 40,
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.05)',
+                  }}>
+                    <LinearGradient
+                      colors={['rgba(149, 165, 166, 0.1)', 'rgba(149, 165, 166, 0.05)']}
+                      style={{
+                        width: 60,
+                        height: 60,
+                        borderRadius: 30,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginBottom: 16,
+                      }}
+                    >
+                      <Ionicons name="calendar-outline" size={30} color="#95a5a6" />
+                    </LinearGradient>
+                    <Text style={{ color: '#ffffff', fontSize: 16, fontWeight: '700', marginBottom: 4 }}>
+                      {t('no_classes_today')}
+                    </Text>
+                    <Text style={{ color: '#95a5a6', fontSize: 14, textAlign: 'center' }}>
+                      {t('schedule_appear_msg')}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            </View>
+
+            {/* Pending Bookings Snippet */}
+            <View style={{ paddingHorizontal: 24, marginBottom: 30 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <View style={{ width: 4, height: 24, backgroundColor: '#f39c12', borderRadius: 2, marginRight: 12 }} />
+                  <Text style={{
+                    fontSize: 22,
+                    fontWeight: '800',
+                    color: '#ffffff',
+                    letterSpacing: 0.5,
+                  }}>
+                    {t('pending_bookings')}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => router.push('/bookings')}
+                  style={{
+                    backgroundColor: 'rgba(243, 156, 18, 0.1)',
+                    paddingHorizontal: 12,
+                    paddingVertical: 6,
+                    borderRadius: 20,
+                  }}
+                >
+                  <Text style={{ color: '#f39c12', fontSize: 13, fontWeight: '700' }}>{t('view_all')}</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={{ gap: 12 }}>
+                {loadingBookings ? (
+                  <View style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                    borderRadius: 20,
+                    padding: 40,
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.05)',
+                  }}>
+                    <Text style={{ color: '#bdc3c7' }}>{t('loading')}</Text>
+                  </View>
+                ) : pendingBookings.length > 0 ? (
+                  pendingBookings.map((booking) => (
+                    <View
+                      key={`booking-${booking.id}`}
+                      style={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.04)',
+                        borderRadius: 20,
+                        padding: 16,
+                        borderWidth: 1,
+                        borderColor: 'rgba(255, 255, 255, 0.08)',
+                      }}
+                    >
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
+                        <View style={{ flex: 1 }}>
+                          <Text style={{ fontSize: 16, color: '#ffffff', fontWeight: '700', marginBottom: 2 }}>
+                            {booking.student_name}
+                          </Text>
+                          <Text style={{ fontSize: 13, color: '#95a5a6' }}>
+                            {booking.subject}
+                          </Text>
+                        </View>
+                        <View style={{ alignItems: 'flex-end' }}>
+                          <Text style={{ fontSize: 14, color: '#f39c12', fontWeight: '700' }}>
+                            {new Date(booking.booking_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                          </Text>
+                          <Text style={{ fontSize: 12, color: '#7f8c8d' }}>
+                            {booking.start_time.split(':').slice(0, 2).join(':')}
+                          </Text>
+                        </View>
+                      </View>
+
+                      <View style={{ flexDirection: 'row', gap: 10 }}>
+                        <TouchableOpacity
+                          onPress={() => handleDashboardBookingAction(booking.id, 'confirm')}
+                          style={{
+                            flex: 1,
+                            height: 36,
+                            borderRadius: 10,
+                            backgroundColor: 'rgba(46, 204, 113, 0.15)',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderWidth: 1,
+                            borderColor: 'rgba(46, 204, 113, 0.2)',
+                          }}
+                        >
+                          <Text style={{ color: '#2ecc71', fontSize: 13, fontWeight: '700' }}>{t('confirm') || 'Confirm'}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => handleDashboardBookingAction(booking.id, 'cancel')}
+                          style={{
+                            flex: 1,
+                            height: 36,
+                            borderRadius: 10,
+                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderWidth: 1,
+                            borderColor: 'rgba(231, 76, 60, 0.2)',
+                          }}
+                        >
+                          <Text style={{ color: '#e74c3c', fontSize: 13, fontWeight: '700' }}>{t('decline') || 'Decline'}</Text>
+                        </TouchableOpacity>
                       </View>
                     </View>
                   ))
                 ) : (
-                  <View style={{ alignItems: 'center', paddingVertical: 20 }}>
-                    <Ionicons name="alert-circle-outline" size={24} color="#95a5a6" />
-                    <Text style={{ color: '#95a5a6', marginTop: 8 }}>{t('no_recent_activities')}</Text>
+                  <View style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                    borderRadius: 20,
+                    padding: 40,
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.05)',
+                  }}>
+                    <Ionicons name="calendar-outline" size={32} color="rgba(255,255,255,0.1)" />
+                    <Text style={{ color: '#95a5a6', marginTop: 12, fontWeight: '600' }}>{t('no_pending_bookings')}</Text>
+                  </View>
+                )}
+              </View>
+            </View>
+
+            {/* Recent Activity */}
+            <View style={{ paddingHorizontal: 24, marginBottom: 30 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
+                <View style={{ width: 4, height: 24, backgroundColor: '#e67e22', borderRadius: 2, marginRight: 12 }} />
+                <Text style={{
+                  fontSize: 22,
+                  fontWeight: '800',
+                  color: '#ffffff',
+                  letterSpacing: 0.5,
+                }}>
+                  {t('recent_activity')}
+                </Text>
+              </View>
+
+              <View style={{ gap: 12 }}>
+                {loadingActivities ? (
+                  <View style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                    borderRadius: 20,
+                    padding: 40,
+                    alignItems: 'center',
+                  }}>
+                    <Text style={{ color: '#bdc3c7' }}>{t('loading_activities')}</Text>
+                  </View>
+                ) : recentActivities.length > 0 ? (
+                  recentActivities.map((activity) => (
+                    <View
+                      key={`${activity.type}-${activity.id}`}
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                        borderRadius: 18,
+                        padding: 14,
+                        borderWidth: 1,
+                        borderColor: 'rgba(255, 255, 255, 0.05)',
+                      }}
+                    >
+                      <View style={{
+                        width: 44,
+                        height: 44,
+                        borderRadius: 12,
+                        backgroundColor: `rgba(${hexToRgb(activity.iconColor)}, 0.15)`,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginRight: 14,
+                      }}>
+                        <Ionicons name={activity.icon} size={22} color={activity.iconColor} />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={{
+                          fontSize: 15,
+                          color: '#ffffff',
+                          fontWeight: '600',
+                          marginBottom: 4,
+                        }}>
+                          {activity.title}
+                        </Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <Text style={{
+                            fontSize: 13,
+                            color: '#bdc3c7',
+                            flex: 1,
+                            marginRight: 8,
+                          }} numberOfLines={1}>
+                            {activity.description}
+                          </Text>
+                          <Text style={{
+                            fontSize: 11,
+                            color: '#7f8c8d',
+                            fontWeight: '500',
+                          }}>
+                            {activity.time}
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                  ))
+                ) : (
+                  <View style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                    borderRadius: 20,
+                    padding: 40,
+                    alignItems: 'center',
+                  }}>
+                    <Ionicons name="journal-outline" size={40} color="rgba(255,255,255,0.1)" />
+                    <Text style={{ color: '#95a5a6', marginTop: 12, fontWeight: '600' }}>{t('no_recent_activities')}</Text>
                   </View>
                 )}
               </View>
