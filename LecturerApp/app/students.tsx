@@ -9,7 +9,9 @@ import {
     RefreshControl,
     TextInput,
     ActivityIndicator,
-    Image
+    Image,
+    FlatList,
+    Platform
 } from 'react-native';
 import { router } from 'expo-router';
 import { tokenStorage } from '../utils/tokenStorage';
@@ -19,6 +21,7 @@ import axios from 'axios';
 import { API_CONFIG } from '../src/config/api';
 import { useTranslation } from 'react-i18next';
 import ProfilePicture from '../src/components/ProfilePicture';
+import { useResponsive } from '../src/hooks/useResponsive';
 
 interface Student {
     id: number;
@@ -30,6 +33,8 @@ interface Student {
 
 const StudentsScreen = () => {
     const { t } = useTranslation();
+    const { isDesktop } = useResponsive();
+    const isWeb = Platform.OS === 'web';
     const [students, setStudents] = useState<Student[]>([]);
     const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
     const [refreshing, setRefreshing] = useState(false);
@@ -93,37 +98,48 @@ const StudentsScreen = () => {
             {/* Header */}
             <View
                 style={{
-                    paddingTop: 60,
-                    paddingBottom: 20,
-                    paddingHorizontal: 20,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    height: 80,
+                    paddingHorizontal: isDesktop ? 24 : 20,
                     backgroundColor: '#1a1a1a',
                     borderBottomWidth: 1,
                     borderBottomColor: '#2c2c2c',
                 }}
             >
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
-                    <TouchableOpacity
-                        onPress={() => router.back()}
-                        style={{
-                            width: 40,
-                            height: 40,
-                            borderRadius: 20,
-                            backgroundColor: '#252525',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            marginEnd: 15,
-                            borderWidth: 1,
-                            borderColor: '#333'
-                        }}
-                    >
-                        <Ionicons name="arrow-back" size={22} color="#fff" />
-                    </TouchableOpacity>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    {!isWeb && (
+                        <TouchableOpacity
+                            onPress={() => router.back()}
+                            style={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: 20,
+                                backgroundColor: '#252525',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                marginEnd: 15,
+                                borderWidth: 1,
+                                borderColor: '#333'
+                            }}
+                        >
+                            <Ionicons name="arrow-back" size={22} color="#fff" />
+                        </TouchableOpacity>
+                    )}
                     <Text style={{ fontSize: 24, fontWeight: '700', color: '#fff' }}>
                         {t('students_directory_title')}
                     </Text>
                 </View>
+            </View>
 
-                {/* Search Bar */}
+            {/* Search Bar */}
+            <View style={{
+                paddingHorizontal: isDesktop ? 24 : 20,
+                paddingVertical: 16,
+                backgroundColor: '#1a1a1a',
+                ...(isDesktop && { maxWidth: 1400, alignSelf: 'center', width: '100%' })
+            }}>
                 <View style={{
                     flexDirection: 'row',
                     alignItems: 'center',
@@ -150,36 +166,182 @@ const StudentsScreen = () => {
                 </View>
             </View>
 
-            <ScrollView
-                style={{ flex: 1 }}
+            {/* Statistics Cards */}
+            <View style={{
+                flexDirection: isDesktop ? 'row' : 'column',
+                flexWrap: 'wrap',
+                paddingHorizontal: isDesktop ? 24 : 20,
+                paddingBottom: 16,
+                gap: 12,
+                ...(isDesktop && { maxWidth: 1400, alignSelf: 'center', width: '100%' })
+            }}>
+                <View style={{
+                    flex: isDesktop ? 1 : undefined,
+                    minWidth: isDesktop ? 150 : undefined,
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 12,
+                    padding: 16,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.08)',
+                }}>
+                    <View style={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: 24,
+                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginRight: 12,
+                    }}>
+                        <Ionicons name="people" size={24} color="#3498db" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
+                            {students.length}
+                        </Text>
+                        <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
+                            {t('total_students')}
+                        </Text>
+                    </View>
+                </View>
+
+                <View style={{
+                    flex: isDesktop ? 1 : undefined,
+                    minWidth: isDesktop ? 150 : undefined,
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 12,
+                    padding: 16,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.08)',
+                }}>
+                    <View style={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: 24,
+                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginRight: 12,
+                    }}>
+                        <Ionicons name="checkmark-circle" size={24} color="#2ecc71" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
+                            {students.filter(s => s.intakes && s.intakes.length > 0).length}
+                        </Text>
+                        <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
+                            {t('active_students')}
+                        </Text>
+                    </View>
+                </View>
+
+                <View style={{
+                    flex: isDesktop ? 1 : undefined,
+                    minWidth: isDesktop ? 150 : undefined,
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 12,
+                    padding: 16,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.08)',
+                }}>
+                    <View style={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: 24,
+                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginRight: 12,
+                    }}>
+                        <Ionicons name="school" size={24} color="#9b59b6" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
+                            {[...new Set(students.flatMap(s => s.intakes?.map(i => i.id) || []))].length}
+                        </Text>
+                        <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
+                            {t('total_intakes')}
+                        </Text>
+                    </View>
+                </View>
+
+                <View style={{
+                    flex: isDesktop ? 1 : undefined,
+                    minWidth: isDesktop ? 150 : undefined,
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 12,
+                    padding: 16,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.08)',
+                }}>
+                    <View style={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: 24,
+                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginRight: 12,
+                    }}>
+                        <Ionicons name="analytics" size={24} color="#f39c12" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
+                            {students.length > 0 ? Math.round(students.reduce((sum, s) => sum + (s.intakes?.length || 0), 0) / students.length * 10) / 10 : 0}
+                        </Text>
+                        <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
+                            {t('avg_intakes_per_student')}
+                        </Text>
+                    </View>
+                </View>
+            </View>
+
+            <FlatList
+                data={filteredStudents}
+                key={isDesktop ? 'desktop-3-col' : 'mobile-1-col'}
+                numColumns={isDesktop ? 3 : 1}
+                keyExtractor={(item) => item.id.toString()}
                 refreshControl={
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#3498db" />
                 }
-            >
-                <View style={{ padding: 20 }}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                contentContainerStyle={{
+                    paddingHorizontal: isDesktop ? 18 : 20,
+                    paddingBottom: 40,
+                    ...(isDesktop && { maxWidth: 1400, alignSelf: 'center', width: '100%' })
+                }}
+                columnWrapperStyle={isDesktop ? { marginBottom: 12 } : undefined}
+                ListHeaderComponent={
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, marginTop: 20 }}>
                         <Text style={{ fontSize: 18, fontWeight: '700', color: '#fff' }}>
                             {t('all_students_title')} ({filteredStudents.length})
                         </Text>
                         {loading && <ActivityIndicator size="small" color="#3498db" />}
                     </View>
-
-                    {filteredStudents.map((student) => (
+                }
+                renderItem={({ item: student }) => (
+                    <View style={{ width: isDesktop ? '33.33%' : '100%', paddingHorizontal: isDesktop ? 6 : 0, marginBottom: isDesktop ? 0 : 12 }}>
                         <TouchableOpacity
-                            key={student.id}
                             onPress={() => router.push(`/student-details/${student.id}`)}
                             style={{
                                 backgroundColor: '#252525',
                                 borderRadius: 16,
                                 padding: 16,
-                                marginBottom: 12,
-                                flexDirection: 'row',
-                                alignItems: 'center',
+                                flexDirection: isDesktop ? 'column' : 'row',
+                                alignItems: isDesktop ? 'flex-start' : 'center',
                                 borderWidth: 1,
-                                borderColor: '#333'
+                                borderColor: '#333',
+                                height: '100%'
                             }}
                         >
-                            <View style={{ marginEnd: 16 }}>
+                            <View style={{ marginEnd: isDesktop ? 0 : 16, marginBottom: isDesktop ? 12 : 0, alignSelf: isDesktop ? 'center' : 'flex-start' }}>
                                 <ProfilePicture
                                     imageUrl={student.profile_picture_url}
                                     firstName={student.name ? student.name.split(' ')[0] : 'Student'}
@@ -188,14 +350,14 @@ const StudentsScreen = () => {
                                 />
                             </View>
 
-                            <View style={{ flex: 1 }}>
-                                <Text style={{ color: '#fff', fontSize: 17, fontWeight: '700', marginBottom: 4 }}>
+                            <View style={{ flex: 1, width: '100%' }}>
+                                <Text style={{ color: '#fff', fontSize: 17, fontWeight: '700', marginBottom: 4, textAlign: isDesktop ? 'center' : 'left' }}>
                                     {student.name}
                                 </Text>
-                                <Text style={{ color: '#bdc3c7', fontSize: 14, marginBottom: 8 }}>
+                                <Text style={{ color: '#bdc3c7', fontSize: 14, marginBottom: 8, textAlign: isDesktop ? 'center' : 'left' }}>
                                     {student.email}
                                 </Text>
-                                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+                                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: isDesktop ? 'center' : 'flex-start' }}>
                                     {student.intakes.map((intake, index) => (
                                         <View
                                             key={index}
@@ -214,29 +376,30 @@ const StudentsScreen = () => {
                                 </View>
                             </View>
 
-                            <View style={{
-                                width: 32,
-                                height: 32,
-                                borderRadius: 16,
-                                backgroundColor: '#333',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}>
-                                <Ionicons name="chevron-forward" size={16} color="#fff" />
-                            </View>
+                            {!isDesktop && (
+                                <View style={{
+                                    width: 32,
+                                    height: 32,
+                                    borderRadius: 16,
+                                    backgroundColor: '#333',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}>
+                                    <Ionicons name="chevron-forward" size={16} color="#fff" />
+                                </View>
+                            )}
                         </TouchableOpacity>
-                    ))}
-
-                    {filteredStudents.length === 0 && (
-                        <View style={{ alignItems: 'center', paddingVertical: 60, opacity: 0.5 }}>
-                            <Ionicons name="people-outline" size={64} color="#7f8c8d" />
-                            <Text style={{ color: '#7f8c8d', marginTop: 15, fontSize: 16, textAlign: 'center' }}>
-                                {t('no_students_found')}
-                            </Text>
-                        </View>
-                    )}
-                </View>
-            </ScrollView>
+                    </View>
+                )}
+                ListEmptyComponent={
+                    <View style={{ alignItems: 'center', paddingVertical: 60, opacity: 0.5 }}>
+                        <Ionicons name="people-outline" size={64} color="#7f8c8d" />
+                        <Text style={{ color: '#7f8c8d', marginTop: 15, fontSize: 16, textAlign: 'center' }}>
+                            {t('no_students_found')}
+                        </Text>
+                    </View>
+                }
+            />
         </View>
     );
 };

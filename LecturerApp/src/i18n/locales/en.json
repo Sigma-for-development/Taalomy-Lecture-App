@@ -418,6 +418,8 @@
     "active_intakes": "Active Intakes",
     "total_students": "Total Students",
     "completed_intakes": "Completed Intakes",
+    "active_students": "Active Students",
+    "avg_intakes_per_student": "Avg. Intakes/Student",
     "pending_bookings": "Pending Bookings",
     "no_pending_bookings": "No pending bookings",
     "booking_confirm_success": "Booking confirmed successfully",

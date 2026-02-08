@@ -418,6 +418,8 @@
     "active_intakes": "المجموعات النشطة",
     "total_students": "إجمالي الطلاب",
     "completed_intakes": "المجموعات المكتملة",
+    "active_students": "الطلاب النشطين",
+    "avg_intakes_per_student": "متوسط المجموعات/طالب",
     "pending_bookings": "الحجوزات المعلقة",
     "no_pending_bookings": "لا توجد حجوزات معلقة",
     "booking_confirm_success": "تم تأكيد الحجز بنجاح",
