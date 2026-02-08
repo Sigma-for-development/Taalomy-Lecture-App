@@ -25,6 +25,8 @@ import IntakeSelectionModal from '../src/components/IntakeSelectionModal';
 import { appEventEmitter } from '../src/utils/eventEmitter';
 import { lecturerAPI } from '../src/utils/api';
 import { aiContextCache } from '../src/utils/aiContextCache';
+import MiniAIChat from '../src/components/MiniAIChat';
+import { Image } from 'react-native';
 
 // Width will be handled by the hook inside the component
 
@@ -196,6 +198,7 @@ const Dashboard = () => {
   const [loadingSchedule, setLoadingSchedule] = useState(true);
   const [pendingBookings, setPendingBookings] = useState<Booking[]>([]);
   const [loadingBookings, setLoadingBookings] = useState(true);
+  const [isAIChatVisible, setIsAIChatVisible] = useState(false);
 
   useEffect(() => {
     loadUserData();
@@ -936,6 +939,51 @@ const Dashboard = () => {
                     color: '#bdc3c7',
                   }}>
                     {t('classes_today')}
+                  </Text>
+                </TouchableOpacity>
+
+                {/* AI Companion Widget */}
+                <TouchableOpacity
+                  onPress={() => setIsAIChatVisible(true)}
+                  style={{
+                    flex: isDesktop ? 1 : 0,
+                    minWidth: isDesktop ? 280 : (width - 60) / 2,
+                    backgroundColor: 'rgba(52, 152, 219, 0.15)',
+                    borderRadius: 16,
+                    padding: 24,
+                    marginBottom: 16,
+                    borderWidth: 1,
+                    borderColor: 'rgba(52, 152, 219, 0.4)',
+                  }}>
+                  <View style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 28,
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: 12,
+                    overflow: 'hidden',
+                  }}>
+                    <Image
+                      source={require('../assets/aibot.png')}
+                      style={{ width: 56, height: 56, borderRadius: 28 }}
+                      resizeMode="cover"
+                    />
+                  </View>
+                  <Text style={{
+                    fontSize: 24,
+                    fontWeight: 'bold',
+                    color: '#3498db',
+                    marginBottom: 4,
+                  }}>
+                    AI
+                  </Text>
+                  <Text style={{
+                    fontSize: 14,
+                    color: '#bdc3c7',
+                  }}>
+                    Companion
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -1755,6 +1803,47 @@ const Dashboard = () => {
           setShowQuizIntakeModal(false);
           router.push(`/intake-details/quizzes?id=${intakeId}`);
         }}
+      />
+
+      {/* Floating AI Toggle Button */}
+      <TouchableOpacity
+        onPress={() => setIsAIChatVisible(!isAIChatVisible)}
+        style={{
+          position: 'absolute',
+          bottom: 30,
+          right: 30,
+          width: 80,
+          height: 80,
+          borderRadius: 40,
+          backgroundColor: isAIChatVisible ? 'rgba(231, 76, 60, 0.9)' : 'rgba(52, 152, 219, 0.9)',
+          alignItems: 'center',
+          justifyContent: 'center',
+          shadowColor: '#3498db',
+          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: 0.5,
+          shadowRadius: 12,
+          elevation: 10,
+          borderWidth: 1,
+          borderColor: 'rgba(255, 255, 255, 0.2)',
+          zIndex: 999,
+        }}
+      >
+        {isAIChatVisible ? (
+          <Ionicons name="close" size={40} color="#fff" />
+        ) : (
+          <View style={{ width: 80, height: 80, borderRadius: 40, overflow: 'hidden' }}>
+            <Image
+              source={require('../assets/aibot.png')}
+              style={{ width: 80, height: 80, borderRadius: 40 }}
+              resizeMode="cover"
+            />
+          </View>
+        )}
+      </TouchableOpacity>
+
+      <MiniAIChat
+        isVisible={isAIChatVisible}
+        onClose={() => setIsAIChatVisible(false)}
       />
     </View>
   );
