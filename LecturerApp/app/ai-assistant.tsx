@@ -102,6 +102,16 @@ const AIAssistantScreen = () => {
     const [messages, setMessages] = useState<any[]>([]);
     const [isTyping, setIsTyping] = useState(false);
     const [inputText, setInputText] = useState('');
+    const welcomeFadeAnim = useRef(new Animated.Value(1)).current;
+    const [welcomeVisible, setWelcomeVisible] = useState(true);
+
+    const fadeOutWelcome = () => {
+        Animated.timing(welcomeFadeAnim, {
+            toValue: 0,
+            duration: 600,
+            useNativeDriver: true,
+        }).start(() => setWelcomeVisible(false));
+    };
 
     useEffect(() => {
         setMessages([
@@ -120,6 +130,10 @@ const AIAssistantScreen = () => {
 
     const onSend = useCallback(async (newMessages: any[] = []) => {
         if (newMessages.length === 0) return;
+
+        if (welcomeVisible) {
+            fadeOutWelcome();
+        }
 
         setMessages((previousMessages) =>
             GiftedChat.append(previousMessages, newMessages)
@@ -363,6 +377,20 @@ const AIAssistantScreen = () => {
                 alwaysShowSend
                 messagesContainerStyle={{ paddingTop: 100 }}
             />
+            {welcomeVisible && (
+                <Animated.View
+                    style={[styles.welcomeContainer, { opacity: welcomeFadeAnim }]}
+                    pointerEvents="none"
+                >
+                    <Ionicons name="sparkles-outline" size={48} color="rgba(52, 152, 219, 0.3)" style={{ marginBottom: 20 }} />
+                    <Text style={styles.welcomeText}>
+                        I am your AI Companion. I can suggest, read, and assist you with your endeavors as a lecturer.
+                    </Text>
+                    <Text style={[styles.welcomeText, { marginTop: 12, fontSize: 13, opacity: 0.15 }]}>
+                        Please note: I do not have a long-term memory.
+                    </Text>
+                </Animated.View>
+            )}
             {Platform.OS === 'android' && <KeyboardAvoidingView behavior="padding" />}
         </View>
     );
@@ -426,6 +454,25 @@ const styles = StyleSheet.create({
     statusText: {
         color: '#95a5a6',
         fontSize: 12,
+    },
+    welcomeContainer: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 100,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 40,
+        zIndex: 1,
+    },
+    welcomeText: {
+        color: '#fff',
+        fontSize: 16,
+        textAlign: 'center',
+        opacity: 0.25,
+        lineHeight: 24,
+        maxWidth: 400,
     },
 });
 
