@@ -22,6 +22,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import WalletInfoSlides from '../src/components/WalletInfoSlides';
 import { useLocalization } from '../src/context/LocalizationContext';
 import { useTranslation } from 'react-i18next';
+import { aiContextCache } from '../src/utils/aiContextCache';
 
 interface Wallet {
   id: number;
@@ -191,6 +192,7 @@ const WalletScreen = () => {
           walletData.balance = parseFloat(walletData.balance);
         }
         setWallet(walletData);
+        aiContextCache.updateContext({ wallet: walletData });
       }
 
       // Load transactions
@@ -200,6 +202,7 @@ const WalletScreen = () => {
 
       if (transactionsResponse.status === 200) {
         setTransactions(transactionsResponse.data);
+        aiContextCache.updateContext({ transactions: transactionsResponse.data });
       }
       return true;
     } catch (error) {

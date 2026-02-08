@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { lecturerAPI } from './api';
+import { aiContextCache } from './aiContextCache';
 
 const GROQ_API_KEY = process.env.EXPO_PUBLIC_GROQ_LECTURER_PERSONAL_API;
 const GROQ_MODEL = "openai/gpt-oss-20b"; // User specified model
@@ -12,39 +12,28 @@ export interface AIChatMessage {
 export const aiService = {
     async getLecturerContext() {
         try {
-            const [profile, stats, classes, groups, bookings] = await Promise.all([
-                lecturerAPI.getUserProfile().catch(() => ({ data: {} })),
-                lecturerAPI.getDashboardStats().catch(() => ({ data: {} })),
-                lecturerAPI.getClasses().catch(() => ({ data: [] })),
-                lecturerAPI.getGroups().catch(() => ({ data: [] })),
-                lecturerAPI.getBookings().catch(() => ({ data: [] })),
-            ]);
+            const cache = await aiContextCache.getContext();
 
             const context = {
-                lecturerName: `${profile.data.first_name || ''} ${profile.data.last_name || ''}`.trim(),
-                totalStudents: stats.data.total_students || 0,
-                pendingGrades: stats.data.pending_grades || 0,
-                classesToday: stats.data.classes_today || 0,
-                classes: (classes.data || []).map((c: any) => ({
+                lecturerName: `${cache.profile?.first_name || ''} ${cache.profile?.last_name || ''}`.trim(),
+                stats: cache.stats || {},
+                wallet: cache.wallet || { balance: 0 },
+                recentTransactions: (cache.transactions || []).slice(0, 5),
+                classes: (cache.classes || []).map((c: any) => ({
                     name: c.name,
+                    type: c.type,
                     venue: c.venue,
                     days: c.days_of_week,
                     startTime: c.start_time,
                     endTime: c.end_time
                 })),
-                groups: (groups.data || []).map((g: any) => ({
-                    name: g.name,
-                    venue: g.venue,
-                    days: g.days_of_week,
-                    startTime: g.start_time,
-                    endTime: g.end_time
-                })),
-                pendingBookings: (bookings.data || []).filter((b: any) => b.status === 'pending').map((b: any) => ({
+                pendingBookings: (cache.bookings || []).filter((b: any) => b.status === 'pending').map((b: any) => ({
                     student: b.student_name,
                     subject: b.subject,
                     date: b.booking_date,
                     time: `${b.start_time} - ${b.end_time}`
-                }))
+                })),
+                lastDataUpdate: cache.lastUpdated
             };
 
             return JSON.stringify(context, null, 2);

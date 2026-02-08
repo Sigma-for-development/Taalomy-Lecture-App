@@ -24,6 +24,7 @@ import ProfilePicture from '../src/components/ProfilePicture';
 import IntakeSelectionModal from '../src/components/IntakeSelectionModal';
 import { appEventEmitter } from '../src/utils/eventEmitter';
 import { lecturerAPI } from '../src/utils/api';
+import { aiContextCache } from '../src/utils/aiContextCache';
 
 // Width will be handled by the hook inside the component
 
@@ -261,6 +262,7 @@ const Dashboard = () => {
 
           setUserData(updatedUser as UserData);
           await AsyncStorage.setItem('user_data', JSON.stringify(updatedUser));
+          aiContextCache.updateContext({ profile: updatedUser });
         } catch (fetchError) {
           console.error('Error fetching latest user data:', fetchError);
         }
@@ -286,6 +288,8 @@ const Dashboard = () => {
       if (response.data.recentActivities) {
         setRecentActivities(response.data.recentActivities);
       }
+
+      aiContextCache.updateContext({ stats: response.data.stats || response.data });
 
     } catch (error) {
       console.error('Error loading dashboard stats:', error);
@@ -362,6 +366,7 @@ const Dashboard = () => {
       });
 
       setTodaySchedule(combined);
+      aiContextCache.updateContext({ classes: combined });
     } catch (error) {
       console.error('Error loading today schedule:', error);
     } finally {
@@ -379,6 +384,7 @@ const Dashboard = () => {
           .sort((a: Booking, b: Booking) => new Date(b.booking_date).getTime() - new Date(a.booking_date).getTime())
           .slice(0, 3);
         setPendingBookings(pending);
+        aiContextCache.updateContext({ bookings: response.data });
       }
     } catch (error) {
       console.error('Error loading pending bookings:', error);
