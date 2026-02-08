@@ -7,7 +7,9 @@ import {
     Alert,
     StatusBar,
     RefreshControl,
-    ActivityIndicator
+    ActivityIndicator,
+    Platform,
+    FlatList
 } from 'react-native';
 import { router } from 'expo-router';
 import { tokenStorage } from '../utils/tokenStorage';
@@ -17,6 +19,7 @@ import axios from 'axios';
 import { API_CONFIG } from '../src/config/api';
 import { useTranslation } from 'react-i18next';
 import ProfilePicture from '../src/components/ProfilePicture';
+import { useResponsive } from '../src/hooks/useResponsive';
 
 interface Invitation {
     id: number;
@@ -35,6 +38,8 @@ interface Invitation {
 
 const InvitationsScreen = () => {
     const { t } = useTranslation();
+    const { isDesktop } = useResponsive();
+    const isWeb = Platform.OS === 'web';
     const [invitations, setInvitations] = useState<Invitation[]>([]);
     const [filteredInvitations, setFilteredInvitations] = useState<Invitation[]>([]);
     const [refreshing, setRefreshing] = useState(false);
@@ -151,6 +156,12 @@ const InvitationsScreen = () => {
         return diffDays;
     };
 
+    // Calculate statistics
+    const totalInvitations = invitations.length;
+    const pendingInvitations = invitations.filter(inv => inv.status === 'pending').length;
+    const acceptedInvitations = invitations.filter(inv => inv.status === 'accepted').length;
+    const expiredInvitations = invitations.filter(inv => inv.status === 'expired' || inv.status === 'cancelled').length;
+
     if (loading) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#1a1a1a' }}>
@@ -174,37 +185,183 @@ const InvitationsScreen = () => {
 
             {/* Header */}
             <View style={{
-                paddingTop: 60,
-                paddingBottom: 20,
-                paddingHorizontal: 20,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                height: 80,
+                paddingHorizontal: isDesktop ? 24 : 20,
                 backgroundColor: '#1a1a1a',
                 borderBottomWidth: 1,
                 borderBottomColor: '#2c2c2c',
             }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
-                    <TouchableOpacity
-                        onPress={() => router.back()}
-                        style={{
-                            width: 40,
-                            height: 40,
-                            borderRadius: 20,
-                            backgroundColor: '#252525',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            marginEnd: 15,
-                            borderWidth: 1,
-                            borderColor: '#333'
-                        }}
-                    >
-                        <Ionicons name="arrow-back" size={22} color="#fff" />
-                    </TouchableOpacity>
+                <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                    {!isWeb && (
+                        <TouchableOpacity
+                            onPress={() => router.back()}
+                            style={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: 20,
+                                backgroundColor: '#252525',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                marginEnd: 15,
+                                borderWidth: 1,
+                                borderColor: '#333'
+                            }}
+                        >
+                            <Ionicons name="arrow-back" size={22} color="#fff" />
+                        </TouchableOpacity>
+                    )}
                     <Text style={{ fontSize: 24, fontWeight: '700', color: '#fff' }}>
                         {t('invitations')}
                     </Text>
                 </View>
+            </View>
 
-                {/* Filter Buttons */}
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 10 }}>
+            {/* Statistics Cards */}
+            <View style={{
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                paddingHorizontal: isDesktop ? 24 : 20,
+                paddingTop: 20,
+                paddingBottom: 16,
+                gap: 12,
+                backgroundColor: '#1a1a1a',
+                ...(isDesktop && { maxWidth: 1400, alignSelf: 'center', width: '100%' })
+            }}>
+                <View style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 12,
+                    padding: 16,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.08)',
+                    ...(isDesktop && { flex: 1, minWidth: 150 })
+                }}>
+                    <View style={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: 24,
+                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginRight: 12,
+                    }}>
+                        <Ionicons name="mail" size={24} color="#3498db" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
+                            {totalInvitations}
+                        </Text>
+                        <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
+                            {t('total_invitations')}
+                        </Text>
+                    </View>
+                </View>
+
+                <View style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 12,
+                    padding: 16,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.08)',
+                    ...(isDesktop && { flex: 1, minWidth: 150 })
+                }}>
+                    <View style={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: 24,
+                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginRight: 12,
+                    }}>
+                        <Ionicons name="time" size={24} color="#f39c12" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
+                            {pendingInvitations}
+                        </Text>
+                        <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
+                            {t('pending_invitations')}
+                        </Text>
+                    </View>
+                </View>
+
+                <View style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 12,
+                    padding: 16,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.08)',
+                    ...(isDesktop && { flex: 1, minWidth: 150 })
+                }}>
+                    <View style={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: 24,
+                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginRight: 12,
+                    }}>
+                        <Ionicons name="checkmark-circle" size={24} color="#2ecc71" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
+                            {acceptedInvitations}
+                        </Text>
+                        <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
+                            {t('accepted_invitations')}
+                        </Text>
+                    </View>
+                </View>
+
+                <View style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 12,
+                    padding: 16,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.08)',
+                    ...(isDesktop && { flex: 1, minWidth: 150 })
+                }}>
+                    <View style={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: 24,
+                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginRight: 12,
+                    }}>
+                        <Ionicons name="close-circle" size={24} color="#95a5a6" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
+                            {expiredInvitations}
+                        </Text>
+                        <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
+                            {t('expired_invitations')}
+                        </Text>
+                    </View>
+                </View>
+            </View>
+
+            {/* Filter Buttons */}
+            <View style={{
+                paddingVertical: 12,
+                backgroundColor: '#1a1a1a',
+                ...(isDesktop && { paddingHorizontal: 24, maxWidth: 1400, alignSelf: 'center', width: '100%' })
+            }}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                     {statusFilters.map((filter) => (
                         <TouchableOpacity
                             key={filter.key}
@@ -231,27 +388,32 @@ const InvitationsScreen = () => {
                 </ScrollView>
             </View>
 
-            <ScrollView
-                style={{ flex: 1 }}
+            <FlatList
+                data={filteredInvitations}
+                key={isDesktop ? 'desktop-3-col' : 'mobile-1-col'}
+                numColumns={isDesktop ? 3 : 1}
+                keyExtractor={(item) => item.id.toString()}
+                contentContainerStyle={{
+                    paddingHorizontal: isDesktop ? 18 : 20,
+                    paddingBottom: 20,
+                    ...(isDesktop && { maxWidth: 1400, alignSelf: 'center', width: '100%' })
+                }}
+                columnWrapperStyle={isDesktop ? { marginBottom: 12 } : undefined}
                 refreshControl={
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#3498db" />
                 }
-            >
-                <View style={{ padding: 20 }}>
-                    {filteredInvitations.map((invitation) => {
-                        const daysLeft = getDaysUntilExpiry(invitation.expires_at);
-                        return (
-                            <View
-                                key={invitation.id}
-                                style={{
-                                    backgroundColor: '#252525',
-                                    borderRadius: 16,
-                                    padding: 16,
-                                    marginBottom: 12,
-                                    borderWidth: 1,
-                                    borderColor: '#333'
-                                }}
-                            >
+                renderItem={({ item: invitation }) => {
+                    const daysLeft = getDaysUntilExpiry(invitation.expires_at);
+                    return (
+                        <View style={{ width: isDesktop ? '33.33%' : '100%', paddingHorizontal: isDesktop ? 6 : 0, marginBottom: isDesktop ? 0 : 12 }}>
+                            <View style={{
+                                backgroundColor: '#252525',
+                                borderRadius: 16,
+                                padding: 16,
+                                borderWidth: 1,
+                                borderColor: '#333',
+                                height: '100%'
+                            }}>
                                 {/* Header: Status Badge */}
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -288,14 +450,14 @@ const InvitationsScreen = () => {
                                 </View>
 
                                 {/* Student Info */}
-                                <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700', marginBottom: 4 }}>
+                                <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700', marginBottom: 4 }} numberOfLines={1}>
                                     {invitation.student_name}
                                 </Text>
 
                                 {/* Target Info */}
                                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
                                     <Ionicons name={getTypeIcon(invitation.invitation_type) as any} size={16} color="#3498db" />
-                                    <Text style={{ color: '#3498db', fontSize: 14, marginStart: 6 }}>
+                                    <Text style={{ color: '#3498db', fontSize: 14, marginStart: 6 }} numberOfLines={1}>
                                         {t(invitation.invitation_type)}: {invitation.target_name}
                                     </Text>
                                 </View>
@@ -330,7 +492,7 @@ const InvitationsScreen = () => {
                                         <Text style={{ color: '#7f8c8d', fontSize: 12, marginBottom: 4 }}>
                                             {t('your_message')}:
                                         </Text>
-                                        <Text style={{ color: '#bdc3c7', fontSize: 14 }}>
+                                        <Text style={{ color: '#bdc3c7', fontSize: 14 }} numberOfLines={2}>
                                             {invitation.message}
                                         </Text>
                                     </View>
@@ -361,19 +523,18 @@ const InvitationsScreen = () => {
                                     </TouchableOpacity>
                                 )}
                             </View>
-                        );
-                    })}
-
-                    {filteredInvitations.length === 0 && (
-                        <View style={{ alignItems: 'center', paddingVertical: 60, opacity: 0.5 }}>
-                            <Ionicons name="mail-outline" size={64} color="#7f8c8d" />
-                            <Text style={{ color: '#7f8c8d', marginTop: 15, fontSize: 16, textAlign: 'center' }}>
-                                {t('no_invitations_found')}
-                            </Text>
                         </View>
-                    )}
-                </View>
-            </ScrollView>
+                    );
+                }}
+                ListEmptyComponent={
+                    <View style={{ alignItems: 'center', paddingVertical: 60, opacity: 0.5 }}>
+                        <Ionicons name="mail-outline" size={64} color="#7f8c8d" />
+                        <Text style={{ color: '#7f8c8d', marginTop: 15, fontSize: 16, textAlign: 'center' }}>
+                            {t('no_invitations_found')}
+                        </Text>
+                    </View>
+                }
+            />
         </View>
     );
 };

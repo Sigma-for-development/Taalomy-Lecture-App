@@ -22,6 +22,7 @@ import { API_CONFIG } from '../src/config/api';
 import { lecturerAPI } from '../src/utils/api';
 import { socketIOManager } from '../src/utils/socketio';
 import { useTranslation } from 'react-i18next';
+import { useResponsive } from '../src/hooks/useResponsive';
 
 interface Intake {
   id: number;
@@ -65,6 +66,8 @@ interface Student {
 
 const SendAnnouncementScreen = () => {
   const { t } = useTranslation();
+  const { isDesktop } = useResponsive();
+  const isWeb = Platform.OS === 'web';
   const [intakes, setIntakes] = useState<Intake[]>([]);
   const [classes, setClasses] = useState<Class[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
@@ -243,7 +246,7 @@ const SendAnnouncementScreen = () => {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#0a0a0a', justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ flex: 1, backgroundColor: '#1a1a1a', justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#3498db" />
         <Text style={{ color: '#ecf0f1', marginTop: 10 }}>{t('loading_messages')}</Text>
       </View>
@@ -251,20 +254,8 @@ const SendAnnouncementScreen = () => {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#0a0a0a' }}>
+    <View style={{ flex: 1, backgroundColor: '#1a1a1a' }}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
-
-      {/* Professional Dark Background */}
-      <LinearGradient
-        colors={['#0a0a0a', '#1a1a1a', '#2d2d2d']}
-        style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          top: 0,
-          bottom: 0,
-        }}
-      />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -276,253 +267,263 @@ const SendAnnouncementScreen = () => {
         >
           {/* Header */}
           <View style={{
-            paddingTop: Platform.OS === 'ios' ? 60 : 40,
-            paddingHorizontal: 24,
-            paddingBottom: 20,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            height: 80,
+            paddingHorizontal: isDesktop ? 24 : 20,
+            backgroundColor: '#1a1a1a',
+            borderBottomWidth: 1,
+            borderBottomColor: '#2c2c2c',
           }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+              {!isWeb && (
+                <TouchableOpacity
+                  onPress={() => router.back()}
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
+                    backgroundColor: '#252525',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderWidth: 1,
+                    borderColor: '#333',
+                    marginEnd: 15
+                  }}
+                >
+                  <Ionicons name="arrow-back" size={22} color="#fff" />
+                </TouchableOpacity>
+              )}
+              <View>
+                <Text style={{
+                  fontSize: 24,
+                  fontWeight: '700',
+                  color: '#fff',
+                }}>
+                  {t('announcement_header_title')}
+                </Text>
+                <Text style={{
+                  fontSize: 14,
+                  color: '#95a5a6',
+                  marginTop: 2,
+                }}>
+                  {t('announcement_header_subtitle')}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Form Container */}
+          <View style={{
+            paddingHorizontal: isDesktop ? 24 : 20,
+            paddingTop: 24,
+            ...(isDesktop && { maxWidth: 800, alignSelf: 'center', width: '100%' })
+          }}>
+            {/* Tab Selector */}
             <View style={{
               flexDirection: 'row',
-              alignItems: 'center',
-              marginBottom: 20,
-            }}>
-              <TouchableOpacity
-                onPress={() => router.back()}
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 20,
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginEnd: 16,
-                }}
-              >
-                <Ionicons name="arrow-back" size={24} color="#3498db" />
-              </TouchableOpacity>
-              <Text style={{
-                fontSize: 24,
-                fontWeight: 'bold',
-                color: '#ecf0f1',
-              }}>
-                {t('announcement_header_title')}
-              </Text>
-            </View>
-
-            <Text style={{
-              fontSize: 16,
-              color: '#bdc3c7',
-              lineHeight: 24,
-            }}>
-              {t('announcement_header_subtitle')}
-            </Text>
-          </View>
-
-          {/* Tab Selector */}
-          <View style={{
-            flexDirection: 'row',
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            marginHorizontal: 24,
-            borderRadius: 12,
-            marginBottom: 20,
-            borderWidth: 1,
-            borderColor: 'rgba(255, 255, 255, 0.1)',
-          }}>
-            <TouchableOpacity
-              style={[
-                styles.tabButton,
-                activeTab === 'intake' && styles.activeTab
-              ]}
-              onPress={() => setActiveTab('intake')}
-            >
-              <Text style={[
-                styles.tabText,
-                activeTab === 'intake' && styles.activeTabText
-              ]}>
-                {t('tab_intake')}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.tabButton,
-                activeTab === 'class' && styles.activeTab
-              ]}
-              onPress={() => setActiveTab('class')}
-            >
-              <Text style={[
-                styles.tabText,
-                activeTab === 'class' && styles.activeTabText
-              ]}>
-                {t('tab_class')}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.tabButton,
-                activeTab === 'group' && styles.activeTab
-              ]}
-              onPress={() => setActiveTab('group')}
-            >
-              <Text style={[
-                styles.tabText,
-                activeTab === 'group' && styles.activeTabText
-              ]}>
-                {t('tab_group')}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Entity Selection */}
-          <View style={{ paddingHorizontal: 24, marginBottom: 20 }}>
-            <Text style={{
-              fontSize: 18,
-              fontWeight: 'bold',
-              color: '#ecf0f1',
-              marginBottom: 12,
-            }}>
-              {t(`select_${activeTab}`)}
-            </Text>
-
-            {activeTab === 'intake' && (
-              <View style={styles.entityContainer}>
-                {intakes.map((intake) => (
-                  <TouchableOpacity
-                    key={intake.id}
-                    style={[
-                      styles.entityItem,
-                      selectedIntake?.id === intake.id && styles.selectedEntity
-                    ]}
-                    onPress={() => setSelectedIntake(intake)}
-                  >
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.entityName}>{intake.name}</Text>
-                      <Text style={styles.entityStats}>
-                        {t('students_count_format', { current: intake.current_students, max: intake.max_students })}
-                      </Text>
-                    </View>
-                    <Ionicons
-                      name={selectedIntake?.id === intake.id ? "radio-button-on" : "radio-button-off"}
-                      size={24}
-                      color={selectedIntake?.id === intake.id ? "#3498db" : "#95a5a6"}
-                    />
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
-
-            {activeTab === 'class' && (
-              <View style={styles.entityContainer}>
-                {classes.map((classItem) => (
-                  <TouchableOpacity
-                    key={classItem.id}
-                    style={[
-                      styles.entityItem,
-                      selectedClass?.id === classItem.id && styles.selectedEntity
-                    ]}
-                    onPress={() => setSelectedClass(classItem)}
-                  >
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.entityName}>{classItem.name}</Text>
-                      <Text style={styles.entityStats}>
-                        {t('students_count_format', { current: classItem.current_students, max: classItem.max_students })}
-                      </Text>
-                    </View>
-                    <Ionicons
-                      name={selectedClass?.id === classItem.id ? "radio-button-on" : "radio-button-off"}
-                      size={24}
-                      color={selectedClass?.id === classItem.id ? "#3498db" : "#95a5a6"}
-                    />
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
-
-            {activeTab === 'group' && (
-              <View style={styles.entityContainer}>
-                {groups.map((group) => (
-                  <TouchableOpacity
-                    key={group.id}
-                    style={[
-                      styles.entityItem,
-                      selectedGroup?.id === group.id && styles.selectedEntity
-                    ]}
-                    onPress={() => setSelectedGroup(group)}
-                  >
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.entityName}>{group.name}</Text>
-                      <Text style={styles.entityStats}>
-                        {t('students_count_format', { current: group.current_students, max: group.max_students })}
-                      </Text>
-                    </View>
-                    <Ionicons
-                      name={selectedGroup?.id === group.id ? "radio-button-on" : "radio-button-off"}
-                      size={24}
-                      color={selectedGroup?.id === group.id ? "#3498db" : "#95a5a6"}
-                    />
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
-          </View>
-
-          {/* Message Input */}
-          <View style={{ paddingHorizontal: 24, marginBottom: 20 }}>
-            <Text style={{
-              fontSize: 18,
-              fontWeight: 'bold',
-              color: '#ecf0f1',
-              marginBottom: 12,
-            }}>
-              {t('your_message_label')}
-            </Text>
-
-            <View style={{
               backgroundColor: 'rgba(255, 255, 255, 0.05)',
               borderRadius: 12,
+              marginBottom: 24,
               borderWidth: 1,
               borderColor: 'rgba(255, 255, 255, 0.1)',
-              padding: 16,
             }}>
-              <TextInput
-                style={{
-                  color: '#ecf0f1',
-                  fontSize: 16,
-                  minHeight: 120,
-                  textAlignVertical: 'top',
-                }}
-                placeholder="Type your announcement here..."
-                placeholderTextColor="#95a5a6"
-                value={message}
-                onChangeText={setMessage}
-                multiline
-                editable={!sending}
-              />
+              <TouchableOpacity
+                style={[
+                  styles.tabButton,
+                  activeTab === 'intake' && styles.activeTab
+                ]}
+                onPress={() => setActiveTab('intake')}
+              >
+                <Text style={[
+                  styles.tabText,
+                  activeTab === 'intake' && styles.activeTabText
+                ]}>
+                  {t('tab_intake')}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.tabButton,
+                  activeTab === 'class' && styles.activeTab
+                ]}
+                onPress={() => setActiveTab('class')}
+              >
+                <Text style={[
+                  styles.tabText,
+                  activeTab === 'class' && styles.activeTabText
+                ]}>
+                  {t('tab_class')}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.tabButton,
+                  activeTab === 'group' && styles.activeTab
+                ]}
+                onPress={() => setActiveTab('group')}
+              >
+                <Text style={[
+                  styles.tabText,
+                  activeTab === 'group' && styles.activeTabText
+                ]}>
+                  {t('tab_group')}
+                </Text>
+              </TouchableOpacity>
             </View>
 
-            {getEntityName() ? (
+            {/* Entity Selection */}
+            <View style={{ marginBottom: 24 }}>
               <Text style={{
-                color: '#bdc3c7',
-                fontSize: 14,
-                marginTop: 8,
-                fontStyle: 'italic',
+                fontSize: 16,
+                fontWeight: '600',
+                color: '#ecf0f1',
+                marginBottom: 12,
               }}>
-                {t('announcement_target_hint', { name: getEntityName() })}
+                {t(`select_${activeTab}`)}
               </Text>
-            ) : (
-              <Text style={{
-                color: '#e74c3c',
-                fontSize: 14,
-                marginTop: 8,
-                fontStyle: 'italic',
-              }}>
-                {t('announcement_select_hint', { type: t(`tab_${activeTab}`) })}
-              </Text>
-            )}
-          </View>
 
-          {/* Send Button */}
-          <View style={{ paddingHorizontal: 24 }}>
+              {activeTab === 'intake' && (
+                <View style={styles.entityContainer}>
+                  {intakes.map((intake) => (
+                    <TouchableOpacity
+                      key={intake.id}
+                      style={[
+                        styles.entityItem,
+                        selectedIntake?.id === intake.id && styles.selectedEntity
+                      ]}
+                      onPress={() => setSelectedIntake(intake)}
+                    >
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.entityName}>{intake.name}</Text>
+                        <Text style={styles.entityStats}>
+                          {t('students_count_format', { current: intake.current_students, max: intake.max_students })}
+                        </Text>
+                      </View>
+                      <Ionicons
+                        name={selectedIntake?.id === intake.id ? "radio-button-on" : "radio-button-off"}
+                        size={24}
+                        color={selectedIntake?.id === intake.id ? "#3498db" : "#95a5a6"}
+                      />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+
+              {activeTab === 'class' && (
+                <View style={styles.entityContainer}>
+                  {classes.map((classItem) => (
+                    <TouchableOpacity
+                      key={classItem.id}
+                      style={[
+                        styles.entityItem,
+                        selectedClass?.id === classItem.id && styles.selectedEntity
+                      ]}
+                      onPress={() => setSelectedClass(classItem)}
+                    >
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.entityName}>{classItem.name}</Text>
+                        <Text style={styles.entityStats}>
+                          {t('students_count_format', { current: classItem.current_students, max: classItem.max_students })}
+                        </Text>
+                      </View>
+                      <Ionicons
+                        name={selectedClass?.id === classItem.id ? "radio-button-on" : "radio-button-off"}
+                        size={24}
+                        color={selectedClass?.id === classItem.id ? "#3498db" : "#95a5a6"}
+                      />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+
+              {activeTab === 'group' && (
+                <View style={styles.entityContainer}>
+                  {groups.map((group) => (
+                    <TouchableOpacity
+                      key={group.id}
+                      style={[
+                        styles.entityItem,
+                        selectedGroup?.id === group.id && styles.selectedEntity
+                      ]}
+                      onPress={() => setSelectedGroup(group)}
+                    >
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.entityName}>{group.name}</Text>
+                        <Text style={styles.entityStats}>
+                          {t('students_count_format', { current: group.current_students, max: group.max_students })}
+                        </Text>
+                      </View>
+                      <Ionicons
+                        name={selectedGroup?.id === group.id ? "radio-button-on" : "radio-button-off"}
+                        size={24}
+                        color={selectedGroup?.id === group.id ? "#3498db" : "#95a5a6"}
+                      />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+            </View>
+
+            {/* Message Input */}
+            <View style={{ marginBottom: 24 }}>
+              <Text style={{
+                fontSize: 16,
+                fontWeight: '600',
+                color: '#ecf0f1',
+                marginBottom: 12,
+              }}>
+                {t('your_message_label')}
+              </Text>
+
+              <View style={{
+                backgroundColor: '#2c2c2c',
+                borderRadius: 12,
+                borderWidth: 1,
+                borderColor: '#333',
+                padding: 16,
+              }}>
+                <TextInput
+                  style={{
+                    color: '#ecf0f1',
+                    fontSize: 16,
+                    minHeight: 120,
+                    textAlignVertical: 'top',
+                  }}
+                  placeholder="Type your announcement here..."
+                  placeholderTextColor="#7f8c8d"
+                  value={message}
+                  onChangeText={setMessage}
+                  multiline
+                  editable={!sending}
+                />
+              </View>
+
+              {getEntityName() ? (
+                <Text style={{
+                  color: '#95a5a6',
+                  fontSize: 13,
+                  marginTop: 8,
+                  fontStyle: 'italic',
+                }}>
+                  {t('announcement_target_hint', { name: getEntityName() })}
+                </Text>
+              ) : (
+                <Text style={{
+                  color: '#e74c3c',
+                  fontSize: 13,
+                  marginTop: 8,
+                  fontStyle: 'italic',
+                }}>
+                  {t('announcement_select_hint', { type: t(`tab_${activeTab}`) })}
+                </Text>
+              )}
+            </View>
+
+            {/* Send Button */}
             <TouchableOpacity
               style={{
                 backgroundColor: '#3498db',
@@ -539,8 +540,8 @@ const SendAnnouncementScreen = () => {
               ) : (
                 <Text style={{
                   color: '#fff',
-                  fontSize: 18,
-                  fontWeight: 'bold',
+                  fontSize: 16,
+                  fontWeight: '700',
                 }}>
                   {t('send_announcement_button')}
                 </Text>

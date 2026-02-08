@@ -11,6 +11,7 @@ import {
   RefreshControl,
   Image,
   ScrollView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
@@ -20,6 +21,7 @@ import api from '../src/config/api';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
+import { useResponsive } from '../src/hooks/useResponsive';
 
 interface ChatRoom {
   id: number;
@@ -61,6 +63,8 @@ type FilterType = 'all' | 'class' | 'group' | 'direct';
 
 const MessagesScreen = () => {
   const { t, i18n } = useTranslation();
+  const { isDesktop } = useResponsive();
+  const isWeb = Platform.OS === 'web';
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -133,6 +137,12 @@ const MessagesScreen = () => {
     if (activeFilter === 'all') return chatRooms;
     return chatRooms.filter(room => room.chat_type === activeFilter);
   }, [chatRooms, activeFilter]);
+
+  // Calculate statistics
+  const totalConversations = chatRooms.length;
+  const unreadMessages = chatRooms.reduce((sum, room) => sum + room.unread_count, 0);
+  const activeChats = chatRooms.filter(room => room.last_message !== null).length;
+  const responseRate = totalConversations > 0 ? Math.round((activeChats / totalConversations) * 100) : 0;
 
   const handleChatRoomPress = (room: ChatRoom) => {
     if (room.chat_type === 'class' && room.class_obj && room.class_obj.id) {
@@ -320,16 +330,6 @@ const MessagesScreen = () => {
     return (
       <View style={styles.container}>
         <StatusBar barStyle="light-content" />
-        <LinearGradient
-          colors={['#0a0a0a', '#1a1a1a', '#2d2d2d']}
-          style={styles.backgroundGradient}
-        />
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#fff" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>{t('messages_header')}</Text>
-        </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#3498db" />
           <Text style={styles.loadingText}>{t('loading_messages')}</Text>
@@ -342,16 +342,6 @@ const MessagesScreen = () => {
     return (
       <View style={styles.container}>
         <StatusBar barStyle="light-content" />
-        <LinearGradient
-          colors={['#0a0a0a', '#1a1a1a', '#2d2d2d']}
-          style={styles.backgroundGradient}
-        />
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#fff" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>{t('messages_header')}</Text>
-        </View>
         <View style={styles.errorContainer}>
           <Ionicons name="warning-outline" size={48} color="#e74c3c" />
           <Text style={styles.errorText}>{error}</Text>
@@ -366,21 +356,86 @@ const MessagesScreen = () => {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
-      <LinearGradient
-        colors={['#0a0a0a', '#1a1a1a', '#2d2d2d']}
-        style={styles.backgroundGradient}
-      />
 
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('messages_header')}</Text>
+      <View style={[
+        styles.header,
+        isDesktop && { paddingHorizontal: 24 }
+      ]}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+          {!isWeb && (
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                backgroundColor: '#252525',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderWidth: 1,
+                borderColor: '#333',
+                marginEnd: 15
+              }}
+            >
+              <Ionicons name="arrow-back" size={22} color="#fff" />
+            </TouchableOpacity>
+          )}
+          <Text style={styles.headerTitle}>{t('messages_header')}</Text>
+        </View>
+      </View>
+
+      {/* Statistics Cards */}
+      <View style={[
+        styles.statsContainer,
+        isDesktop && { paddingHorizontal: 24, maxWidth: 1400, alignSelf: 'center', width: '100%' }
+      ]}>
+        <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 150 }]}>
+          <View style={styles.statIconContainer}>
+            <Ionicons name="chatbubbles" size={24} color="#3498db" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.statValue}>{totalConversations}</Text>
+            <Text style={styles.statLabel}>{t('total_conversations')}</Text>
+          </View>
+        </View>
+
+        <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 150 }]}>
+          <View style={styles.statIconContainer}>
+            <Ionicons name="mail-unread" size={24} color="#e74c3c" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.statValue}>{unreadMessages}</Text>
+            <Text style={styles.statLabel}>{t('unread_messages')}</Text>
+          </View>
+        </View>
+
+        <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 150 }]}>
+          <View style={styles.statIconContainer}>
+            <Ionicons name="checkmark-circle" size={24} color="#2ecc71" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.statValue}>{activeChats}</Text>
+            <Text style={styles.statLabel}>{t('active_chats')}</Text>
+          </View>
+        </View>
+
+        <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 150 }]}>
+          <View style={styles.statIconContainer}>
+            <Ionicons name="trending-up" size={24} color="#f39c12" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.statValue}>{responseRate}%</Text>
+            <Text style={styles.statLabel}>{t('response_rate')}</Text>
+          </View>
+        </View>
       </View>
 
       {/* Filter Bar */}
-      <View style={styles.filterContainer}>
+      <View style={[
+        styles.filterContainer,
+        isDesktop && { paddingHorizontal: 24, maxWidth: 1400, alignSelf: 'center', width: '100%' }
+      ]}>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -396,10 +451,15 @@ const MessagesScreen = () => {
       {/* Chat Rooms List */}
       <FlatList
         data={filteredChatRooms}
-        renderItem={renderChatRoom}
+        key={isDesktop ? 'desktop-3-col' : 'mobile-1-col'}
+        numColumns={isDesktop ? 3 : 1}
         keyExtractor={(item) => item.id.toString()}
         style={styles.chatList}
-        contentContainerStyle={styles.chatListContent}
+        contentContainerStyle={[
+          styles.chatListContent,
+          isDesktop && { paddingHorizontal: 18, maxWidth: 1400, alignSelf: 'center', width: '100%' }
+        ]}
+        columnWrapperStyle={isDesktop ? { marginBottom: 12 } : undefined}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -408,6 +468,11 @@ const MessagesScreen = () => {
             colors={['#3498db']}
           />
         }
+        renderItem={({ item }) => (
+          <View style={{ width: isDesktop ? '33.33%' : '100%', paddingHorizontal: isDesktop ? 6 : 0, marginBottom: isDesktop ? 0 : 12 }}>
+            {renderChatRoom({ item })}
+          </View>
+        )}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Ionicons name="chatbubbles-outline" size={64} color="#7f8c8d" />
@@ -427,39 +492,67 @@ const MessagesScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0a0a0a',
-  },
-  backgroundGradient: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
+    backgroundColor: '#1a1a1a',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    height: 80,
     paddingHorizontal: 20,
-    paddingTop: 60, // Adjust for status bar
-    paddingBottom: 16,
-    zIndex: 10,
-  },
-  backButton: {
-    padding: 8,
-    marginEnd: 10,
+    backgroundColor: '#1a1a1a',
+    borderBottomWidth: 1,
+    borderBottomColor: '#2c2c2c',
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: '700',
     color: '#fff',
-    flex: 1,
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 16,
+    gap: 12,
+    backgroundColor: '#1a1a1a',
+  },
+  statCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 12,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  statIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  statValue: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#fff',
+    marginBottom: 2,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: '#95a5a6',
+    fontWeight: '500',
   },
   filterContainer: {
-    marginBottom: 10,
+    paddingVertical: 12,
+    backgroundColor: '#1a1a1a',
   },
   filterContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 8,
+    paddingHorizontal: 0,
   },
   filterItem: {
     paddingHorizontal: 20,
@@ -527,11 +620,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: '#2c2c2c',
     borderRadius: 16,
-    marginBottom: 12,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: '#333',
+    height: '100%',
   },
   avatarContainer: {
     position: 'relative',
