@@ -8,6 +8,8 @@ import {
     RefreshControl,
     TextInput,
     ActivityIndicator,
+    FlatList,
+    Platform
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { router } from 'expo-router';
@@ -18,6 +20,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { API_CONFIG } from '../src/config/api';
+import { useResponsive } from '../src/hooks/useResponsive';
 
 interface Intake {
     id: number;
@@ -34,6 +37,8 @@ interface Intake {
 
 const DemoSessionsScreen = () => {
     const { t } = useTranslation();
+    const { isDesktop } = useResponsive();
+    const isWeb = Platform.OS === 'web';
     const [intakes, setIntakes] = useState<Intake[]>([]);
     const [filteredIntakes, setFilteredIntakes] = useState<Intake[]>([]);
     const [refreshing, setRefreshing] = useState(false);
@@ -41,6 +46,12 @@ const DemoSessionsScreen = () => {
     const [searchQuery, setSearchQuery] = useState('');
 
     const baseurl = API_CONFIG.ACCOUNTS_BASE_URL;
+
+    // Calculate statistics
+    const totalSessions = filteredIntakes.length;
+    const upcomingSessions = filteredIntakes.filter(i => i.status === 'active').length;
+    const completedSessions = filteredIntakes.filter(i => i.status === 'completed').length;
+    const totalParticipants = filteredIntakes.reduce((sum, i) => sum + i.current_students, 0);
 
     useEffect(() => {
         loadIntakes();
@@ -110,70 +121,235 @@ const DemoSessionsScreen = () => {
         <View style={{ flex: 1, backgroundColor: '#1a1a1a' }}>
             <StatusBar barStyle="light-content" />
 
-            {/* Header - Green Theme for Demo */}
-            <LinearGradient
-                colors={['#27ae60', '#2ecc71']}
+            {/* Header */}
+            <View
                 style={{
-                    paddingTop: 50,
-                    paddingBottom: 20,
-                    paddingHorizontal: 20,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    height: 80,
+                    paddingHorizontal: isDesktop ? 24 : 20,
+                    backgroundColor: '#1a1a1a',
+                    borderBottomWidth: 1,
+                    borderBottomColor: '#2c2c2c',
                 }}
             >
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
-                    <TouchableOpacity
-                        onPress={() => router.back()}
-                        style={{
-                            padding: 8,
-                            marginEnd: 12,
-                        }}
-                    >
-                        <Ionicons name="arrow-back" size={24} color="#fff" />
-                    </TouchableOpacity>
-                    <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#fff' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                    {!isWeb && (
+                        <TouchableOpacity
+                            onPress={() => router.back()}
+                            style={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: 20,
+                                backgroundColor: '#252525',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                borderWidth: 1,
+                                borderColor: '#333',
+                                marginEnd: 15
+                            }}
+                        >
+                            <Ionicons name="arrow-back" size={22} color="#fff" />
+                        </TouchableOpacity>
+                    )}
+                    <Text style={{ fontSize: 24, fontWeight: '700', color: '#fff' }}>
                         {t('demo_sessions_title')}
                     </Text>
                 </View>
+            </View>
 
-                {/* Search Bar */}
+            {/* Statistics Cards */}
+            <View style={{
+                flexDirection: isDesktop ? 'row' : 'column',
+                flexWrap: 'wrap',
+                paddingHorizontal: isDesktop ? 24 : 20,
+                paddingTop: 20,
+                paddingBottom: 16,
+                gap: 12,
+                backgroundColor: '#1a1a1a',
+                ...(isDesktop && { maxWidth: 1400, alignSelf: 'center', width: '100%' })
+            }}>
+                <View style={{
+                    flex: isDesktop ? 1 : undefined,
+                    minWidth: isDesktop ? 150 : undefined,
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 12,
+                    padding: 16,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.08)',
+                }}>
+                    <View style={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: 24,
+                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginRight: 12,
+                    }}>
+                        <Ionicons name="flask" size={24} color="#2ecc71" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
+                            {totalSessions}
+                        </Text>
+                        <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
+                            {t('total_demo_sessions')}
+                        </Text>
+                    </View>
+                </View>
+
+                <View style={{
+                    flex: isDesktop ? 1 : undefined,
+                    minWidth: isDesktop ? 150 : undefined,
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 12,
+                    padding: 16,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.08)',
+                }}>
+                    <View style={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: 24,
+                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginRight: 12,
+                    }}>
+                        <Ionicons name="calendar" size={24} color="#3498db" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
+                            {upcomingSessions}
+                        </Text>
+                        <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
+                            {t('upcoming_sessions')}
+                        </Text>
+                    </View>
+                </View>
+
+                <View style={{
+                    flex: isDesktop ? 1 : undefined,
+                    minWidth: isDesktop ? 150 : undefined,
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 12,
+                    padding: 16,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.08)',
+                }}>
+                    <View style={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: 24,
+                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginRight: 12,
+                    }}>
+                        <Ionicons name="checkmark-circle" size={24} color="#9b59b6" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
+                            {completedSessions}
+                        </Text>
+                        <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
+                            {t('completed_sessions')}
+                        </Text>
+                    </View>
+                </View>
+
+                <View style={{
+                    flex: isDesktop ? 1 : undefined,
+                    minWidth: isDesktop ? 150 : undefined,
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 12,
+                    padding: 16,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.08)',
+                }}>
+                    <View style={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: 24,
+                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginRight: 12,
+                    }}>
+                        <Ionicons name="people" size={24} color="#f39c12" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
+                            {totalParticipants}
+                        </Text>
+                        <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
+                            {t('total_participants')}
+                        </Text>
+                    </View>
+                </View>
+            </View>
+
+            {/* Search Bar */}
+            <View style={{
+                paddingHorizontal: isDesktop ? 24 : 20,
+                paddingVertical: 16,
+                backgroundColor: '#1a1a1a',
+                ...(isDesktop && { maxWidth: 1400, alignSelf: 'center', width: '100%' })
+            }}>
                 <TextInput
                     style={{
-                        backgroundColor: 'rgba(255,255,255,0.2)',
+                        backgroundColor: '#252525',
                         borderRadius: 10,
                         paddingHorizontal: 15,
                         paddingVertical: 12,
                         color: '#fff',
                         fontSize: 16,
+                        borderWidth: 1,
+                        borderColor: '#333',
                     }}
                     placeholder={t('demo_sessions_search_placeholder')}
-                    placeholderTextColor="rgba(255,255,255,0.7)"
+                    placeholderTextColor="#7f8c8d"
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                     returnKeyType="done"
                 />
-            </LinearGradient>
+            </View>
 
-            <ScrollView
-                style={{ flex: 1 }}
+            <FlatList
+                data={filteredIntakes}
+                key={isDesktop ? 'desktop-3-col' : 'mobile-1-col'}
+                numColumns={isDesktop ? 3 : 1}
+                keyExtractor={(item) => item.id.toString()}
                 refreshControl={
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#2ecc71" />
                 }
-            >
-                <View style={{ padding: 20 }}>
-                    <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 15 }}>
-                        {t('demo_sessions_active_title')} ({filteredIntakes.length})
-                    </Text>
-
-                    {filteredIntakes.map((intake) => (
+                contentContainerStyle={{
+                    paddingHorizontal: isDesktop ? 18 : 20,
+                    paddingBottom: 40,
+                    ...(isDesktop && { maxWidth: 1400, alignSelf: 'center', width: '100%' })
+                }}
+                columnWrapperStyle={isDesktop ? { marginBottom: 12 } : undefined}
+                renderItem={({ item: intake }) => (
+                    <View style={{ width: isDesktop ? '33.33%' : '100%', paddingHorizontal: isDesktop ? 6 : 0, marginBottom: isDesktop ? 0 : 16 }}>
                         <TouchableOpacity
-                            key={intake.id}
                             onPress={() => router.push(`/intake-details/${intake.id}`)}
                             style={{
                                 backgroundColor: '#2c2c2c',
                                 borderRadius: 15,
                                 padding: 20,
-                                marginBottom: 15,
                                 borderLeftWidth: 4,
-                                borderLeftColor: '#2ecc71'
+                                borderLeftColor: '#2ecc71',
+                                height: '100%'
                             }}
                         >
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
@@ -192,11 +368,11 @@ const DemoSessionsScreen = () => {
                                 </View>
                             </View>
 
-                            <Text style={{ color: '#bdc3c7', fontSize: 14, marginBottom: 10, lineHeight: 20 }}>
+                            <Text style={{ color: '#bdc3c7', fontSize: 14, marginBottom: 10, lineHeight: 20 }} numberOfLines={2}>
                                 {intake.description}
                             </Text>
 
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+                            <View style={{ flexDirection: 'column', gap: 8, marginBottom: 8 }}>
                                 <Text style={{ color: '#95a5a6', fontSize: 12 }}>
                                     <Text style={{ fontWeight: 'bold' }}>{t('date_label')}:</Text> {formatDate(intake.start_date)}
                                 </Text>
@@ -209,21 +385,20 @@ const DemoSessionsScreen = () => {
                                 <Text style={{ color: '#2ecc71', fontSize: 14, fontWeight: 'bold' }}>
                                     {intake.current_students} {t('students_enrolled_suffix')}
                                 </Text>
-                                <Ionicons name="chevron-forward" size={16} color="#95a5a6" />
+                                {!isDesktop && <Ionicons name="chevron-forward" size={16} color="#95a5a6" />}
                             </View>
                         </TouchableOpacity>
-                    ))}
-
-                    {filteredIntakes.length === 0 && (
-                        <View style={{ alignItems: 'center', paddingVertical: 40 }}>
-                            <Ionicons name="flask-outline" size={48} color="#7f8c8d" />
-                            <Text style={{ color: '#7f8c8d', marginTop: 10, fontSize: 16 }}>
-                                {t('no_demo_sessions')}
-                            </Text>
-                        </View>
-                    )}
-                </View>
-            </ScrollView>
+                    </View>
+                )}
+                ListEmptyComponent={
+                    <View style={{ alignItems: 'center', paddingVertical: 40 }}>
+                        <Ionicons name="flask-outline" size={48} color="#7f8c8d" />
+                        <Text style={{ color: '#7f8c8d', marginTop: 10, fontSize: 16 }}>
+                            {t('no_demo_sessions')}
+                        </Text>
+                    </View>
+                }
+            />
         </View>
     );
 };
