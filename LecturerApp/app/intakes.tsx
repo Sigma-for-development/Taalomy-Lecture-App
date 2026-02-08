@@ -10,7 +10,8 @@ import {
   TextInput,
   ActivityIndicator,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  FlatList,
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useTranslation } from 'react-i18next'; // Added import
@@ -21,6 +22,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { lecturerAPI } from '../src/utils/api';
 import { socketIOManager } from '../src/utils/socketio';
 import DatePicker from '../src/components/DatePicker';
+import { useResponsive } from '../src/hooks/useResponsive';
 
 interface Intake {
   id: number;
@@ -36,6 +38,8 @@ interface Intake {
 
 const IntakesScreen = () => {
   const { t, i18n } = useTranslation();
+  const { isDesktop } = useResponsive();
+  const isWeb = Platform.OS === 'web';
   const [intakes, setIntakes] = useState<Intake[]>([]);
   const [filteredIntakes, setFilteredIntakes] = useState<Intake[]>([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -202,16 +206,18 @@ const IntakesScreen = () => {
       {/* Header */}
       <View
         style={{
-          paddingTop: 60,
-          paddingBottom: 20,
-          paddingHorizontal: 20,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          height: 80,
+          paddingHorizontal: isDesktop ? 24 : 20,
           backgroundColor: '#1a1a1a',
           borderBottomWidth: 1,
           borderBottomColor: '#2c2c2c',
         }}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          {!isWeb && (
             <TouchableOpacity
               onPress={() => router.back()}
               style={{
@@ -228,34 +234,41 @@ const IntakesScreen = () => {
             >
               <Ionicons name={i18n.language === 'ar' ? "chevron-forward" : "chevron-back"} size={22} color="#fff" />
             </TouchableOpacity>
-            <Text style={{ fontSize: 24, fontWeight: '700', color: '#fff' }}>
-              {t('intakes')}
-            </Text>
-          </View>
-          <TouchableOpacity
-            onPress={() => setShowCreateModal(true)}
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: 22,
-              backgroundColor: '#3498db',
-              alignItems: 'center',
-              justifyContent: 'center',
-              shadowColor: "#3498db",
-              shadowOffset: {
-                width: 0,
-                height: 4,
-              },
-              shadowOpacity: 0.3,
-              shadowRadius: 4.65,
-              elevation: 8,
-            }}
-          >
-            <Ionicons name="add" size={24} color="#fff" />
-          </TouchableOpacity>
+          )}
+          <Text style={{ fontSize: 24, fontWeight: '700', color: '#fff' }}>
+            {t('intakes')}
+          </Text>
         </View>
+        <TouchableOpacity
+          onPress={() => setShowCreateModal(true)}
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: 22,
+            backgroundColor: '#3498db',
+            alignItems: 'center',
+            justifyContent: 'center',
+            shadowColor: "#3498db",
+            shadowOffset: {
+              width: 0,
+              height: 4,
+            },
+            shadowOpacity: 0.3,
+            shadowRadius: 4.65,
+            elevation: 8,
+          }}
+        >
+          <Ionicons name="add" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
 
-        {/* Search Bar */}
+      {/* Search Bar */}
+      <View style={{
+        paddingHorizontal: isDesktop ? 24 : 20,
+        paddingVertical: 16,
+        backgroundColor: '#1a1a1a',
+        ...(isDesktop && { maxWidth: 1400, alignSelf: 'center', width: '100%' })
+      }}>
         <View style={{
           flexDirection: 'row',
           alignItems: 'center',
@@ -285,31 +298,177 @@ const IntakesScreen = () => {
         </View>
       </View>
 
-      <ScrollView
-        style={{ flex: 1 }}
+      {/* Statistics Cards */}
+      <View style={{
+        flexDirection: isDesktop ? 'row' : 'column',
+        flexWrap: 'wrap',
+        paddingHorizontal: isDesktop ? 24 : 20,
+        paddingBottom: 16,
+        gap: 12,
+        ...(isDesktop && { maxWidth: 1400, alignSelf: 'center', width: '100%' })
+      }}>
+        <View style={{
+          flex: isDesktop ? 1 : undefined,
+          minWidth: isDesktop ? 150 : undefined,
+          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+          borderRadius: 12,
+          padding: 16,
+          flexDirection: 'row',
+          alignItems: 'center',
+          borderWidth: 1,
+          borderColor: 'rgba(255, 255, 255, 0.08)',
+        }}>
+          <View style={{
+            width: 48,
+            height: 48,
+            borderRadius: 24,
+            backgroundColor: 'rgba(255, 255, 255, 0.08)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginRight: 12,
+          }}>
+            <Ionicons name="school" size={24} color="#3498db" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
+              {intakes.length}
+            </Text>
+            <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
+              {t('total_intakes')}
+            </Text>
+          </View>
+        </View>
+
+        <View style={{
+          flex: isDesktop ? 1 : undefined,
+          minWidth: isDesktop ? 150 : undefined,
+          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+          borderRadius: 12,
+          padding: 16,
+          flexDirection: 'row',
+          alignItems: 'center',
+          borderWidth: 1,
+          borderColor: 'rgba(255, 255, 255, 0.08)',
+        }}>
+          <View style={{
+            width: 48,
+            height: 48,
+            borderRadius: 24,
+            backgroundColor: 'rgba(255, 255, 255, 0.08)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginRight: 12,
+          }}>
+            <Ionicons name="checkmark-circle" size={24} color="#2ecc71" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
+              {intakes.filter(i => i.status === 'active').length}
+            </Text>
+            <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
+              {t('active_intakes')}
+            </Text>
+          </View>
+        </View>
+
+        <View style={{
+          flex: isDesktop ? 1 : undefined,
+          minWidth: isDesktop ? 150 : undefined,
+          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+          borderRadius: 12,
+          padding: 16,
+          flexDirection: 'row',
+          alignItems: 'center',
+          borderWidth: 1,
+          borderColor: 'rgba(255, 255, 255, 0.08)',
+        }}>
+          <View style={{
+            width: 48,
+            height: 48,
+            borderRadius: 24,
+            backgroundColor: 'rgba(255, 255, 255, 0.08)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginRight: 12,
+          }}>
+            <Ionicons name="people" size={24} color="#9b59b6" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
+              {intakes.reduce((sum, i) => sum + i.current_students, 0)}
+            </Text>
+            <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
+              {t('total_students')}
+            </Text>
+          </View>
+        </View>
+
+        <View style={{
+          flex: isDesktop ? 1 : undefined,
+          minWidth: isDesktop ? 150 : undefined,
+          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+          borderRadius: 12,
+          padding: 16,
+          flexDirection: 'row',
+          alignItems: 'center',
+          borderWidth: 1,
+          borderColor: 'rgba(255, 255, 255, 0.08)',
+        }}>
+          <View style={{
+            width: 48,
+            height: 48,
+            borderRadius: 24,
+            backgroundColor: 'rgba(255, 255, 255, 0.08)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginRight: 12,
+          }}>
+            <Ionicons name="trophy" size={24} color="#f39c12" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
+              {intakes.filter(i => i.status === 'completed').length}
+            </Text>
+            <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
+              {t('completed_intakes')}
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      <FlatList
+        data={filteredIntakes}
+        key={isDesktop ? 'desktop-3-col' : 'mobile-1-col'}
+        numColumns={isDesktop ? 3 : 1}
+        keyExtractor={(item) => item.id.toString()}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#3498db" />
         }
-      >
-        <View style={{ padding: 20 }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        contentContainerStyle={{
+          paddingHorizontal: isDesktop ? 18 : 20,
+          paddingBottom: 40,
+          ...(isDesktop && { maxWidth: 1400, alignSelf: 'center', width: '100%' })
+        }}
+        columnWrapperStyle={isDesktop ? { marginBottom: 12 } : undefined}
+        ListHeaderComponent={
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, marginTop: 20 }}>
             <Text style={{ fontSize: 18, fontWeight: '700', color: '#fff' }}>
               {t('your_intakes', { count: filteredIntakes.length })}
             </Text>
             {loading && <ActivityIndicator size="small" color="#3498db" />}
           </View>
-
-          {filteredIntakes.map((intake) => (
+        }
+        renderItem={({ item: intake }) => (
+          <View style={{ width: isDesktop ? '33.33%' : '100%', paddingHorizontal: isDesktop ? 6 : 0, marginBottom: isDesktop ? 0 : 15 }}>
             <TouchableOpacity
-              key={intake.id}
               onPress={() => router.push(`/intake-details/${intake.id}`)}
               style={{
                 backgroundColor: '#252525',
                 borderRadius: 16,
                 padding: 20,
-                marginBottom: 15,
                 borderWidth: 1,
-                borderColor: '#333'
+                borderColor: '#333',
+                height: '100%'
               }}
             >
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
@@ -383,32 +542,31 @@ const IntakesScreen = () => {
                 </View>
               </View>
             </TouchableOpacity>
-          ))}
-
-          {filteredIntakes.length === 0 && (
-            <View style={{ alignItems: 'center', paddingVertical: 60, opacity: 0.5 }}>
-              <Ionicons name="school-outline" size={64} color="#7f8c8d" />
-              <Text style={{ color: '#7f8c8d', marginTop: 15, fontSize: 16, textAlign: 'center' }}>
-                {searchQuery ? t('no_intakes_found') : t('no_intakes_created')}
-              </Text>
-              {!searchQuery && (
-                <TouchableOpacity
-                  onPress={() => setShowCreateModal(true)}
-                  style={{
-                    backgroundColor: '#3498db',
-                    paddingHorizontal: 24,
-                    paddingVertical: 12,
-                    borderRadius: 25,
-                    marginTop: 20,
-                  }}
-                >
-                  <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>{t('create_first_intake')}</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          )}
-        </View>
-      </ScrollView>
+          </View>
+        )}
+        ListEmptyComponent={
+          <View style={{ alignItems: 'center', paddingVertical: 60, opacity: 0.5 }}>
+            <Ionicons name="school-outline" size={64} color="#7f8c8d" />
+            <Text style={{ color: '#7f8c8d', marginTop: 15, fontSize: 16, textAlign: 'center' }}>
+              {searchQuery ? t('no_intakes_found') : t('no_intakes_created')}
+            </Text>
+            {!searchQuery && (
+              <TouchableOpacity
+                onPress={() => setShowCreateModal(true)}
+                style={{
+                  backgroundColor: '#3498db',
+                  paddingHorizontal: 24,
+                  paddingVertical: 12,
+                  borderRadius: 25,
+                  marginTop: 20,
+                }}
+              >
+                <Text style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>{t('create_first_intake')}</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        }
+      />
 
       {/* Create Intake Modal */}
       <Modal
