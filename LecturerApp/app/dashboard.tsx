@@ -964,7 +964,7 @@ const Dashboard = () => {
 
                 {/* AI Companion Widget */}
                 <TouchableOpacity
-                  onPress={() => setIsAIChatVisible(true)}
+                  onPress={() => router.push('/ai-assistant')}
                   style={{
                     flex: isDesktop ? 1 : 0,
                     minWidth: isDesktop ? 280 : (width - 60) / 2,

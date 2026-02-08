@@ -359,6 +359,18 @@ const AIAssistantScreen = () => {
                 colors={['#0a0a0a', '#141414']}
                 style={StyleSheet.absoluteFill}
             />
+            <Image
+                source={require('../assets/ai-chat-bk.png')}
+                style={[
+                    StyleSheet.absoluteFill,
+                    {
+                        opacity: 0.08, // Lowered opacity for low interference
+                        width: '100%',
+                        height: '100%',
+                    }
+                ]}
+                resizeMode="cover"
+            />
             {renderChatHeader()}
             <GiftedChat
                 messages={messages}
