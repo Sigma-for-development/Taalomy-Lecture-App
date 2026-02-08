@@ -9,8 +9,8 @@ export const useResponsive = () => {
     const isWeb = Platform.OS === 'web';
 
     // Calculate content width for centered layouts on desktop
-    // Max width 1200px, otherwise full width with some padding
-    const contentWidth = isDesktop ? Math.min(width - 300, 1200) : width; // Subtract sidebar width (approx 280px)
+    // Max width 1600px, otherwise full width with some padding
+    const contentWidth = isDesktop ? Math.min(width - 300, 1600) : width; // Subtract sidebar width (approx 280px)
 
     // Grid columns calculation
     const getGridColumns = (itemMinWidth: number = 300) => {
@@ -18,8 +18,8 @@ export const useResponsive = () => {
     };
 
     const containerStyle = isDesktop ? {
-        maxWidth: 1200,
-        alignSelf: 'center' as 'center',
+        maxWidth: 1600,
+        alignSelf: 'flex-start' as 'flex-start',
         width: '100%',
         paddingHorizontal: 24
     } : {

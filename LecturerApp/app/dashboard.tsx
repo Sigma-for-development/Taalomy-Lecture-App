@@ -105,7 +105,7 @@ interface Class {
 
 const Dashboard = () => {
   const { t } = useTranslation();
-  const { isDesktop, width, containerStyle } = useResponsive();
+  const { isDesktop, isWeb, width, containerStyle } = useResponsive();
   const [showWelcome, setShowWelcome] = useState(true);
   const [showQuizIntakeModal, setShowQuizIntakeModal] = useState(false);
   const pan = useRef(new Animated.ValueXY()).current;
@@ -635,10 +635,11 @@ const Dashboard = () => {
                 <TouchableOpacity
                   onPress={() => router.push('/intakes')}
                   style={{
-                    width: isDesktop ? '32%' : (width - 60) / 2,
+                    flex: isDesktop ? 1 : 0,
+                    minWidth: isDesktop ? 280 : (width - 60) / 2,
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: 16,
-                    padding: 20,
+                    padding: 24,
                     marginBottom: 16,
                     borderWidth: 1,
                     borderColor: 'rgba(255, 255, 255, 0.1)',
@@ -673,10 +674,11 @@ const Dashboard = () => {
                 <TouchableOpacity
                   onPress={() => router.push('/demo-sessions')}
                   style={{
-                    width: isDesktop ? '31%' : (width - 60) / 2,
+                    flex: isDesktop ? 1 : 0,
+                    minWidth: isDesktop ? 280 : (width - 60) / 2,
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: 16,
-                    padding: 20,
+                    padding: 24,
                     marginBottom: 16,
                     borderWidth: 1,
                     borderColor: '#2ecc71', // Green border for Demos
@@ -711,10 +713,11 @@ const Dashboard = () => {
                 <TouchableOpacity
                   onPress={() => router.push('/students')}
                   style={{
-                    width: isDesktop ? '31%' : (width - 60) / 2,
+                    flex: isDesktop ? 1 : 0,
+                    minWidth: isDesktop ? 280 : (width - 60) / 2,
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: 16,
-                    padding: 20,
+                    padding: 24,
                     marginBottom: 16,
                     borderWidth: 1,
                     borderColor: 'rgba(255, 255, 255, 0.1)',
@@ -749,10 +752,11 @@ const Dashboard = () => {
                 <TouchableOpacity
                   onPress={() => router.push('/grading')}
                   style={{
-                    width: isDesktop ? '31%' : (width - 60) / 2,
+                    flex: isDesktop ? 1 : 0,
+                    minWidth: isDesktop ? 280 : (width - 60) / 2,
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: 16,
-                    padding: 20,
+                    padding: 24,
                     marginBottom: 16,
                     borderWidth: 1,
                     borderColor: 'rgba(255, 255, 255, 0.1)',
@@ -787,10 +791,11 @@ const Dashboard = () => {
                 <TouchableOpacity
                   onPress={() => router.push('/timetable')}
                   style={{
-                    width: isDesktop ? '31%' : (width - 60) / 2,
+                    flex: isDesktop ? 1 : 0,
+                    minWidth: isDesktop ? 280 : (width - 60) / 2,
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: 16,
-                    padding: 20,
+                    padding: 24,
                     marginBottom: 16,
                     borderWidth: 1,
                     borderColor: 'rgba(255, 255, 255, 0.1)',
@@ -844,7 +849,8 @@ const Dashboard = () => {
               >
                 <TouchableOpacity
                   style={{
-                    width: isDesktop ? '23%' : (width - 60) / 2,
+                    flex: isDesktop ? 1 : 0,
+                    minWidth: isDesktop ? 220 : (width - 60) / 2,
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: 16,
                     padding: 20,
@@ -878,7 +884,8 @@ const Dashboard = () => {
 
                 <TouchableOpacity
                   style={{
-                    width: isDesktop ? '23%' : (width - 60) / 2,
+                    flex: isDesktop ? 1 : 0,
+                    minWidth: isDesktop ? 220 : (width - 60) / 2,
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: 16,
                     padding: 20,
@@ -912,7 +919,8 @@ const Dashboard = () => {
 
                 <TouchableOpacity
                   style={{
-                    width: isDesktop ? '23%' : (width - 60) / 2,
+                    flex: isDesktop ? 1 : 0,
+                    minWidth: isDesktop ? 220 : (width - 60) / 2,
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: 16,
                     padding: 20,
@@ -946,7 +954,8 @@ const Dashboard = () => {
 
                 <TouchableOpacity
                   style={{
-                    width: isDesktop ? '23%' : (width - 60) / 2,
+                    flex: isDesktop ? 1 : 0,
+                    minWidth: isDesktop ? 220 : (width - 60) / 2,
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: 16,
                     padding: 20,
@@ -980,7 +989,8 @@ const Dashboard = () => {
 
                 <TouchableOpacity
                   style={{
-                    width: isDesktop ? '23%' : (width - 60) / 2,
+                    flex: isDesktop ? 1 : 0,
+                    minWidth: isDesktop ? 220 : (width - 60) / 2,
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: 16,
                     padding: 20,
@@ -1014,7 +1024,8 @@ const Dashboard = () => {
 
                 <TouchableOpacity
                   style={{
-                    width: isDesktop ? '23%' : (width - 60) / 2,
+                    flex: isDesktop ? 1 : 0,
+                    minWidth: isDesktop ? 220 : (width - 60) / 2,
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: 16,
                     padding: 20,
@@ -1070,7 +1081,8 @@ const Dashboard = () => {
 
                 <TouchableOpacity
                   style={{
-                    width: isDesktop ? '23%' : (width - 60) / 2,
+                    flex: isDesktop ? 1 : 0,
+                    minWidth: isDesktop ? 220 : (width - 60) / 2,
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: 16,
                     padding: 20,
@@ -1104,7 +1116,8 @@ const Dashboard = () => {
 
                 <TouchableOpacity
                   style={{
-                    width: isDesktop ? '23%' : (width - 60) / 2,
+                    flex: isDesktop ? 1 : 0,
+                    minWidth: isDesktop ? 220 : (width - 60) / 2,
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: 16,
                     padding: 20,
@@ -1138,7 +1151,8 @@ const Dashboard = () => {
 
                 <TouchableOpacity
                   style={{
-                    width: isDesktop ? '23%' : (width - 60) / 2,
+                    flex: isDesktop ? 1 : 0,
+                    minWidth: isDesktop ? 220 : (width - 60) / 2,
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: 16,
                     padding: 20,
@@ -1194,7 +1208,8 @@ const Dashboard = () => {
 
                 <TouchableOpacity
                   style={{
-                    width: isDesktop ? '23%' : (width - 60) / 2,
+                    flex: isDesktop ? 1 : 0,
+                    minWidth: isDesktop ? 220 : (width - 60) / 2,
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: 16,
                     padding: 20,
@@ -1303,22 +1318,25 @@ const Dashboard = () => {
             </View>
 
             {/* Footer moved inside sidebar area or at the bottom depending on desktop/mobile */}
-            <View style={{ alignItems: 'center', paddingHorizontal: 24, paddingVertical: 20 }}>
-              <Text style={{
-                fontSize: 11,
-                color: '#7f8c8d',
-                marginBottom: 2,
-              }}>
-                {t('copyright_text')}
-              </Text>
-              <Text style={{
-                fontSize: 9,
-                color: '#7f8c8d',
-                fontWeight: '300',
-              }}>
-                {t('footer_slogan')}
-              </Text>
-            </View>
+            {/* Footer hidden on Web */}
+            {!isWeb && (
+              <View style={{ alignItems: 'center', paddingHorizontal: 24, paddingVertical: 20 }}>
+                <Text style={{
+                  fontSize: 11,
+                  color: '#7f8c8d',
+                  marginBottom: 2,
+                }}>
+                  {t('copyright_text')}
+                </Text>
+                <Text style={{
+                  fontSize: 9,
+                  color: '#7f8c8d',
+                  fontWeight: '300',
+                }}>
+                  {t('footer_slogan')}
+                </Text>
+              </View>
+            )}
           </View>
         </View>
       </ScrollView>

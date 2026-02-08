@@ -6,6 +6,8 @@ import { useResponsive } from '../hooks/useResponsive';
 import { LinearGradient } from 'expo-linear-gradient';
 import { tokenStorage } from '../../utils/tokenStorage';
 import { Alert } from 'react-native';
+import ProfilePicture from './ProfilePicture';
+import { appEventEmitter } from '../utils/eventEmitter';
 
 interface WebLayoutProps {
     children: React.ReactNode;
@@ -47,6 +49,33 @@ export const WebLayout: React.FC<WebLayoutProps> = ({ children }) => {
     const { isDesktop, isWeb } = useResponsive();
     const router = useRouter();
     const pathname = usePathname();
+    const [userData, setUserData] = React.useState<any>(null);
+
+    React.useEffect(() => {
+        loadUserData();
+
+        // Listen for profile updates across the app
+        const handleProfileUpdate = (updatedUserData: any) => {
+            setUserData(updatedUserData);
+        };
+
+        appEventEmitter.on('userProfileUpdated', handleProfileUpdate);
+
+        return () => {
+            appEventEmitter.off('userProfileUpdated', handleProfileUpdate);
+        };
+    }, []);
+
+    const loadUserData = async () => {
+        try {
+            const userDataString = await tokenStorage.getItem('user_data');
+            if (userDataString) {
+                setUserData(JSON.parse(userDataString));
+            }
+        } catch (error) {
+            console.error('Error loading user data in WebLayout:', error);
+        }
+    };
 
     // Public/auth routes that should NOT have the sidebar
     const publicRoutes = ['/', '/login', '/register', '/auth/forgot-password', '/auth/reset-password', '/auth/otp', '/onboarding', '/terms-of-service'];
@@ -142,7 +171,14 @@ export const WebLayout: React.FC<WebLayoutProps> = ({ children }) => {
                         onPress={() => navigate('/timetable')}
                     />
                     <SidebarItem
-                        icon="library-outline"
+                        icon="calendar-number-outline"
+                        label="Bookings"
+                        route="/bookings"
+                        isActive={isActive('/bookings')}
+                        onPress={() => navigate('/bookings')}
+                    />
+                    <SidebarItem
+                        icon="school-outline"
                         label="Intakes"
                         route="/intakes"
                         isActive={isActive('/intakes')}
@@ -156,11 +192,25 @@ export const WebLayout: React.FC<WebLayoutProps> = ({ children }) => {
                         onPress={() => navigate('/students')}
                     />
                     <SidebarItem
+                        icon="checkmark-circle-outline"
+                        label="Attendance"
+                        route="/attendance"
+                        isActive={isActive('/attendance')}
+                        onPress={() => navigate('/attendance')}
+                    />
+                    <SidebarItem
                         icon="document-text-outline"
                         label="Grading"
                         route="/grading"
                         isActive={isActive('/grading')}
                         onPress={() => navigate('/grading')}
+                    />
+                    <SidebarItem
+                        icon="flask-outline"
+                        label="Demos"
+                        route="/demo-sessions"
+                        isActive={isActive('/demo-sessions')}
+                        onPress={() => navigate('/demo-sessions')}
                     />
 
                     <Text style={[styles.sectionTitle, { marginTop: 24 }]}>COMMUNICATION</Text>
@@ -179,9 +229,30 @@ export const WebLayout: React.FC<WebLayoutProps> = ({ children }) => {
                         isActive={isActive('/send-announcement')}
                         onPress={() => navigate('/send-announcement')}
                     />
+                    <SidebarItem
+                        icon="mail-open-outline"
+                        label="Invitations"
+                        route="/invitations"
+                        isActive={isActive('/invitations')}
+                        onPress={() => navigate('/invitations')}
+                    />
+                    <SidebarItem
+                        icon="planet-outline"
+                        label="Lecturer Hub"
+                        route="/lecturer-hub"
+                        isActive={isActive('/lecturer-hub')}
+                        onPress={() => navigate('/lecturer-hub')}
+                    />
 
                     <Text style={[styles.sectionTitle, { marginTop: 24 }]}>ACCOUNT</Text>
 
+                    <SidebarItem
+                        icon="briefcase-outline"
+                        label="Professional Profile"
+                        route="/lecturer-profile"
+                        isActive={isActive('/lecturer-profile')}
+                        onPress={() => navigate('/lecturer-profile')}
+                    />
                     <SidebarItem
                         icon="wallet-outline"
                         label="Wallet"
@@ -197,24 +268,18 @@ export const WebLayout: React.FC<WebLayoutProps> = ({ children }) => {
                         onPress={() => navigate('/settings')}
                     />
 
-                    <View style={{ marginTop: 24, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.1)', paddingTop: 12 }}>
-                        <SidebarItem
-                            icon="log-out-outline"
-                            label="Log Out"
-                            route="/logout"
-                            isActive={false}
-                            onPress={handleLogout}
-                        />
-                    </View>
                 </ScrollView>
 
                 <View style={styles.sidebarFooter}>
                     <TouchableOpacity onPress={() => navigate('/profile-edit')} style={styles.userProfile}>
-                        <View style={styles.avatarPlaceholder}>
-                            <Ionicons name="person" size={20} color="#BDC3C7" />
+                        <View style={{ marginRight: 12 }}>
+                            <ProfilePicture
+                                imageUrl={userData?.profile_picture_url}
+                                size={40}
+                            />
                         </View>
                         <View style={styles.userInfo}>
-                            <Text style={styles.userName}>My Profile</Text>
+                            <Text style={styles.userName}>{userData ? `${userData.first_name} ${userData.last_name}` : 'My Profile'}</Text>
                             <Text style={styles.userRole}>Lecturer</Text>
                         </View>
                     </TouchableOpacity>
