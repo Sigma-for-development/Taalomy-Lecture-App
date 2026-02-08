@@ -118,7 +118,7 @@ interface ScheduleItem {
 }
 
 const Dashboard = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { isDesktop, isWeb, width, containerStyle } = useResponsive();
   const [showWelcome, setShowWelcome] = useState(true);
   const [showQuizIntakeModal, setShowQuizIntakeModal] = useState(false);
@@ -1811,7 +1811,7 @@ const Dashboard = () => {
         style={{
           position: 'absolute',
           bottom: 30,
-          right: 30,
+          [i18n.dir() === 'rtl' ? 'left' : 'right']: 30,
           width: 80,
           height: 80,
           borderRadius: 40,

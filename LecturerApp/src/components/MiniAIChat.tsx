@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { aiService, AIChatMessage } from '../utils/aiService';
 import Markdown from 'react-native-markdown-display';
+import { useTranslation } from 'react-i18next';
 
 interface MiniAIChatProps {
     isVisible: boolean;
@@ -25,8 +26,11 @@ interface MiniAIChatProps {
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const MiniAIChat: React.FC<MiniAIChatProps> = ({ isVisible, onClose }) => {
+    const { t, i18n } = useTranslation();
+    const isRTL = i18n.dir() === 'rtl';
+
     const [messages, setMessages] = useState<AIChatMessage[]>([
-        { role: 'assistant', content: "Hello! I'm your AI Companion. How can I help you manage your classes today?" }
+        { role: 'assistant', content: t('ai_welcome_msg') }
     ]);
     const [inputText, setInputText] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -64,7 +68,7 @@ const MiniAIChat: React.FC<MiniAIChatProps> = ({ isVisible, onClose }) => {
             const response = await aiService.getChatResponse(newMessages);
             setMessages([...newMessages, { role: 'assistant', content: response }]);
         } catch (error) {
-            setMessages([...newMessages, { role: 'assistant', content: "I'm sorry, I'm having trouble connecting right now." }]);
+            setMessages([...newMessages, { role: 'assistant', content: t('ai_error_msg') }]);
         } finally {
             setIsLoading(false);
         }
@@ -73,13 +77,19 @@ const MiniAIChat: React.FC<MiniAIChatProps> = ({ isVisible, onClose }) => {
     if (!shouldRender) return null;
 
     return (
-        <Animated.View style={[styles.container, { transform: [{ translateY: slideAnim }] }]}>
+        <Animated.View style={[
+            styles.container,
+            {
+                transform: [{ translateY: slideAnim }],
+                [isRTL ? 'left' : 'right']: 30
+            }
+        ]}>
             <BlurView intensity={80} tint="dark" style={styles.blurContainer}>
                 {/* Header */}
-                <View style={styles.header}>
-                    <View style={styles.headerInfo}>
-                        <View style={styles.onlineStatus} />
-                        <Text style={styles.headerTitle}>AI Companion</Text>
+                <View style={[styles.header, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+                    <View style={[styles.headerInfo, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+                        <View style={[styles.onlineStatus, { [isRTL ? 'marginLeft' : 'marginRight']: 8 }]} />
+                        <Text style={styles.headerTitle}>{t('ai_companion')}</Text>
                     </View>
                     <TouchableOpacity onPress={onClose} style={styles.closeButton}>
                         <Ionicons name="close" size={20} color="#fff" />
@@ -95,14 +105,28 @@ const MiniAIChat: React.FC<MiniAIChatProps> = ({ isVisible, onClose }) => {
                     {messages.map((msg, index) => (
                         <View key={index} style={[
                             styles.messageBubble,
-                            msg.role === 'user' ? styles.userBubble : styles.botBubble
+                            msg.role === 'user' ? styles.userBubble : styles.botBubble,
+                            {
+                                alignSelf: msg.role === 'user'
+                                    ? (isRTL ? 'flex-start' : 'flex-end')
+                                    : (isRTL ? 'flex-end' : 'flex-start'),
+                                borderBottomRightRadius: msg.role === 'user' ? (isRTL ? 18 : 4) : 18,
+                                borderBottomLeftRadius: msg.role === 'user' ? 18 : (isRTL ? 18 : 4),
+                                borderBottomEndRadius: msg.role === 'assistant' ? (isRTL ? 4 : 18) : 18,
+                            }
                         ]}>
                             {msg.role === 'assistant' ? (
-                                <Markdown style={markdownStyles}>
+                                <Markdown style={{
+                                    ...markdownStyles,
+                                    body: {
+                                        ...markdownStyles.body,
+                                        textAlign: isRTL ? 'right' : 'left'
+                                    }
+                                }}>
                                     {msg.content}
                                 </Markdown>
                             ) : (
-                                <Text style={styles.messageText}>{msg.content}</Text>
+                                <Text style={[styles.messageText, { textAlign: isRTL ? 'right' : 'left' }]}>{msg.content}</Text>
                             )}
                         </View>
                     ))}
@@ -118,12 +142,12 @@ const MiniAIChat: React.FC<MiniAIChatProps> = ({ isVisible, onClose }) => {
                     behavior={Platform.OS === 'ios' ? 'padding' : undefined}
                     keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
                 >
-                    <View style={styles.inputContainer}>
+                    <View style={[styles.inputContainer, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
                         <TextInput
-                            style={styles.input}
+                            style={[styles.input, { textAlign: isRTL ? 'right' : 'left' }]}
                             value={inputText}
                             onChangeText={setInputText}
-                            placeholder="Type a message..."
+                            placeholder={t('ai_input_placeholder')}
                             placeholderTextColor="rgba(255,255,255,0.4)"
                             multiline
                             onKeyPress={(e: any) => {
@@ -135,10 +159,14 @@ const MiniAIChat: React.FC<MiniAIChatProps> = ({ isVisible, onClose }) => {
                         />
                         <TouchableOpacity
                             onPress={handleSend}
-                            style={[styles.sendButton, !inputText.trim() && styles.sendButtonDisabled]}
+                            style={[
+                                styles.sendButton,
+                                !inputText.trim() && styles.sendButtonDisabled,
+                                { [isRTL ? 'marginRight' : 'marginLeft']: 8 }
+                            ]}
                             disabled={!inputText.trim() || isLoading}
                         >
-                            <Ionicons name="send" size={18} color="#fff" />
+                            <Ionicons name={isRTL ? "send-sharp" : "send"} size={18} color="#fff" style={isRTL ? { transform: [{ rotate: '180deg' }] } : {}} />
                         </TouchableOpacity>
                     </View>
                 </KeyboardAvoidingView>
@@ -151,7 +179,6 @@ const styles = StyleSheet.create({
     container: {
         position: 'absolute',
         bottom: 125,
-        right: 30,
         width: Math.min(SCREEN_WIDTH - 40, 380),
         height: 500,
         borderRadius: 24,
@@ -249,7 +276,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#3498db',
         alignItems: 'center',
         justifyContent: 'center',
-        marginLeft: 8,
     },
     sendButtonDisabled: {
         backgroundColor: 'rgba(52, 152, 219, 0.4)',
