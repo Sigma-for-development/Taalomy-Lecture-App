@@ -97,8 +97,9 @@ const CustomTypingIndicator = () => {
 };
 
 const AIAssistantScreen = () => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { isDesktop } = useResponsive();
+    const isRTL = i18n.dir() === 'rtl';
     const [messages, setMessages] = useState<any[]>([]);
     const [isTyping, setIsTyping] = useState(false);
     const [inputText, setInputText] = useState('');
@@ -206,7 +207,7 @@ const AIAssistantScreen = () => {
                         borderWidth: 1,
                         borderColor: 'rgba(255, 255, 255, 0.1)',
                         maxWidth: isDesktop ? '70%' : '85%',
-                        marginBottom: 14, // Increased spacing
+                        marginBottom: 14,
                     },
                     left: {
                         backgroundColor: 'rgba(255, 255, 255, 0.08)',
@@ -215,7 +216,9 @@ const AIAssistantScreen = () => {
                         borderWidth: 1,
                         borderColor: 'rgba(255, 255, 255, 0.1)',
                         maxWidth: isDesktop ? '70%' : '85%',
-                        marginBottom: 14, // Increased spacing
+                        marginBottom: 14,
+                        marginLeft: isRTL ? 0 : undefined,
+                        marginRight: isRTL ? 0 : undefined,
                     },
                 }}
                 textStyle={{
