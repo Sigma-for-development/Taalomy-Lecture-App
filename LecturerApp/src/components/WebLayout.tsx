@@ -12,23 +12,30 @@ interface WebLayoutProps {
 }
 
 const SidebarItem = ({ icon, label, route, isActive, onPress }: any) => {
+    const [isHovered, setIsHovered] = React.useState(false);
+
     return (
         <TouchableOpacity
             onPress={onPress}
+            {...({
+                onMouseEnter: () => Platform.OS === 'web' && setIsHovered(true),
+                onMouseLeave: () => Platform.OS === 'web' && setIsHovered(false)
+            } as any)}
             style={[
                 styles.sidebarItem,
-                isActive && styles.sidebarItemActive
+                isActive && styles.sidebarItemActive,
+                !isActive && isHovered && styles.sidebarItemHover
             ]}
         >
             <Ionicons
                 name={icon}
                 size={22}
-                color={isActive ? '#FFFFFF' : '#BDC3C7'}
+                color={isActive || isHovered ? '#FFFFFF' : '#BDC3C7'}
                 style={{ marginRight: 12 }}
             />
             <Text style={[
                 styles.sidebarText,
-                isActive && styles.sidebarTextActive
+                (isActive || isHovered) && styles.sidebarTextActive
             ]}>
                 {label}
             </Text>
@@ -40,6 +47,10 @@ export const WebLayout: React.FC<WebLayoutProps> = ({ children }) => {
     const { isDesktop, isWeb } = useResponsive();
     const router = useRouter();
     const pathname = usePathname();
+
+    // Public/auth routes that should NOT have the sidebar
+    const publicRoutes = ['/', '/login', '/register', '/auth/forgot-password', '/auth/reset-password', '/auth/otp', '/onboarding', '/terms-of-service'];
+    const isPublicRoute = publicRoutes.includes(pathname) || pathname.startsWith('/auth/');
 
     const handleLogout = async () => {
         if (Platform.OS === 'web') {
@@ -80,7 +91,8 @@ export const WebLayout: React.FC<WebLayoutProps> = ({ children }) => {
     };
 
     // If not web or not desktop, render children normally (mobile layout)
-    if (!isWeb || !isDesktop) {
+    // Also skip sidebar for public/auth routes
+    if (!isWeb || !isDesktop || isPublicRoute) {
         return <>{children}</>;
     }
 
@@ -287,6 +299,9 @@ const styles = StyleSheet.create({
     },
     sidebarItemActive: {
         backgroundColor: '#3498db',
+    },
+    sidebarItemHover: {
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
     },
     sidebarText: {
         color: '#BDC3C7',

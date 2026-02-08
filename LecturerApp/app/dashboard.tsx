@@ -105,7 +105,7 @@ interface Class {
 
 const Dashboard = () => {
   const { t } = useTranslation();
-  const { isDesktop, width } = useResponsive();
+  const { isDesktop, width, containerStyle } = useResponsive();
   const [showWelcome, setShowWelcome] = useState(true);
   const [showQuizIntakeModal, setShowQuizIntakeModal] = useState(false);
   const pan = useRef(new Animated.ValueXY()).current;
@@ -416,7 +416,10 @@ const Dashboard = () => {
 
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={[
+          { paddingBottom: 40 },
+          containerStyle as any
+        ]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -427,891 +430,896 @@ const Dashboard = () => {
           />
         }
       >
-        {/* Header */}
         <View style={{
-          paddingTop: Platform.OS === 'ios' ? 60 : 40,
-          paddingHorizontal: 24,
-          paddingBottom: 20,
+          flexDirection: isDesktop ? 'row' : 'column',
+          gap: isDesktop ? 32 : 0,
+          paddingHorizontal: isDesktop ? 24 : 0,
         }}>
-          <View style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: 20,
-          }}>
-            <View style={{ flex: 1 }}>
-              <Text style={{
-                fontSize: 28,
-                fontWeight: 'bold',
-                color: '#ecf0f1',
-                marginBottom: 4,
+          {/* Main Content Area */}
+          <View style={{ flex: isDesktop ? 2 : 1 }}>
+            {/* Header */}
+            <View style={{
+              paddingTop: Platform.OS === 'ios' ? 60 : 40,
+              paddingHorizontal: 24,
+              paddingBottom: 20,
+            }}>
+              <View style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 20,
               }}>
-                {t('welcome_back_simple')}
-              </Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={{
+                    fontSize: 28,
+                    fontWeight: 'bold',
+                    color: '#ecf0f1',
+                    marginBottom: 4,
+                  }}>
+                    {t('welcome_back_simple')}
+                  </Text>
+                  <Text style={{
+                    fontSize: 20,
+                    color: '#3498db',
+                    fontWeight: '600',
+                  }}>
+                    {t('doctor_prefix')} {userData.first_name} {userData.last_name}
+                  </Text>
+                </View>
+                <View style={{ flexDirection: 'row', gap: 12 }}>
+                  <TouchableOpacity
+                    onPress={() => router.push('/settings')}
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 22,
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Ionicons name="settings-outline" size={24} color="#ecf0f1" />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => router.push('/profile-edit')}
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 22,
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Ionicons name="person-outline" size={24} color="#3498db" />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={handleLogout}
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 22,
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Ionicons name="log-out-outline" size={24} color="#e74c3c" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Lecturer Status Card */}
+              {showWelcome && (
+                <Animated.View
+                  style={{
+                    transform: [{ translateX: pan.x }],
+                  }}
+                  {...panResponder.panHandlers}
+                >
+                  <View style={{
+                    backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                    borderRadius: 16,
+                    padding: 20,
+                    borderWidth: 1,
+                    borderColor: '#3498db',
+                    marginBottom: 24,
+                  }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+                      <View style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 20,
+                        backgroundColor: 'rgba(52, 152, 219, 0.3)',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginEnd: 12,
+                      }}>
+                        <Ionicons name="school-outline" size={20} color="#3498db" />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={{
+                          fontSize: 16,
+                          fontWeight: '600',
+                          color: '#ecf0f1',
+                        }}>
+                          {t('lecturer_portal_title')}
+                        </Text>
+                        <Text style={{
+                          fontSize: 12,
+                          color: '#bdc3c7',
+                        }}>
+                          {t('academic_system')}
+                        </Text>
+                      </View>
+                    </View>
+                    <Text style={{
+                      fontSize: 14,
+                      color: '#bdc3c7',
+                      lineHeight: 20,
+                    }}>
+                      {t('lecturer_portal_desc')}
+                    </Text>
+                  </View>
+                </Animated.View>
+              )}
+            </View>
+
+            {/* Timetable Button */}
+            <TouchableOpacity
+              onPress={() => router.push('/timetable')}
+              style={{
+                marginHorizontal: 24,
+                marginBottom: 20,
+                borderRadius: 16,
+                overflow: 'hidden',
+              }}
+            >
+              <LinearGradient
+                colors={['#2980b9', '#3498db']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={{
+                  padding: 20,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <View>
+                  <Text style={{
+                    fontSize: 18,
+                    fontWeight: 'bold',
+                    color: '#fff',
+                    marginBottom: 4,
+                  }}>
+                    {t('my_timetable')}
+                  </Text>
+                  <Text style={{
+                    fontSize: 14,
+                    color: 'rgba(255, 255, 255, 0.8)',
+                  }}>
+                    {t('view_schedule')}
+                  </Text>
+                </View>
+                <View style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 24,
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                  <Ionicons name="calendar-outline" size={24} color="#fff" />
+                </View>
+              </LinearGradient>
+            </TouchableOpacity>
+
+            {/* Quick Stats */}
+            <View style={{ paddingHorizontal: 24, marginBottom: 30 }}>
               <Text style={{
                 fontSize: 20,
-                color: '#3498db',
-                fontWeight: '600',
+                fontWeight: 'bold',
+                color: '#ecf0f1',
+                marginBottom: 16,
               }}>
-                {t('doctor_prefix')} {userData.first_name} {userData.last_name}
+                {t('quick_overview')}
               </Text>
-            </View>
-            <View style={{ flexDirection: 'row', gap: 12 }}>
-              <TouchableOpacity
-                onPress={() => router.push('/settings')}
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 22,
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Ionicons name="settings-outline" size={24} color="#ecf0f1" />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => router.push('/profile-edit')}
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 22,
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Ionicons name="person-outline" size={24} color="#3498db" />
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={handleLogout}
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 22,
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Ionicons name="log-out-outline" size={24} color="#e74c3c" />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Lecturer Status Card */}
-          {/* Lecturer Status Card */}
-          {showWelcome && (
-            <Animated.View
-              style={{
-                transform: [{ translateX: pan.x }],
-              }}
-              {...panResponder.panHandlers}
-            >
               <View style={{
-                backgroundColor: 'rgba(52, 152, 219, 0.2)',
-                borderRadius: 16,
-                padding: 20,
-                borderWidth: 1,
-                borderColor: '#3498db',
-                marginBottom: 24,
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                gap: isDesktop ? 16 : 0,
+                justifyContent: isDesktop ? 'flex-start' : 'space-between',
               }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+                <TouchableOpacity
+                  onPress={() => router.push('/intakes')}
+                  style={{
+                    width: isDesktop ? '32%' : (width - 60) / 2,
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 16,
+                    padding: 20,
+                    marginBottom: 16,
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                  }}>
                   <View style={{
                     width: 40,
                     height: 40,
                     borderRadius: 20,
-                    backgroundColor: 'rgba(52, 152, 219, 0.3)',
+                    backgroundColor: 'rgba(52, 152, 219, 0.2)',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    marginEnd: 12,
+                    marginBottom: 12,
                   }}>
-                    <Ionicons name="school-outline" size={20} color="#3498db" />
+                    <Ionicons name="library-outline" size={20} color="#3498db" />
                   </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={{
-                      fontSize: 16,
-                      fontWeight: '600',
-                      color: '#ecf0f1',
-                    }}>
-                      {t('lecturer_portal_title')}
-                    </Text>
-                    <Text style={{
-                      fontSize: 12,
-                      color: '#bdc3c7',
-                    }}>
-                      {t('academic_system')}
-                    </Text>
-                  </View>
-                </View>
-                <Text style={{
-                  fontSize: 14,
-                  color: '#bdc3c7',
-                  lineHeight: 20,
-                }}>
-                  {t('lecturer_portal_desc')}
-                </Text>
-              </View>
-            </Animated.View>
-          )}
-        </View>
-
-        {/* Timetable Button */}
-        <TouchableOpacity
-          onPress={() => router.push('/timetable')}
-          style={{
-            marginHorizontal: 24,
-            marginBottom: 20,
-            borderRadius: 16,
-            overflow: 'hidden',
-          }}
-        >
-          <LinearGradient
-            colors={['#2980b9', '#3498db']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={{
-              padding: 20,
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}
-          >
-            <View>
-              <Text style={{
-                fontSize: 18,
-                fontWeight: 'bold',
-                color: '#fff',
-                marginBottom: 4,
-              }}>
-                {t('my_timetable')}
-              </Text>
-              <Text style={{
-                fontSize: 14,
-                color: 'rgba(255, 255, 255, 0.8)',
-              }}>
-                {t('view_schedule')}
-              </Text>
-            </View>
-            <View style={{
-              width: 48,
-              height: 48,
-              borderRadius: 24,
-              backgroundColor: 'rgba(255, 255, 255, 0.2)',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-              <Ionicons name="calendar-outline" size={24} color="#fff" />
-            </View>
-          </LinearGradient>
-        </TouchableOpacity>
-
-
-
-        {/* Quick Stats */}
-        <View style={{ paddingHorizontal: 24, marginBottom: 30 }}>
-          <Text style={{
-            fontSize: 20,
-            fontWeight: 'bold',
-            color: '#ecf0f1',
-            marginBottom: 16,
-          }}>
-            {t('quick_overview')}
-          </Text>
-          <View style={{
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            justifyContent: 'space-between',
-          }}>
-            <TouchableOpacity
-              onPress={() => router.push('/intakes')}
-              style={{
-                width: isDesktop ? '31%' : (width - 60) / 2,
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: 16,
-                padding: 20,
-                marginBottom: 16,
-                borderWidth: 1,
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-              }}>
-              <View style={{
-                width: 40,
-                height: 40,
-                borderRadius: 20,
-                backgroundColor: 'rgba(52, 152, 219, 0.2)',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 12,
-              }}>
-                <Ionicons name="library-outline" size={20} color="#3498db" />
-              </View>
-              <Text style={{
-                fontSize: 24,
-                fontWeight: 'bold',
-                color: '#3498db',
-                marginBottom: 4,
-              }}>
-                {loadingStats ? '...' : stats.intakes}
-              </Text>
-              <Text style={{
-                fontSize: 14,
-                color: '#bdc3c7',
-              }}>
-                {t('active_intakes')}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => router.push('/demo-sessions')}
-              style={{
-                width: isDesktop ? '31%' : (width - 60) / 2,
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: 16,
-                padding: 20,
-                marginBottom: 16,
-                borderWidth: 1,
-                borderColor: '#2ecc71', // Green border for Demos
-              }}>
-              <View style={{
-                width: 40,
-                height: 40,
-                borderRadius: 20,
-                backgroundColor: 'rgba(46, 204, 113, 0.2)',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 12,
-              }}>
-                <Ionicons name="flask-outline" size={20} color="#2ecc71" />
-              </View>
-              <Text style={{
-                fontSize: 24,
-                fontWeight: 'bold',
-                color: '#2ecc71',
-                marginBottom: 4,
-              }}>
-                {t('demos')}
-              </Text>
-              <Text style={{
-                fontSize: 14,
-                color: '#bdc3c7',
-              }}>
-                {t('trial_sessions')}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => router.push('/students')}
-              style={{
-                width: isDesktop ? '31%' : (width - 60) / 2,
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: 16,
-                padding: 20,
-                marginBottom: 16,
-                borderWidth: 1,
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-              }}>
-              <View style={{
-                width: 40,
-                height: 40,
-                borderRadius: 20,
-                backgroundColor: 'rgba(46, 204, 113, 0.2)',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 12,
-              }}>
-                <Ionicons name="people-outline" size={20} color="#2ecc71" />
-              </View>
-              <Text style={{
-                fontSize: 24,
-                fontWeight: 'bold',
-                color: '#2ecc71',
-                marginBottom: 4,
-              }}>
-                {loadingStats ? '...' : stats.students}
-              </Text>
-              <Text style={{
-                fontSize: 14,
-                color: '#bdc3c7',
-              }}>
-                {t('total_students')}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => router.push('/grading')}
-              style={{
-                width: isDesktop ? '31%' : (width - 60) / 2,
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: 16,
-                padding: 20,
-                marginBottom: 16,
-                borderWidth: 1,
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-              }}>
-              <View style={{
-                width: 40,
-                height: 40,
-                borderRadius: 20,
-                backgroundColor: 'rgba(241, 196, 15, 0.2)',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 12,
-              }}>
-                <Ionicons name="document-text-outline" size={20} color="#f1c40f" />
-              </View>
-              <Text style={{
-                fontSize: 24,
-                fontWeight: 'bold',
-                color: '#f1c40f',
-                marginBottom: 4,
-              }}>
-                {loadingStats ? '...' : stats.pendingGrades}
-              </Text>
-              <Text style={{
-                fontSize: 14,
-                color: '#bdc3c7',
-              }}>
-                {t('pending_grades')}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => router.push('/timetable')}
-              style={{
-                width: isDesktop ? '31%' : (width - 60) / 2,
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: 16,
-                padding: 20,
-                marginBottom: 16,
-                borderWidth: 1,
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-              }}>
-              <View style={{
-                width: 40,
-                height: 40,
-                borderRadius: 20,
-                backgroundColor: 'rgba(155, 89, 182, 0.2)',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 12,
-              }}>
-                <Ionicons name="calendar-outline" size={20} color="#9b59b6" />
-              </View>
-              <Text style={{
-                fontSize: 24,
-                fontWeight: 'bold',
-                color: '#9b59b6',
-                marginBottom: 4,
-              }}>
-                {loadingStats ? '...' : stats.todayClasses}
-              </Text>
-              <Text style={{
-                fontSize: 14,
-                color: '#bdc3c7',
-              }}>
-                {t('classes_today')}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Quick Actions */}
-        <View style={{ paddingHorizontal: 24, marginBottom: 30 }}>
-          <Text style={{
-            fontSize: 20,
-            fontWeight: 'bold',
-            color: '#ecf0f1',
-            marginBottom: 16,
-          }}>
-            {t('quick_actions')}
-          </Text>
-          <View
-            style={{
-              flexDirection: 'row',
-              flexWrap: 'wrap',
-              justifyContent: 'space-between',
-            }}
-          >
-            <TouchableOpacity
-              style={{
-                width: (width - 60) / 2,
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: 16,
-                padding: 20,
-                marginBottom: 16,
-                borderWidth: 1,
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-                alignItems: 'center',
-              }}
-              onPress={() => router.push('/intakes')}
-            >
-              <View style={{
-                width: 50,
-                height: 50,
-                borderRadius: 25,
-                backgroundColor: 'rgba(52, 152, 219, 0.2)',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 12,
-              }}>
-                <Ionicons name="school-outline" size={24} color="#3498db" />
-              </View>
-              <Text style={{
-                fontSize: 14,
-                fontWeight: '600',
-                color: '#ecf0f1',
-                textAlign: 'center',
-              }}>
-                {t('manage_intakes')}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={{
-                width: (width - 60) / 2,
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: 16,
-                padding: 20,
-                marginBottom: 16,
-                borderWidth: 1,
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-                alignItems: 'center',
-              }}
-              onPress={() => router.push('/upload-video/new')}
-            >
-              <View style={{
-                width: 50,
-                height: 50,
-                borderRadius: 25,
-                backgroundColor: 'rgba(211, 84, 0, 0.2)',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 12,
-              }}>
-                <Ionicons name="videocam-outline" size={24} color="#d35400" />
-              </View>
-              <Text style={{
-                fontSize: 14,
-                fontWeight: '600',
-                color: '#ecf0f1',
-                textAlign: 'center',
-              }}>
-                Upload Video
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={{
-                width: (width - 60) / 2,
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: 16,
-                padding: 20,
-                marginBottom: 16,
-                borderWidth: 1,
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-                alignItems: 'center',
-              }}
-              onPress={() => setShowQuizIntakeModal(true)}
-            >
-              <View style={{
-                width: 50,
-                height: 50,
-                borderRadius: 25,
-                backgroundColor: 'rgba(231, 76, 60, 0.2)',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 12,
-              }}>
-                <Ionicons name="clipboard-outline" size={24} color="#e74c3c" />
-              </View>
-              <Text style={{
-                fontSize: 14,
-                fontWeight: '600',
-                color: '#ecf0f1',
-                textAlign: 'center',
-              }}>
-                {t('create_start_quiz')}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={{
-                width: (width - 60) / 2,
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: 16,
-                padding: 20,
-                marginBottom: 16,
-                borderWidth: 1,
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-                alignItems: 'center',
-              }}
-              onPress={() => handleNavigation('Send Announcement')}
-            >
-              <View style={{
-                width: 50,
-                height: 50,
-                borderRadius: 25,
-                backgroundColor: 'rgba(155, 89, 182, 0.2)',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 12,
-              }}>
-                <Ionicons name="mail-outline" size={24} color="#9b59b6" />
-              </View>
-              <Text style={{
-                fontSize: 14,
-                fontWeight: '600',
-                color: '#ecf0f1',
-                textAlign: 'center',
-              }}>
-                {t('send_announcement')}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={{
-                width: (width - 60) / 2,
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: 16,
-                padding: 20,
-                marginBottom: 16,
-                borderWidth: 1,
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-                alignItems: 'center',
-              }}
-              onPress={() => router.push('/lecturer-profile')}
-            >
-              <View style={{
-                width: 50,
-                height: 50,
-                borderRadius: 25,
-                backgroundColor: 'rgba(39, 174, 96, 0.2)',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 12,
-              }}>
-                <Ionicons name="briefcase-outline" size={24} color="#27ae60" />
-              </View>
-              <Text style={{
-                fontSize: 14,
-                fontWeight: '600',
-                color: '#ecf0f1',
-                textAlign: 'center',
-              }}>
-                {t('professional_profile')}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={{
-                width: (width - 60) / 2,
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: 16,
-                padding: 20,
-                marginBottom: 16,
-                borderWidth: 1,
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-                alignItems: 'center',
-              }}
-              onPress={() => router.push('/bookings')}
-            >
-              <View style={{
-                width: 50,
-                height: 50,
-                borderRadius: 25,
-                backgroundColor: 'rgba(243, 156, 18, 0.2)',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 12,
-              }}>
-                <Ionicons name="calendar-outline" size={24} color="#f39c12" />
-              </View>
-              {stats.pendingBookings > 0 && (
-                <View style={{
-                  position: 'absolute',
-                  top: 10,
-                  right: 10,
-                  backgroundColor: '#e74c3c',
-                  borderRadius: 10,
-                  minWidth: 20,
-                  height: 20,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  paddingHorizontal: 4,
-                }}>
                   <Text style={{
-                    color: '#fff',
-                    fontSize: 10,
+                    fontSize: 24,
                     fontWeight: 'bold',
+                    color: '#3498db',
+                    marginBottom: 4,
                   }}>
-                    {stats.pendingBookings}
+                    {loadingStats ? '...' : stats.intakes}
                   </Text>
-                </View>
-              )}
-              <Text style={{
-                fontSize: 14,
-                fontWeight: '600',
-                color: '#ecf0f1',
-                textAlign: 'center',
-              }}>
-                {t('manage_bookings')}
-              </Text>
-            </TouchableOpacity>
+                  <Text style={{
+                    fontSize: 14,
+                    color: '#bdc3c7',
+                  }}>
+                    {t('active_intakes')}
+                  </Text>
+                </TouchableOpacity>
 
-            <TouchableOpacity
-              style={{
-                width: (width - 60) / 2,
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: 16,
-                padding: 20,
-                marginBottom: 16,
-                borderWidth: 1,
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-                alignItems: 'center',
-              }}
-              onPress={() => router.push('/attendance')}
-            >
-              <View style={{
-                width: 50,
-                height: 50,
-                borderRadius: 25,
-                backgroundColor: 'rgba(231, 76, 60, 0.2)',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 12,
-              }}>
-                <Ionicons name="checkmark-circle-outline" size={24} color="#e74c3c" />
-              </View>
-              <Text style={{
-                fontSize: 14,
-                fontWeight: '600',
-                color: '#ecf0f1',
-                textAlign: 'center',
-              }}>
-                {t('attendance')}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={{
-                width: (width - 60) / 2,
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: 16,
-                padding: 20,
-                marginBottom: 16,
-                borderWidth: 1,
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-                alignItems: 'center',
-              }}
-              onPress={() => router.push('/wallet')}
-            >
-              <View style={{
-                width: 50,
-                height: 50,
-                borderRadius: 25,
-                backgroundColor: 'rgba(41, 128, 185, 0.2)',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 12,
-              }}>
-                <Ionicons name="wallet-outline" size={24} color="#2980b9" />
-              </View>
-              <Text style={{
-                fontSize: 14,
-                fontWeight: '600',
-                color: '#ecf0f1',
-                textAlign: 'center',
-              }}>
-                {t('wallet')}
-              </Text>
-            </TouchableOpacity>
-
-            {/* Add Messages option */}
-            <TouchableOpacity
-              style={{
-                width: (width - 60) / 2,
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: 16,
-                padding: 20,
-                marginBottom: 16,
-                borderWidth: 1,
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-                alignItems: 'center',
-              }}
-              onPress={() => router.push('/messages')}
-            >
-              <View style={{
-                width: 50,
-                height: 50,
-                borderRadius: 25,
-                backgroundColor: 'rgba(0, 122, 255, 0.2)',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 12,
-              }}>
-                <Ionicons name="chatbubble-ellipses-outline" size={24} color="#007AFF" />
-                {/* Notification badge for unread messages */}
-                {unreadMessages > 0 && (
+                <TouchableOpacity
+                  onPress={() => router.push('/demo-sessions')}
+                  style={{
+                    width: isDesktop ? '31%' : (width - 60) / 2,
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 16,
+                    padding: 20,
+                    marginBottom: 16,
+                    borderWidth: 1,
+                    borderColor: '#2ecc71', // Green border for Demos
+                  }}>
                   <View style={{
-                    position: 'absolute',
-                    top: -5,
-                    right: -5,
-                    backgroundColor: '#e74c3c',
-                    borderRadius: 10,
-                    minWidth: 20,
-                    height: 20,
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
+                    backgroundColor: 'rgba(46, 204, 113, 0.2)',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    paddingHorizontal: 5,
+                    marginBottom: 12,
                   }}>
-                    <Text style={{
-                      color: '#fff',
-                      fontSize: 12,
-                      fontWeight: 'bold',
+                    <Ionicons name="flask-outline" size={20} color="#2ecc71" />
+                  </View>
+                  <Text style={{
+                    fontSize: 24,
+                    fontWeight: 'bold',
+                    color: '#2ecc71',
+                    marginBottom: 4,
+                  }}>
+                    {t('demos')}
+                  </Text>
+                  <Text style={{
+                    fontSize: 14,
+                    color: '#bdc3c7',
+                  }}>
+                    {t('trial_sessions')}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => router.push('/students')}
+                  style={{
+                    width: isDesktop ? '31%' : (width - 60) / 2,
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 16,
+                    padding: 20,
+                    marginBottom: 16,
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                  }}>
+                  <View style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
+                    backgroundColor: 'rgba(46, 204, 113, 0.2)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: 12,
+                  }}>
+                    <Ionicons name="people-outline" size={20} color="#2ecc71" />
+                  </View>
+                  <Text style={{
+                    fontSize: 24,
+                    fontWeight: 'bold',
+                    color: '#2ecc71',
+                    marginBottom: 4,
+                  }}>
+                    {loadingStats ? '...' : stats.students}
+                  </Text>
+                  <Text style={{
+                    fontSize: 14,
+                    color: '#bdc3c7',
+                  }}>
+                    {t('total_students')}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => router.push('/grading')}
+                  style={{
+                    width: isDesktop ? '31%' : (width - 60) / 2,
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 16,
+                    padding: 20,
+                    marginBottom: 16,
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                  }}>
+                  <View style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
+                    backgroundColor: 'rgba(241, 196, 15, 0.2)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: 12,
+                  }}>
+                    <Ionicons name="document-text-outline" size={20} color="#f1c40f" />
+                  </View>
+                  <Text style={{
+                    fontSize: 24,
+                    fontWeight: 'bold',
+                    color: '#f1c40f',
+                    marginBottom: 4,
+                  }}>
+                    {loadingStats ? '...' : stats.pendingGrades}
+                  </Text>
+                  <Text style={{
+                    fontSize: 14,
+                    color: '#bdc3c7',
+                  }}>
+                    {t('pending_grades')}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => router.push('/timetable')}
+                  style={{
+                    width: isDesktop ? '31%' : (width - 60) / 2,
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 16,
+                    padding: 20,
+                    marginBottom: 16,
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                  }}>
+                  <View style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
+                    backgroundColor: 'rgba(155, 89, 182, 0.2)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: 12,
+                  }}>
+                    <Ionicons name="calendar-outline" size={20} color="#9b59b6" />
+                  </View>
+                  <Text style={{
+                    fontSize: 24,
+                    fontWeight: 'bold',
+                    color: '#9b59b6',
+                    marginBottom: 4,
+                  }}>
+                    {loadingStats ? '...' : stats.todayClasses}
+                  </Text>
+                  <Text style={{
+                    fontSize: 14,
+                    color: '#bdc3c7',
+                  }}>
+                    {t('classes_today')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Quick Actions */}
+            <View style={{ paddingHorizontal: 24, marginBottom: 30 }}>
+              <Text style={{
+                fontSize: 20,
+                fontWeight: 'bold',
+                color: '#ecf0f1',
+                marginBottom: 16,
+              }}>
+                {t('quick_actions')}
+              </Text>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  flexWrap: 'wrap',
+                  gap: isDesktop ? 16 : 0,
+                  justifyContent: isDesktop ? 'flex-start' : 'space-between',
+                }}
+              >
+                <TouchableOpacity
+                  style={{
+                    width: isDesktop ? '23%' : (width - 60) / 2,
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 16,
+                    padding: 20,
+                    marginBottom: 16,
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    alignItems: 'center',
+                  }}
+                  onPress={() => router.push('/intakes')}
+                >
+                  <View style={{
+                    width: 50,
+                    height: 50,
+                    borderRadius: 25,
+                    backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: 12,
+                  }}>
+                    <Ionicons name="school-outline" size={24} color="#3498db" />
+                  </View>
+                  <Text style={{
+                    fontSize: 14,
+                    fontWeight: '600',
+                    color: '#ecf0f1',
+                    textAlign: 'center',
+                  }}>
+                    {t('manage_intakes')}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={{
+                    width: isDesktop ? '23%' : (width - 60) / 2,
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 16,
+                    padding: 20,
+                    marginBottom: 16,
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    alignItems: 'center',
+                  }}
+                  onPress={() => router.push('/upload-video/new')}
+                >
+                  <View style={{
+                    width: 50,
+                    height: 50,
+                    borderRadius: 25,
+                    backgroundColor: 'rgba(211, 84, 0, 0.2)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: 12,
+                  }}>
+                    <Ionicons name="videocam-outline" size={24} color="#d35400" />
+                  </View>
+                  <Text style={{
+                    fontSize: 14,
+                    fontWeight: '600',
+                    color: '#ecf0f1',
+                    textAlign: 'center',
+                  }}>
+                    Upload Video
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={{
+                    width: isDesktop ? '23%' : (width - 60) / 2,
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 16,
+                    padding: 20,
+                    marginBottom: 16,
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    alignItems: 'center',
+                  }}
+                  onPress={() => setShowQuizIntakeModal(true)}
+                >
+                  <View style={{
+                    width: 50,
+                    height: 50,
+                    borderRadius: 25,
+                    backgroundColor: 'rgba(231, 76, 60, 0.2)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: 12,
+                  }}>
+                    <Ionicons name="clipboard-outline" size={24} color="#e74c3c" />
+                  </View>
+                  <Text style={{
+                    fontSize: 14,
+                    fontWeight: '600',
+                    color: '#ecf0f1',
+                    textAlign: 'center',
+                  }}>
+                    {t('create_start_quiz')}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={{
+                    width: isDesktop ? '23%' : (width - 60) / 2,
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 16,
+                    padding: 20,
+                    marginBottom: 16,
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    alignItems: 'center',
+                  }}
+                  onPress={() => handleNavigation('Send Announcement')}
+                >
+                  <View style={{
+                    width: 50,
+                    height: 50,
+                    borderRadius: 25,
+                    backgroundColor: 'rgba(155, 89, 182, 0.2)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: 12,
+                  }}>
+                    <Ionicons name="mail-outline" size={24} color="#9b59b6" />
+                  </View>
+                  <Text style={{
+                    fontSize: 14,
+                    fontWeight: '600',
+                    color: '#ecf0f1',
+                    textAlign: 'center',
+                  }}>
+                    {t('send_announcement')}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={{
+                    width: isDesktop ? '23%' : (width - 60) / 2,
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 16,
+                    padding: 20,
+                    marginBottom: 16,
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    alignItems: 'center',
+                  }}
+                  onPress={() => router.push('/lecturer-profile')}
+                >
+                  <View style={{
+                    width: 50,
+                    height: 50,
+                    borderRadius: 25,
+                    backgroundColor: 'rgba(39, 174, 96, 0.2)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: 12,
+                  }}>
+                    <Ionicons name="briefcase-outline" size={24} color="#27ae60" />
+                  </View>
+                  <Text style={{
+                    fontSize: 14,
+                    fontWeight: '600',
+                    color: '#ecf0f1',
+                    textAlign: 'center',
+                  }}>
+                    {t('professional_profile')}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={{
+                    width: isDesktop ? '23%' : (width - 60) / 2,
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 16,
+                    padding: 20,
+                    marginBottom: 16,
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    alignItems: 'center',
+                  }}
+                  onPress={() => router.push('/bookings')}
+                >
+                  <View style={{
+                    width: 50,
+                    height: 50,
+                    borderRadius: 25,
+                    backgroundColor: 'rgba(243, 156, 18, 0.2)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: 12,
+                  }}>
+                    <Ionicons name="calendar-outline" size={24} color="#f39c12" />
+                  </View>
+                  {stats.pendingBookings > 0 && (
+                    <View style={{
+                      position: 'absolute',
+                      top: 10,
+                      right: 10,
+                      backgroundColor: '#e74c3c',
+                      borderRadius: 10,
+                      minWidth: 20,
+                      height: 20,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      paddingHorizontal: 4,
                     }}>
-                      {unreadMessages > 99 ? '99+' : unreadMessages}
-                    </Text>
+                      <Text style={{
+                        color: '#fff',
+                        fontSize: 10,
+                        fontWeight: 'bold',
+                      }}>
+                        {stats.pendingBookings}
+                      </Text>
+                    </View>
+                  )}
+                  <Text style={{
+                    fontSize: 14,
+                    fontWeight: '600',
+                    color: '#ecf0f1',
+                    textAlign: 'center',
+                  }}>
+                    {t('manage_bookings')}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={{
+                    width: isDesktop ? '23%' : (width - 60) / 2,
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 16,
+                    padding: 20,
+                    marginBottom: 16,
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    alignItems: 'center',
+                  }}
+                  onPress={() => router.push('/attendance')}
+                >
+                  <View style={{
+                    width: 50,
+                    height: 50,
+                    borderRadius: 25,
+                    backgroundColor: 'rgba(231, 76, 60, 0.2)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: 12,
+                  }}>
+                    <Ionicons name="checkmark-circle-outline" size={24} color="#e74c3c" />
+                  </View>
+                  <Text style={{
+                    fontSize: 14,
+                    fontWeight: '600',
+                    color: '#ecf0f1',
+                    textAlign: 'center',
+                  }}>
+                    {t('attendance')}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={{
+                    width: isDesktop ? '23%' : (width - 60) / 2,
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 16,
+                    padding: 20,
+                    marginBottom: 16,
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    alignItems: 'center',
+                  }}
+                  onPress={() => router.push('/wallet')}
+                >
+                  <View style={{
+                    width: 50,
+                    height: 50,
+                    borderRadius: 25,
+                    backgroundColor: 'rgba(41, 128, 185, 0.2)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: 12,
+                  }}>
+                    <Ionicons name="wallet-outline" size={24} color="#2980b9" />
+                  </View>
+                  <Text style={{
+                    fontSize: 14,
+                    fontWeight: '600',
+                    color: '#ecf0f1',
+                    textAlign: 'center',
+                  }}>
+                    {t('wallet')}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={{
+                    width: isDesktop ? '23%' : (width - 60) / 2,
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 16,
+                    padding: 20,
+                    marginBottom: 16,
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    alignItems: 'center',
+                  }}
+                  onPress={() => router.push('/messages')}
+                >
+                  <View style={{
+                    width: 50,
+                    height: 50,
+                    borderRadius: 25,
+                    backgroundColor: 'rgba(0, 122, 255, 0.2)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: 12,
+                  }}>
+                    <Ionicons name="chatbubble-ellipses-outline" size={24} color="#007AFF" />
+                    {unreadMessages > 0 && (
+                      <View style={{
+                        position: 'absolute',
+                        top: -5,
+                        right: -5,
+                        backgroundColor: '#e74c3c',
+                        borderRadius: 10,
+                        minWidth: 20,
+                        height: 20,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        paddingHorizontal: 5,
+                      }}>
+                        <Text style={{
+                          color: '#fff',
+                          fontSize: 12,
+                          fontWeight: 'bold',
+                        }}>
+                          {unreadMessages > 99 ? '99+' : unreadMessages}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                  <Text style={{
+                    fontSize: 14,
+                    fontWeight: '600',
+                    color: '#ecf0f1',
+                    textAlign: 'center',
+                  }}>
+                    {t('messages')}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={{
+                    width: isDesktop ? '23%' : (width - 60) / 2,
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 16,
+                    padding: 20,
+                    marginBottom: 16,
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    alignItems: 'center',
+                  }}
+                  onPress={() => router.push('/lecturer-hub')}
+                >
+                  <View style={{
+                    width: 50,
+                    height: 50,
+                    borderRadius: 25,
+                    backgroundColor: 'rgba(155, 89, 182, 0.2)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: 12,
+                  }}>
+                    <Ionicons name="people-outline" size={24} color="#9b59b6" />
+                  </View>
+                  <Text style={{
+                    fontSize: 14,
+                    fontWeight: '600',
+                    color: '#ecf0f1',
+                    textAlign: 'center',
+                  }}>
+                    {t('lecturer_hub.title')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+
+          <View style={{ flex: isDesktop ? 1 : 1, paddingTop: isDesktop ? 60 : 0 }}>
+            {/* Recent Activity */}
+            <View style={{ paddingHorizontal: 24, marginBottom: 30 }}>
+              <Text style={{
+                fontSize: 20,
+                fontWeight: 'bold',
+                color: '#ecf0f1',
+                marginBottom: 16,
+              }}>
+                {t('recent_activity')}
+              </Text>
+              <View style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                borderRadius: 16,
+                padding: 20,
+                borderWidth: 1,
+                borderColor: 'rgba(255, 255, 255, 0.1)',
+              }}>
+                {loadingActivities ? (
+                  <View style={{ alignItems: 'center', paddingVertical: 20 }}>
+                    <Text style={{ color: '#bdc3c7' }}>{t('loading_activities')}</Text>
+                  </View>
+                ) : recentActivities.length > 0 ? (
+                  recentActivities.map((activity, index) => (
+                    <View key={`${activity.type}-${activity.id}`} style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginBottom: index === recentActivities.length - 1 ? 0 : 16,
+                    }}>
+                      <View style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: 16,
+                        backgroundColor: `rgba(${hexToRgb(activity.iconColor)}, 0.2)`,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginEnd: 12,
+                      }}>
+                        <Ionicons name={activity.icon} size={16} color={activity.iconColor} />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={{
+                          fontSize: 14,
+                          color: '#ecf0f1',
+                          marginBottom: 2,
+                        }}>
+                          {activity.title}
+                        </Text>
+                        <Text style={{
+                          fontSize: 12,
+                          color: '#95a5a6',
+                        }}>
+                          {activity.description}
+                        </Text>
+                        <Text style={{
+                          fontSize: 10,
+                          color: '#7f8c8d',
+                          marginTop: 2,
+                        }}>
+                          {activity.time}
+                        </Text>
+                      </View>
+                    </View>
+                  ))
+                ) : (
+                  <View style={{ alignItems: 'center', paddingVertical: 20 }}>
+                    <Ionicons name="alert-circle-outline" size={24} color="#95a5a6" />
+                    <Text style={{ color: '#95a5a6', marginTop: 8 }}>{t('no_recent_activities')}</Text>
                   </View>
                 )}
               </View>
+            </View>
+
+            {/* Footer moved inside sidebar area or at the bottom depending on desktop/mobile */}
+            <View style={{ alignItems: 'center', paddingHorizontal: 24, paddingVertical: 20 }}>
               <Text style={{
-                fontSize: 14,
-                fontWeight: '600',
-                color: '#ecf0f1',
-                textAlign: 'center',
+                fontSize: 11,
+                color: '#7f8c8d',
+                marginBottom: 2,
               }}>
-                {t('messages')}
+                {t('copyright_text')}
               </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={{
-                width: (width - 60) / 2,
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                borderRadius: 16,
-                padding: 20,
-                marginBottom: 16,
-                borderWidth: 1,
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-                alignItems: 'center',
-              }}
-              onPress={() => router.push('/lecturer-hub')}
-            >
-              <View style={{
-                width: 50,
-                height: 50,
-                borderRadius: 25,
-                backgroundColor: 'rgba(155, 89, 182, 0.2)',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 12,
-              }}>
-                <Ionicons name="people-outline" size={24} color="#9b59b6" />
-              </View>
               <Text style={{
-                fontSize: 14,
-                fontWeight: '600',
-                color: '#ecf0f1',
-                textAlign: 'center',
+                fontSize: 9,
+                color: '#7f8c8d',
+                fontWeight: '300',
               }}>
-                {t('lecturer_hub.title')}
+                {t('footer_slogan')}
               </Text>
-            </TouchableOpacity>
+            </View>
           </View>
-        </View>
-
-        {/* Recent Activity */}
-        <View style={{ paddingHorizontal: 24, marginBottom: 30 }}>
-          <Text style={{
-            fontSize: 20,
-            fontWeight: 'bold',
-            color: '#ecf0f1',
-            marginBottom: 16,
-          }}>
-            {t('recent_activity')}
-          </Text>
-          <View style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            borderRadius: 16,
-            padding: 20,
-            borderWidth: 1,
-            borderColor: 'rgba(255, 255, 255, 0.1)',
-          }}>
-            {loadingActivities ? (
-              // Show loading state
-              <View style={{ alignItems: 'center', paddingVertical: 20 }}>
-                <Text style={{ color: '#bdc3c7' }}>{t('loading_activities')}</Text>
-              </View>
-            ) : recentActivities.length > 0 ? (
-              // Show real activities
-              recentActivities.map((activity, index) => (
-                <View key={`${activity.type}-${activity.id}`} style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginBottom: index === recentActivities.length - 1 ? 0 : 16,
-                }}>
-                  <View style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 16,
-                    backgroundColor: `rgba(${hexToRgb(activity.iconColor)}, 0.2)`,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginEnd: 12,
-                  }}>
-                    <Ionicons name={activity.icon} size={16} color={activity.iconColor} />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={{
-                      fontSize: 14,
-                      color: '#ecf0f1',
-                      marginBottom: 2,
-                    }}>
-                      {activity.title}
-                    </Text>
-                    <Text style={{
-                      fontSize: 12,
-                      color: '#95a5a6',
-                    }}>
-                      {activity.description}
-                    </Text>
-                    <Text style={{
-                      fontSize: 10,
-                      color: '#7f8c8d',
-                      marginTop: 2,
-                    }}>
-                      {activity.time}
-                    </Text>
-                  </View>
-                </View>
-              ))
-            ) : (
-              // Show empty state
-              <View style={{ alignItems: 'center', paddingVertical: 20 }}>
-                <Ionicons name="alert-circle-outline" size={24} color="#95a5a6" />
-                <Text style={{ color: '#95a5a6', marginTop: 8 }}>{t('no_recent_activities')}</Text>
-              </View>
-            )}
-          </View>
-        </View>
-
-        {/* Footer */}
-        <View style={{ alignItems: 'center', paddingHorizontal: 24 }}>
-          <Text style={{
-            fontSize: 11,
-            color: '#7f8c8d',
-            marginBottom: 2,
-          }}>
-            {t('copyright_text')}
-          </Text>
-          <Text style={{
-            fontSize: 9,
-            color: '#7f8c8d',
-            fontWeight: '300',
-          }}>
-            {t('footer_slogan')}
-          </Text>
         </View>
       </ScrollView>
 
