@@ -7,30 +7,34 @@ import {
     ScrollView,
     Alert,
     StatusBar,
-    Platform
+    Platform,
+    Modal
 } from 'react-native';
 import { Stack, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
+import { changeLanguage as i18nChangeLanguage } from '../src/i18n';
 import { I18nManager } from 'react-native';
 import { tokenStorage } from '../utils/tokenStorage';
+import { BlurView } from 'expo-blur';
 
 export default function SettingsScreen() {
     const { t, i18n } = useTranslation();
+    const [isLanguageModalVisible, setIsLanguageModalVisible] = React.useState(false);
 
     const changeLanguage = async (lang: 'en' | 'ar') => {
         if (i18n.language === lang) return;
 
         try {
-            await tokenStorage.setItem('user-language', lang);
-            await i18n.changeLanguage(lang);
+            await i18nChangeLanguage(lang);
+            setIsLanguageModalVisible(false);
 
-            const isRTL = lang === 'ar';
-            if (I18nManager.isRTL !== isRTL) {
-                I18nManager.allowRTL(isRTL);
-                I18nManager.forceRTL(isRTL);
-                Alert.alert(t('language_changed'), t('restart_app_msg'));
+            if (Platform.OS !== 'web') {
+                const isRTL = lang === 'ar';
+                if (I18nManager.isRTL !== isRTL) {
+                    Alert.alert(t('language_changed'), t('restart_app_msg'));
+                }
             }
         } catch (error) {
             console.error('Error changing language:', error);
@@ -38,26 +42,7 @@ export default function SettingsScreen() {
     };
 
     const showLanguageOptions = () => {
-        Alert.alert(
-            t('switch_language'),
-            t('language'),
-            [
-                {
-                    text: t('english'),
-                    onPress: () => changeLanguage('en'),
-                    style: i18n.language === 'en' ? 'default' : 'default'
-                },
-                {
-                    text: t('arabic'),
-                    onPress: () => changeLanguage('ar'),
-                    style: i18n.language === 'ar' ? 'default' : 'default'
-                },
-                {
-                    text: t('cancel'),
-                    style: 'cancel'
-                }
-            ]
-        );
+        setIsLanguageModalVisible(true);
     };
 
     const renderSettingItem = (
@@ -70,9 +55,9 @@ export default function SettingsScreen() {
             <View style={styles.settingIconContainer}>
                 <Ionicons name={icon} size={22} color={color} />
             </View>
-            <Text style={[styles.settingText, { textAlign: I18nManager.isRTL ? 'right' : 'left' }]}>{title}</Text>
+            <Text style={[styles.settingText, { textAlign: i18n.dir() === 'rtl' ? 'right' : 'left' }]}>{title}</Text>
             <Ionicons
-                name={I18nManager.isRTL ? "chevron-back" : "chevron-forward"}
+                name={i18n.dir() === 'rtl' ? "chevron-back" : "chevron-forward"}
                 size={20}
                 color="#95a5a6"
             />
@@ -148,7 +133,7 @@ export default function SettingsScreen() {
 
             <ScrollView style={styles.content}>
                 <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, { textAlign: I18nManager.isRTL ? 'right' : 'left' }]}>
+                    <Text style={[styles.sectionTitle, { textAlign: i18n.dir() === 'rtl' ? 'right' : 'left' }]}>
                         {t('general')}
                     </Text>
                     {renderSettingItem(
@@ -172,7 +157,7 @@ export default function SettingsScreen() {
                 </View>
 
                 <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, { textAlign: I18nManager.isRTL ? 'right' : 'left' }]}>
+                    <Text style={[styles.sectionTitle, { textAlign: i18n.dir() === 'rtl' ? 'right' : 'left' }]}>
                         {t('support_and_legal')}
                     </Text>
                     {renderSettingItem(
@@ -188,7 +173,13 @@ export default function SettingsScreen() {
                     {renderSettingItem(
                         'information-circle-outline',
                         t('about'),
-                        () => Alert.alert(t('about'), t('app_version_info'))
+                        () => {
+                            if (Platform.OS === 'web') {
+                                window.alert(`${t('about')}\n\n${t('app_version_info')}`);
+                            } else {
+                                Alert.alert(t('about'), t('app_version_info'));
+                            }
+                        }
                     )}
                 </View>
 
@@ -201,12 +192,58 @@ export default function SettingsScreen() {
                         <View style={[styles.settingIconContainer, { backgroundColor: 'rgba(231, 76, 60, 0.1)' }]}>
                             <Ionicons name="log-out-outline" size={22} color="#e74c3c" />
                         </View>
-                        <Text style={[styles.settingText, { color: '#e74c3c', textAlign: I18nManager.isRTL ? 'right' : 'left' }]}>
+                        <Text style={[styles.settingText, { color: '#e74c3c', textAlign: i18n.dir() === 'rtl' ? 'right' : 'left' }]}>
                             {t('logout')}
                         </Text>
                     </TouchableOpacity>
                 </View>
             </ScrollView>
+
+            {/* Language Selection Modal */}
+            <Modal
+                visible={isLanguageModalVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setIsLanguageModalVisible(false)}
+            >
+                <TouchableOpacity
+                    style={styles.modalOverlay}
+                    activeOpacity={1}
+                    onPress={() => setIsLanguageModalVisible(false)}
+                >
+                    <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>{t('switch_language')}</Text>
+
+                        <TouchableOpacity
+                            style={[styles.languageOption, i18n.language === 'en' && styles.languageOptionActive]}
+                            onPress={() => changeLanguage('en')}
+                        >
+                            <Text style={[styles.languageOptionText, i18n.language === 'en' && styles.languageOptionTextActive]}>
+                                {t('english')}
+                            </Text>
+                            {i18n.language === 'en' && <Ionicons name="checkmark-circle" size={20} color="#3498db" />}
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[styles.languageOption, i18n.language === 'ar' && styles.languageOptionActive]}
+                            onPress={() => changeLanguage('ar')}
+                        >
+                            <Text style={[styles.languageOptionText, i18n.language === 'ar' && styles.languageOptionTextActive]}>
+                                {t('arabic')}
+                            </Text>
+                            {i18n.language === 'ar' && <Ionicons name="checkmark-circle" size={20} color="#3498db" />}
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={styles.modalCancelButton}
+                            onPress={() => setIsLanguageModalVisible(false)}
+                        >
+                            <Text style={styles.modalCancelText}>{t('cancel')}</Text>
+                        </TouchableOpacity>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
         </View >
     );
 }
@@ -292,5 +329,59 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#ecf0f1',
         fontWeight: '500',
+    },
+    modalOverlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.7)',
+    },
+    modalContent: {
+        width: '85%',
+        maxWidth: 400,
+        backgroundColor: '#1a1a1a',
+        borderRadius: 24,
+        padding: 24,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.1)',
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#fff',
+        marginBottom: 20,
+        textAlign: 'center',
+    },
+    languageOption: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingVertical: 16,
+        paddingHorizontal: 20,
+        borderRadius: 12,
+        backgroundColor: 'rgba(255,255,255,0.05)',
+        marginBottom: 10,
+    },
+    languageOptionActive: {
+        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+        borderColor: 'rgba(52, 152, 219, 0.3)',
+        borderWidth: 1,
+    },
+    languageOptionText: {
+        fontSize: 16,
+        color: '#bdc3c7',
+    },
+    languageOptionTextActive: {
+        color: '#3498db',
+        fontWeight: 'bold',
+    },
+    modalCancelButton: {
+        marginTop: 10,
+        paddingVertical: 12,
+        alignItems: 'center',
+    },
+    modalCancelText: {
+        fontSize: 16,
+        color: '#95a5a6',
     },
 });

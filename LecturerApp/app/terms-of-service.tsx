@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 const TermsOfService = () => {
     const router = useRouter();
     const { t, i18n } = useTranslation();
-    const isRTL = I18nManager.isRTL;
+    const isRTL = i18n.dir() === 'rtl';
 
     return (
         <View style={styles.container}>

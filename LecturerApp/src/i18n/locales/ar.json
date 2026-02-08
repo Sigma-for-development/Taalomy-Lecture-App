@@ -1434,5 +1434,7 @@
     "class_price": "سعر الصف",
     "term_price": "سعر الفصل",
     "currency": "جنيه",
-    "search_students": "ابحث عن طلاب..."
+    "communication": "الاتصالات",
+    "account": "الحساب",
+    "grading": "التصحيح"
 }

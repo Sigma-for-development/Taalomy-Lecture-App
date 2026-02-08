@@ -8,6 +8,8 @@ import { tokenStorage } from '../../utils/tokenStorage';
 import { Alert } from 'react-native';
 import ProfilePicture from './ProfilePicture';
 import { appEventEmitter } from '../utils/eventEmitter';
+import { useTranslation } from 'react-i18next';
+import { I18nManager } from 'react-native';
 
 interface WebLayoutProps {
     children: React.ReactNode;
@@ -15,6 +17,8 @@ interface WebLayoutProps {
 
 const SidebarItem = ({ icon, label, route, isActive, onPress }: any) => {
     const [isHovered, setIsHovered] = React.useState(false);
+    const { i18n } = useTranslation();
+    const isRTL = i18n.dir() === 'rtl';
 
     return (
         <TouchableOpacity
@@ -33,11 +37,12 @@ const SidebarItem = ({ icon, label, route, isActive, onPress }: any) => {
                 name={icon}
                 size={22}
                 color={isActive || isHovered ? '#FFFFFF' : '#BDC3C7'}
-                style={{ marginRight: 12 }}
+                style={{ [isRTL ? 'marginLeft' : 'marginRight']: 18 }}
             />
             <Text style={[
                 styles.sidebarText,
-                (isActive || isHovered) && styles.sidebarTextActive
+                (isActive || isHovered) && styles.sidebarTextActive,
+                { textAlign: isRTL ? 'right' : 'left', flex: 1 }
             ]}>
                 {label}
             </Text>
@@ -48,6 +53,8 @@ const SidebarItem = ({ icon, label, route, isActive, onPress }: any) => {
 const AISidebarItem = ({ label, route, isActive, onPress }: any) => {
     const [isHovered, setIsHovered] = React.useState(false);
     const glowAnim = React.useRef(new Animated.Value(0)).current;
+    const { i18n } = useTranslation();
+    const isRTL = i18n.dir() === 'rtl';
 
     React.useEffect(() => {
         Animated.loop(
@@ -78,13 +85,6 @@ const AISidebarItem = ({ label, route, isActive, onPress }: any) => {
         outputRange: [0.3, 0.8],
     });
 
-    const containerStyles = [
-        styles.sidebarItem,
-        isActive && styles.sidebarItemActive,
-        !isActive && isHovered && styles.sidebarItemHover,
-        { marginBottom: 12 }
-    ];
-
     return (
         <TouchableOpacity
             onPress={onPress}
@@ -101,7 +101,6 @@ const AISidebarItem = ({ label, route, isActive, onPress }: any) => {
             ]}
         >
             <Animated.View style={{
-                marginRight: 12,
                 shadowColor: '#a29bfe',
                 shadowOffset: { width: 0, height: 0 },
                 shadowOpacity: shadowOpacity,
@@ -111,18 +110,20 @@ const AISidebarItem = ({ label, route, isActive, onPress }: any) => {
                     name="sparkles"
                     size={22}
                     color={isActive ? '#FFFFFF' : '#a29bfe'}
+                    style={{ [isRTL ? 'marginLeft' : 'marginRight']: 18 }}
                 />
             </Animated.View>
             <Text style={[
                 styles.sidebarText,
                 (isActive || isHovered) && styles.sidebarTextActive,
-                !isActive && { color: '#a29bfe', fontWeight: 'bold' }
+                !isActive && { color: '#a29bfe', fontWeight: 'bold' },
+                { textAlign: isRTL ? 'right' : 'left', flex: 1 }
             ]}>
                 {label}
             </Text>
             <Animated.View style={{
                 position: 'absolute',
-                right: 12,
+                [isRTL ? 'left' : 'right']: 12,
                 width: 8,
                 height: 8,
                 borderRadius: 4,
@@ -134,9 +135,11 @@ const AISidebarItem = ({ label, route, isActive, onPress }: any) => {
 
 export const WebLayout: React.FC<WebLayoutProps> = ({ children }) => {
     const { isDesktop, isWeb } = useResponsive();
+    const { t, i18n } = useTranslation();
     const router = useRouter();
     const pathname = usePathname();
     const [userData, setUserData] = React.useState<any>(null);
+    const isRTL = i18n.dir() === 'rtl';
 
     React.useEffect(() => {
         loadUserData();
@@ -224,12 +227,12 @@ export const WebLayout: React.FC<WebLayoutProps> = ({ children }) => {
     };
 
     return (
-        <View style={styles.container}>
+        <View key={i18n.language} style={styles.container}>
             {/* Sidebar */}
-            <View style={styles.sidebar}>
+            <View style={[styles.sidebar, isRTL ? { borderRightWidth: 0, borderLeftWidth: 1, borderLeftColor: '#2d2d2d' } : {}]}>
                 <View style={styles.logoContainer}>
                     <View style={styles.brandingContainer}>
-                        <View style={styles.logoWrapper}>
+                        <View style={[styles.logoWrapper, { [isRTL ? 'marginLeft' : 'marginRight']: -12 }]}>
                             <Image
                                 source={require('../../assets/taalomy-white-txt.png')}
                                 style={styles.logoImage}
@@ -241,122 +244,126 @@ export const WebLayout: React.FC<WebLayoutProps> = ({ children }) => {
                 </View>
 
                 <ScrollView style={styles.sidebarContent}>
-                    <Text style={styles.sectionTitle}>MENU</Text>
+                    <Text style={[styles.sectionTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{t('general')}</Text>
 
                     <SidebarItem
                         icon="grid-outline"
-                        label="Dashboard"
+                        label={t('dashboard')}
                         route="/dashboard"
                         isActive={isActive('/dashboard')}
                         onPress={() => navigate('/dashboard')}
                     />
                     <SidebarItem
                         icon="calendar-outline"
-                        label="Timetable"
+                        label={t('timetable')}
                         route="/timetable"
                         isActive={isActive('/timetable')}
                         onPress={() => navigate('/timetable')}
                     />
                     <SidebarItem
                         icon="calendar-number-outline"
-                        label="Bookings"
+                        label={t('pending_bookings')}
                         route="/bookings"
                         isActive={isActive('/bookings')}
                         onPress={() => navigate('/bookings')}
                     />
                     <SidebarItem
                         icon="school-outline"
-                        label="Intakes"
+                        label={t('intakes')}
                         route="/intakes"
                         isActive={isActive('/intakes')}
                         onPress={() => navigate('/intakes')}
                     />
                     <SidebarItem
                         icon="people-outline"
-                        label="Students"
+                        label={t('students')}
                         route="/students"
                         isActive={isActive('/students')}
                         onPress={() => navigate('/students')}
                     />
                     <SidebarItem
                         icon="checkmark-circle-outline"
-                        label="Attendance"
+                        label={t('attendance')}
                         route="/attendance"
                         isActive={isActive('/attendance')}
                         onPress={() => navigate('/attendance')}
                     />
                     <SidebarItem
                         icon="document-text-outline"
-                        label="Grading"
+                        label={t('grading')}
                         route="/grading"
                         isActive={isActive('/grading')}
                         onPress={() => navigate('/grading')}
                     />
                     <SidebarItem
                         icon="flask-outline"
-                        label="Demos"
+                        label={t('demos')}
                         route="/demo-sessions"
                         isActive={isActive('/demo-sessions')}
                         onPress={() => navigate('/demo-sessions')}
                     />
 
                     <AISidebarItem
-                        label="AI Assistant"
+                        label={t('ai_assistant')}
                         route="/ai-assistant"
                         isActive={isActive('/ai-assistant')}
                         onPress={() => navigate('/ai-assistant')}
                     />
 
-                    <Text style={[styles.sectionTitle, { marginTop: 24 }]}>COMMUNICATION</Text>
+                    <Text style={[styles.sectionTitle, { marginTop: 24, textAlign: isRTL ? 'right' : 'left' }]}>
+                        {t('communication')}
+                    </Text>
 
                     <SidebarItem
                         icon="chatbubbles-outline"
-                        label="Messages"
+                        label={t('messages')}
                         route="/messages"
                         isActive={isActive('/messages')}
                         onPress={() => navigate('/messages')}
                     />
                     <SidebarItem
                         icon="megaphone-outline"
-                        label="Announcements"
+                        label={t('announcements_header')}
                         route="/send-announcement"
                         isActive={isActive('/send-announcement')}
                         onPress={() => navigate('/send-announcement')}
                     />
                     <SidebarItem
                         icon="mail-open-outline"
-                        label="Invitations"
+                        label={t('invitations')}
                         route="/invitations"
                         isActive={isActive('/invitations')}
                         onPress={() => navigate('/invitations')}
                     />
                     <SidebarItem
                         icon="planet-outline"
-                        label="Lecturer Hub"
+                        label={t('lecturer_hub.title')}
                         route="/lecturer-hub"
                         isActive={isActive('/lecturer-hub')}
                         onPress={() => navigate('/lecturer-hub')}
                     />
 
-                    <Text style={[styles.sectionTitle, { marginTop: 24 }]}>ACCOUNT</Text>
+                    <Text style={[styles.sectionTitle, { marginTop: 24, textAlign: isRTL ? 'right' : 'left' }]}>
+                        {t('account')}
+                    </Text>
 
                     <SidebarItem
                         icon="briefcase-outline"
-                        label="Professional Profile"
+                        label={t('professional_profile')}
                         route="/lecturer-profile"
                         isActive={isActive('/lecturer-profile')}
                         onPress={() => navigate('/lecturer-profile')}
                     />
                     <SidebarItem
                         icon="wallet-outline"
-                        label="Wallet"
+                        label={t('wallet')}
                         route="/wallet"
                         isActive={isActive('/wallet')}
                         onPress={() => navigate('/wallet')}
                     />
                     <SidebarItem
                         icon="settings-outline"
-                        label="Settings"
+                        label={t('settings')}
                         route="/settings"
                         isActive={isActive('/settings')}
                         onPress={() => navigate('/settings')}
@@ -365,16 +372,21 @@ export const WebLayout: React.FC<WebLayoutProps> = ({ children }) => {
                 </ScrollView>
 
                 <View style={styles.sidebarFooter}>
-                    <TouchableOpacity onPress={() => navigate('/profile-edit')} style={styles.userProfile}>
-                        <View style={{ marginRight: 12 }}>
+                    <TouchableOpacity
+                        onPress={() => navigate('/profile-edit')}
+                        style={styles.userProfile}
+                    >
+                        <View style={{ [isRTL ? 'marginLeft' : 'marginRight']: 16 }}>
                             <ProfilePicture
                                 imageUrl={userData?.profile_picture_url}
                                 size={40}
                             />
                         </View>
                         <View style={styles.userInfo}>
-                            <Text style={styles.userName}>{userData ? `${userData.first_name} ${userData.last_name}` : 'My Profile'}</Text>
-                            <Text style={styles.userRole}>Lecturer</Text>
+                            <Text style={styles.userName}>
+                                {userData ? `${userData.first_name} ${userData.last_name}` : t('profile')}
+                            </Text>
+                            <Text style={styles.userRole}>{t('lecturer')}</Text>
                         </View>
                     </TouchableOpacity>
                 </View>
@@ -448,6 +460,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 8,
         paddingHorizontal: 12,
+        width: '100%',
     },
     sidebarItem: {
         flexDirection: 'row',

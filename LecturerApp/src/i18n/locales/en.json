@@ -1422,5 +1422,7 @@
     "class_price": "Class Price",
     "term_price": "Term Price",
     "currency": "EGP",
-    "search_students": "Search students..."
+    "communication": "Communication",
+    "account": "Account",
+    "grading": "Grading"
 }

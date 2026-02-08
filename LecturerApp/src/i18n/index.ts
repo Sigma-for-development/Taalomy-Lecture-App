@@ -1,7 +1,7 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import { getLocales } from 'expo-localization';
-import { I18nManager } from 'react-native';
+import { I18nManager, Platform } from 'react-native';
 import { tokenStorage } from '../../utils/tokenStorage';
 import en from './locales/en.json';
 import ar from './locales/ar.json';
@@ -37,8 +37,12 @@ const initI18n = async () => {
             });
 
         // Handle RTL
-        // We check if the layout needs to be consistent with the language
         const isRTL = savedLanguage === 'ar';
+
+        if (Platform.OS === 'web') {
+            document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+            document.documentElement.lang = (savedLanguage as string);
+        }
 
         // Only force update if the status is different
         if (I18nManager.isRTL !== isRTL) {
@@ -53,4 +57,25 @@ const initI18n = async () => {
 };
 
 export default initI18n;
+
+/**
+ * Utility to change language and sync document direction on Web
+ */
+export const changeLanguage = async (newLng: string) => {
+    await i18n.changeLanguage(newLng);
+    await tokenStorage.setItem('user-language', newLng);
+
+    const isRTL = newLng === 'ar';
+
+    if (Platform.OS === 'web') {
+        document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+        document.documentElement.lang = newLng;
+    }
+
+    if (I18nManager.isRTL !== isRTL) {
+        I18nManager.allowRTL(isRTL);
+        I18nManager.forceRTL(isRTL);
+    }
+};
+
 export { i18n };
