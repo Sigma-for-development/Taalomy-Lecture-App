@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Platform, StyleSheet, Image } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Platform, StyleSheet, Image, Animated, Easing } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useResponsive } from '../hooks/useResponsive';
@@ -41,6 +41,93 @@ const SidebarItem = ({ icon, label, route, isActive, onPress }: any) => {
             ]}>
                 {label}
             </Text>
+        </TouchableOpacity >
+    );
+};
+
+const AISidebarItem = ({ label, route, isActive, onPress }: any) => {
+    const [isHovered, setIsHovered] = React.useState(false);
+    const glowAnim = React.useRef(new Animated.Value(0)).current;
+
+    React.useEffect(() => {
+        Animated.loop(
+            Animated.sequence([
+                Animated.timing(glowAnim, {
+                    toValue: 1,
+                    duration: 1500,
+                    easing: Easing.inOut(Easing.ease),
+                    useNativeDriver: false,
+                }),
+                Animated.timing(glowAnim, {
+                    toValue: 0,
+                    duration: 1500,
+                    easing: Easing.inOut(Easing.ease),
+                    useNativeDriver: false,
+                }),
+            ])
+        ).start();
+    }, []);
+
+    const glowColor = glowAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['rgba(108, 92, 231, 0.1)', 'rgba(162, 155, 254, 0.6)'], // Deep Purple Glow
+    });
+
+    const shadowOpacity = glowAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0.3, 0.8],
+    });
+
+    const containerStyles = [
+        styles.sidebarItem,
+        isActive && styles.sidebarItemActive,
+        !isActive && isHovered && styles.sidebarItemHover,
+        { marginBottom: 12 }
+    ];
+
+    return (
+        <TouchableOpacity
+            onPress={onPress}
+            {...({
+                onMouseEnter: () => Platform.OS === 'web' && setIsHovered(true),
+                onMouseLeave: () => Platform.OS === 'web' && setIsHovered(false)
+            } as any)}
+            style={[
+                styles.sidebarItem,
+                !isActive && styles.sidebarItemMagic,
+                isActive && styles.sidebarItemActiveMagic,
+                !isActive && isHovered && styles.sidebarItemHover,
+                { marginBottom: 12 }
+            ]}
+        >
+            <Animated.View style={{
+                marginRight: 12,
+                shadowColor: '#a29bfe',
+                shadowOffset: { width: 0, height: 0 },
+                shadowOpacity: shadowOpacity,
+                shadowRadius: 8,
+            }}>
+                <Ionicons
+                    name="sparkles"
+                    size={22}
+                    color={isActive ? '#FFFFFF' : '#a29bfe'}
+                />
+            </Animated.View>
+            <Text style={[
+                styles.sidebarText,
+                (isActive || isHovered) && styles.sidebarTextActive,
+                !isActive && { color: '#a29bfe', fontWeight: 'bold' }
+            ]}>
+                {label}
+            </Text>
+            <Animated.View style={{
+                position: 'absolute',
+                right: 12,
+                width: 8,
+                height: 8,
+                borderRadius: 4,
+                backgroundColor: isActive ? '#FFFFFF' : glowColor,
+            }} />
         </TouchableOpacity>
     );
 };
@@ -211,6 +298,13 @@ export const WebLayout: React.FC<WebLayoutProps> = ({ children }) => {
                         route="/demo-sessions"
                         isActive={isActive('/demo-sessions')}
                         onPress={() => navigate('/demo-sessions')}
+                    />
+
+                    <AISidebarItem
+                        label="AI Assistant"
+                        route="/ai-assistant"
+                        isActive={isActive('/ai-assistant')}
+                        onPress={() => navigate('/ai-assistant')}
                     />
 
                     <Text style={[styles.sectionTitle, { marginTop: 24 }]}>COMMUNICATION</Text>
@@ -411,5 +505,17 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#0a0a0a',
         // On web, the Stack Navigator will fill this area
+    },
+    sidebarItemMagic: {
+        backgroundColor: 'rgba(108, 92, 231, 0.05)',
+        borderWidth: 1,
+        borderColor: 'rgba(108, 92, 231, 0.15)',
+    },
+    sidebarItemActiveMagic: {
+        backgroundColor: '#6c5ce7',
+        shadowColor: '#6c5ce7',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
     },
 });
