@@ -119,7 +119,9 @@ interface ScheduleItem {
 
 const Dashboard = () => {
   const { t, i18n } = useTranslation();
-  const { isDesktop, isWeb, width, containerStyle } = useResponsive();
+  const isRTL = i18n.dir() === 'rtl';
+  const width = Dimensions.get('window').width;
+  const { isDesktop, isWeb, containerStyle } = useResponsive();
   const [showWelcome, setShowWelcome] = useState(true);
   const [showQuizIntakeModal, setShowQuizIntakeModal] = useState(false);
   const pan = useRef(new Animated.ValueXY()).current;
@@ -1423,11 +1425,22 @@ const Dashboard = () => {
           </View>
 
           <View style={{ flex: isDesktop ? 1 : 1, paddingTop: isDesktop ? 60 : 0 }}>
-            {/* Today's Schedule Snippet */}
+            {/* Today's Schedule */}
             <View style={{ paddingHorizontal: 24, marginBottom: 30 }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <View style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 16
+              }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <View style={{ width: 4, height: 24, backgroundColor: '#3498db', borderRadius: 2, marginRight: 12 }} />
+                  <View style={{
+                    width: 4,
+                    height: 24,
+                    backgroundColor: '#3498db',
+                    borderRadius: 2,
+                    [isRTL ? 'marginLeft' : 'marginRight']: 12
+                  }} />
                   <Text style={{
                     fontSize: 22,
                     fontWeight: '800',
@@ -1463,40 +1476,33 @@ const Dashboard = () => {
                     <Text style={{ color: '#bdc3c7' }}>{t('loading')}</Text>
                   </View>
                 ) : todaySchedule.length > 0 ? (
-                  todaySchedule.map((item) => (
+                  todaySchedule.map((item, index) => (
                     <TouchableOpacity
                       key={`${item.type}-${item.id}`}
                       onPress={() => router.push(item.type === 'class' ? `/class-details/${item.id}` : `/group-details/${item.id}`)}
-                      activeOpacity={0.7}
                       style={{
                         flexDirection: 'row',
                         alignItems: 'center',
                         backgroundColor: 'rgba(255, 255, 255, 0.04)',
-                        borderRadius: 20,
-                        padding: 16,
+                        borderRadius: 22,
+                        padding: 14,
                         borderWidth: 1,
                         borderColor: 'rgba(255, 255, 255, 0.08)',
-                        shadowColor: '#000',
-                        shadowOffset: { width: 0, height: 4 },
-                        shadowOpacity: 0.2,
-                        shadowRadius: 8,
                       }}
                     >
                       <LinearGradient
-                        colors={item.type === 'class' ? ['#3498db', '#2980b9'] : ['#9b59b6', '#8e44ad']}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
+                        colors={['#3498db', '#2980b9']}
                         style={{
                           width: 60,
                           height: 60,
-                          borderRadius: 15,
+                          borderRadius: 18,
                           alignItems: 'center',
                           justifyContent: 'center',
-                          marginRight: 16,
+                          [isRTL ? 'marginLeft' : 'marginRight']: 16,
                         }}
                       >
-                        <Text style={{ fontSize: 14, fontWeight: '900', color: '#ffffff' }}>
-                          {item.start_time ? formatTimeSnippet(item.start_time).split(' ')[0] : 'TBA'}
+                        <Text style={{ fontSize: 16, color: '#ffffff', fontWeight: '800' }}>
+                          {item.start_time ? formatTimeSnippet(item.start_time).split(' ')[0] : ''}
                         </Text>
                         <Text style={{ fontSize: 10, color: '#ffffff', fontWeight: '700', opacity: 0.9 }}>
                           {item.start_time ? formatTimeSnippet(item.start_time).split(' ')[1] : ''}
@@ -1504,13 +1510,17 @@ const Dashboard = () => {
                       </LinearGradient>
 
                       <View style={{ flex: 1 }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                        <View style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          marginBottom: 6
+                        }}>
                           <View style={{
                             paddingHorizontal: 8,
                             paddingVertical: 2,
                             borderRadius: 6,
                             backgroundColor: item.type === 'class' ? 'rgba(52, 152, 219, 0.15)' : 'rgba(155, 89, 182, 0.15)',
-                            marginRight: 8,
+                            [isRTL ? 'marginLeft' : 'marginRight']: 8,
                           }}>
                             <Text style={{
                               fontSize: 10,
@@ -1522,11 +1532,17 @@ const Dashboard = () => {
                             </Text>
                           </View>
                         </View>
-                        <Text style={{ fontSize: 17, color: '#ffffff', fontWeight: '700', marginBottom: 6 }} numberOfLines={1}>
+                        <Text style={{
+                          fontSize: 17,
+                          color: '#ffffff',
+                          fontWeight: '700',
+                          marginBottom: 6,
+                          textAlign: isRTL ? 'right' : 'left'
+                        }} numberOfLines={1}>
                           {item.name}
                         </Text>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                          <Ionicons name="location-sharp" size={14} color="#95a5a6" style={{ marginRight: 6 }} />
+                          <Ionicons name="location-sharp" size={14} color="#95a5a6" style={{ [isRTL ? 'marginLeft' : 'marginRight']: 6 }} />
                           <Text style={{ fontSize: 13, color: '#95a5a6', fontWeight: '500' }} numberOfLines={1}>
                             {item.venue || t('no_venue')}
                           </Text>
@@ -1541,7 +1557,7 @@ const Dashboard = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                       }}>
-                        <Ionicons name="chevron-forward" size={20} color="#ffffff" />
+                        <Ionicons name={isRTL ? "chevron-back" : "chevron-forward"} size={20} color="#ffffff" />
                       </View>
                     </TouchableOpacity>
                   ))
@@ -1580,9 +1596,20 @@ const Dashboard = () => {
 
             {/* Pending Bookings Snippet */}
             <View style={{ paddingHorizontal: 24, marginBottom: 30 }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <View style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 16
+              }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <View style={{ width: 4, height: 24, backgroundColor: '#f39c12', borderRadius: 2, marginRight: 12 }} />
+                  <View style={{
+                    width: 4,
+                    height: 24,
+                    backgroundColor: '#f39c12',
+                    borderRadius: 2,
+                    [isRTL ? 'marginLeft' : 'marginRight']: 12
+                  }} />
                   <Text style={{
                     fontSize: 22,
                     fontWeight: '800',
@@ -1629,20 +1656,38 @@ const Dashboard = () => {
                         borderColor: 'rgba(255, 255, 255, 0.08)',
                       }}
                     >
-                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
+                      <View style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        marginBottom: 12
+                      }}>
                         <View style={{ flex: 1 }}>
-                          <Text style={{ fontSize: 16, color: '#ffffff', fontWeight: '700', marginBottom: 2 }}>
+                          <Text style={{
+                            fontSize: 16,
+                            color: '#ffffff',
+                            fontWeight: '700',
+                            marginBottom: 2,
+                            textAlign: isRTL ? 'right' : 'left'
+                          }}>
                             {booking.student_name}
                           </Text>
-                          <Text style={{ fontSize: 13, color: '#95a5a6' }}>
+                          <Text style={{
+                            fontSize: 13,
+                            color: '#95a5a6',
+                            textAlign: isRTL ? 'right' : 'left'
+                          }}>
                             {booking.subject}
                           </Text>
                         </View>
-                        <View style={{ alignItems: 'flex-end' }}>
-                          <Text style={{ fontSize: 14, color: '#f39c12', fontWeight: '700' }}>
-                            {new Date(booking.booking_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                        <View style={{
+                          alignItems: isRTL ? 'flex-start' : 'flex-end',
+                          [isRTL ? 'marginRight' : 'marginLeft']: 16,
+                          minWidth: 80
+                        }}>
+                          <Text style={{ fontSize: 13, color: '#f39c12', fontWeight: '800' }}>
+                            {new Date(booking.booking_date).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US', { month: 'short', day: 'numeric' })}
                           </Text>
-                          <Text style={{ fontSize: 12, color: '#7f8c8d' }}>
+                          <Text style={{ fontSize: 12, color: '#7f8c8d', fontWeight: '600' }}>
                             {booking.start_time.split(':').slice(0, 2).join(':')}
                           </Text>
                         </View>
@@ -1653,8 +1698,8 @@ const Dashboard = () => {
                           onPress={() => handleDashboardBookingAction(booking.id, 'confirm')}
                           style={{
                             flex: 1,
-                            height: 36,
-                            borderRadius: 10,
+                            height: 38,
+                            borderRadius: 12,
                             backgroundColor: 'rgba(46, 204, 113, 0.15)',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -1662,14 +1707,14 @@ const Dashboard = () => {
                             borderColor: 'rgba(46, 204, 113, 0.2)',
                           }}
                         >
-                          <Text style={{ color: '#2ecc71', fontSize: 13, fontWeight: '700' }}>{t('confirm') || 'Confirm'}</Text>
+                          <Text style={{ color: '#2ecc71', fontSize: 13, fontWeight: '700' }}>{t('confirm')}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                           onPress={() => handleDashboardBookingAction(booking.id, 'cancel')}
                           style={{
                             flex: 1,
-                            height: 36,
-                            borderRadius: 10,
+                            height: 38,
+                            borderRadius: 12,
                             backgroundColor: 'rgba(231, 76, 60, 0.1)',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -1677,7 +1722,7 @@ const Dashboard = () => {
                             borderColor: 'rgba(231, 76, 60, 0.2)',
                           }}
                         >
-                          <Text style={{ color: '#e74c3c', fontSize: 13, fontWeight: '700' }}>{t('decline') || 'Decline'}</Text>
+                          <Text style={{ color: '#e74c3c', fontSize: 13, fontWeight: '700' }}>{t('decline')}</Text>
                         </TouchableOpacity>
                       </View>
                     </View>
