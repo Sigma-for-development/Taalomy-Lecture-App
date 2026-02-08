@@ -121,12 +121,12 @@ const AIAssistantScreen = () => {
                 createdAt: new Date(),
                 user: {
                     _id: 2,
-                    name: 'AI Companion',
+                    name: t('ai_companion'),
                     avatar: require('../assets/aibot.png'),
                 },
             },
         ]);
-    }, []);
+    }, [t]);
 
     const onSend = useCallback(async (newMessages: any[] = []) => {
         if (newMessages.length === 0) return;
@@ -159,7 +159,7 @@ const AIAssistantScreen = () => {
                 createdAt: new Date(),
                 user: {
                     _id: 2,
-                    name: 'AI Companion',
+                    name: t('ai_companion'),
                     avatar: require('../assets/aibot.png'),
                 },
             };
@@ -340,10 +340,10 @@ const AIAssistantScreen = () => {
                     style={styles.headerAvatar}
                 />
                 <View style={styles.headerInfo}>
-                    <Text style={styles.headerName}>AI Companion</Text>
+                    <Text style={styles.headerName}>{t('ai_companion')}</Text>
                     <View style={styles.statusContainer}>
                         <View style={styles.statusDot} />
-                        <Text style={styles.statusText}>Online</Text>
+                        <Text style={styles.statusText}>{t('ai_online')}</Text>
                     </View>
                 </View>
             </View>
@@ -384,10 +384,10 @@ const AIAssistantScreen = () => {
                 >
                     <Ionicons name="sparkles-outline" size={48} color="rgba(52, 152, 219, 0.3)" style={{ marginBottom: 20 }} />
                     <Text style={styles.welcomeText}>
-                        I am your AI Companion. I can suggest, read, and assist you with your endeavors as a lecturer.
+                        {t('ai_welcome_intro')}
                     </Text>
                     <Text style={[styles.welcomeText, { marginTop: 12, fontSize: 13, opacity: 0.15 }]}>
-                        Please note: I do not have a long-term memory.
+                        {t('ai_welcome_note')}
                     </Text>
                 </Animated.View>
             )}

@@ -393,6 +393,8 @@
     "ai_error_msg": "I'm sorry, I'm having trouble connecting right now.",
     "ai_greeting": "Hello! I'm your personal AI companion. How can I help you today?",
     "ai_placeholder": "Ask me anything...",
+    "ai_welcome_intro": "I am your AI Companion. I can suggest, read, and assist you with your endeavors as a lecturer.",
+    "ai_welcome_note": "Please note: I do not have a long-term memory.",
     "pending_bookings": "Pending Bookings",
     "no_pending_bookings": "No pending bookings",
     "booking_confirm_success": "Booking confirmed successfully",
