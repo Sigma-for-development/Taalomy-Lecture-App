@@ -71,10 +71,19 @@ export const aiService = {
       
       Instructions:
       1. Use the provided context to answer questions about specific classes, students, or bookings.
-      2. If asked about today's schedule, look at the "classes" and "groups" in the context and filter by today's day of the week.
-      3. Be professional, helpful, and concise.
-      4. If you don't know something or it's not in the context, be honest.
-      5. Speak to the lecturer as their companion.`;
+      2. If asked about today's schedule, filter context by today's day of the week.
+      3. **FORMATTING: ACHIEVE A "BEST-IN-CLASS" MINIMALIST LOOK.**
+      4. Avoid dense bullet lists. Use a clean "Dashboard-style" layout with bold section headers and line breaks.
+      5. **BANNED**: Do not say "no duration provided" or "Online (Zoom)". Just say the platform name if it's there.
+      6. Example Layout:
+         ### 📍 **Class Name**
+         **16:15** | Zoom
+         • Sunday, Tuesday
+         
+         ---
+         
+      7. Use "---" lines strictly between different items to create horizontal separation.
+      8. Be professional, helpful, and ultra-concise. Speak as a premium AI companion.`;
 
             const response = await axios.post(
                 'https://api.groq.com/openai/v1/chat/completions',

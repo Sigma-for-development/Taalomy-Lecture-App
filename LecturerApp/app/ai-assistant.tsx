@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { aiService, AIChatMessage } from '../src/utils/aiService';
 import { useResponsive } from '../src/hooks/useResponsive';
 import { LinearGradient } from 'expo-linear-gradient';
+import Markdown from 'react-native-markdown-display';
 
 const AnimatedMessage = ({ children }: { children: React.ReactNode }) => {
     const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -191,6 +192,7 @@ const AIAssistantScreen = () => {
                         borderWidth: 1,
                         borderColor: 'rgba(255, 255, 255, 0.1)',
                         maxWidth: isDesktop ? '70%' : '85%',
+                        marginBottom: 14, // Increased spacing
                     },
                     left: {
                         backgroundColor: 'rgba(255, 255, 255, 0.08)',
@@ -199,12 +201,43 @@ const AIAssistantScreen = () => {
                         borderWidth: 1,
                         borderColor: 'rgba(255, 255, 255, 0.1)',
                         maxWidth: isDesktop ? '70%' : '85%',
+                        marginBottom: 14, // Increased spacing
                     },
                 }}
                 textStyle={{
-                    right: { color: '#fff', fontSize: 16, lineHeight: 24, margin: 0, padding: 0 },
-                    left: { color: '#ecf0f1', fontSize: 16, lineHeight: 24, margin: 0, padding: 0 },
+                    right: { color: '#fff' },
+                    left: { color: '#ecf0f1' },
                 }}
+                renderMessageText={(props) => (
+                    <Markdown
+                        style={{
+                            body: {
+                                color: props.position === 'right' ? '#fff' : '#ecf0f1',
+                                fontSize: 16,
+                                lineHeight: 24,
+                            },
+                            heading3: {
+                                color: props.position === 'right' ? '#fff' : '#fff',
+                                fontSize: 20,
+                                fontWeight: 'bold',
+                                marginVertical: 8,
+                            },
+                            hr: {
+                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                marginVertical: 12,
+                            },
+                            bullet_list: {
+                                marginVertical: 4,
+                            },
+                            strong: {
+                                fontWeight: 'bold',
+                                color: props.position === 'right' ? '#fff' : '#fff',
+                            }
+                        }}
+                    >
+                        {props.currentMessage.text}
+                    </Markdown>
+                )}
                 renderTicks={() => null}
             />
         );
@@ -285,12 +318,31 @@ const AIAssistantScreen = () => {
         );
     };
 
+    const renderChatHeader = () => (
+        <View style={styles.headerContainer}>
+            <View style={styles.headerBlur}>
+                <Image
+                    source={require('../assets/aibot.png')}
+                    style={styles.headerAvatar}
+                />
+                <View style={styles.headerInfo}>
+                    <Text style={styles.headerName}>AI Companion</Text>
+                    <View style={styles.statusContainer}>
+                        <View style={styles.statusDot} />
+                        <Text style={styles.statusText}>Online</Text>
+                    </View>
+                </View>
+            </View>
+        </View>
+    );
+
     return (
         <View style={styles.container}>
             <LinearGradient
                 colors={['#0a0a0a', '#141414']}
                 style={StyleSheet.absoluteFill}
             />
+            {renderChatHeader()}
             <GiftedChat
                 messages={messages}
                 text={inputText}
@@ -308,8 +360,8 @@ const AIAssistantScreen = () => {
                 showAvatarForEveryMessage={true}
                 showUserAvatar={false}
                 renderAvatar={renderAvatar}
-                renderAvatarOnTop={true}
                 alwaysShowSend
+                messagesContainerStyle={{ paddingTop: 100 }}
             />
             {Platform.OS === 'android' && <KeyboardAvoidingView behavior="padding" />}
         </View>
@@ -320,6 +372,60 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#0a0a0a',
+    },
+    headerContainer: {
+        position: 'absolute',
+        top: 25,
+        left: 0,
+        right: 0,
+        zIndex: 100,
+        alignItems: 'center',
+    },
+    headerBlur: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        borderRadius: 36,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        ...Platform.select({
+            web: {
+                backdropFilter: 'blur(10px)',
+            },
+        }) as any,
+    },
+    headerAvatar: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        marginRight: 14,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    headerInfo: {
+        justifyContent: 'center',
+    },
+    headerName: {
+        color: '#fff',
+        fontSize: 17,
+        fontWeight: 'bold',
+    },
+    statusContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 3,
+    },
+    statusDot: {
+        width: 7,
+        height: 7,
+        borderRadius: 3.5,
+        backgroundColor: '#2ecc71',
+        marginRight: 7,
+    },
+    statusText: {
+        color: '#95a5a6',
+        fontSize: 12,
     },
 });
 
