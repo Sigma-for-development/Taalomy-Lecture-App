@@ -261,12 +261,8 @@ const TimetableScreen = () => {
                     <View style={{
                         flexDirection: 'row',
                         flexWrap: 'wrap',
-                        paddingHorizontal: 24,
                         paddingVertical: 16,
-                        gap: 12,
-                        maxWidth: 1400,
-                        alignSelf: 'center',
-                        width: '100%'
+                        gap: 16,
                     }}>
                         <View style={[styles.statCard, { flex: 1, minWidth: 200 }]}>
                             <View style={[styles.statIconContainer, { backgroundColor: 'rgba(52, 152, 219, 0.15)' }]}>
