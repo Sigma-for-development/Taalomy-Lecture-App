@@ -342,10 +342,11 @@ const Register = () => {
   return (
     <View style={{ flex: 1, backgroundColor: '#0a0a0a' }}>
       <SeoHead
-        title="Lecturer Registration"
-        description="Create a Taalomy Lecturer account to manage classes, attendance, and student communication."
+        title="Create Lecturer Account"
+        description="Join thousands of educators on Taalomy. Register as a lecturer to start managing classes and student records efficiently."
         path="/register"
-        index={false}
+        keywords="lecturer registration, teacher signup, educational platform join, Taalomy account"
+        index={true}
       />
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 

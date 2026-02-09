@@ -283,7 +283,15 @@ class SocketIOManager {
     }
   }
 
-  // sendTyping removed
+  async sendTyping(typing: boolean) {
+    if (this.socket && this.currentRoomId && this.socket.connected) {
+      console.log('Sending typing indicator:', typing, 'for room:', this.currentRoomId);
+      this.socket.emit('typing', {
+        room_id: this.currentRoomId,
+        typing: typing
+      });
+    }
+  }
 
   // Event listener methods
   onMessage(callback: (message: ChatMessage) => void) {

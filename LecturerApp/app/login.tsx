@@ -214,9 +214,10 @@ const Login: React.FC = () => {
     <View style={{ flex: 1, backgroundColor: '#0a0a0a' }}>
       <SeoHead
         title="Lecturer Login"
-        description="Sign in to Taalomy Lecturer to manage classes, attendance, and student communication."
+        description="Sign in to your Taalomy Lecturer account to manage your classes, track attendance, and engage with students."
         path="/login"
-        index={false}
+        keywords="lecturer login, teacher sign in, Taalomy login, academic portal access"
+        index={true}
       />
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 

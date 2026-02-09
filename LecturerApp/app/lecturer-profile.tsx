@@ -22,6 +22,7 @@ import Toast from 'react-native-toast-message';
 import axios from 'axios';
 import { useLocalization } from '../src/context/LocalizationContext';
 import { useTranslation } from 'react-i18next'; // Added import
+import { SeoHead } from '../src/components/SeoHead';
 
 interface LecturerProfile {
   id?: number;
@@ -276,6 +277,12 @@ const LecturerProfileScreen = () => {
 
   return (
     <View style={styles.container}>
+      <SeoHead
+        title={profile.id ? `${t('professional_profile_title')}` : 'Lecturer Profile'}
+        description={profile.bio || t('profile_saved_success')}
+        path="/lecturer-profile"
+        keywords={`${profile.speciality || 'lecturer'}, ${profile.subjects_taught || 'teaching'}, Taalomy profile`}
+      />
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
       <LinearGradient

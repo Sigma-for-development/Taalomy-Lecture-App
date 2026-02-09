@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /auth/reset-password
+Disallow: /auth/otp
+Disallow: /_expo/*
 
 Sitemap: https://lecturer.taalomy.com/sitemap.xml
