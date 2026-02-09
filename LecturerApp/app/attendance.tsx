@@ -32,7 +32,7 @@ const AttendanceScreen = () => {
       {/* Header */}
       <View style={[
         styles.header,
-        isDesktop && { paddingHorizontal: 24, height: 80, paddingTop: 0 }
+        isWeb ? { paddingHorizontal: isDesktop ? 24 : 20, height: 80, paddingTop: 0, paddingBottom: 0 } : {}
       ]}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           {!isWeb && (

@@ -270,7 +270,10 @@ const SendAnnouncementScreen = () => {
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'space-between',
-            height: 80,
+            ...(isWeb ? { height: 80 } : {
+              paddingTop: Platform.OS === 'ios' ? 60 : 40,
+              paddingBottom: 20,
+            }),
             paddingHorizontal: isDesktop ? 24 : 20,
             backgroundColor: '#1a1a1a',
             borderBottomWidth: 1,

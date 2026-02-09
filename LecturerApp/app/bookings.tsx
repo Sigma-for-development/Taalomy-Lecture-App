@@ -712,7 +712,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    height: 80,
+    ...(Platform.OS === 'web' ? { height: 80 } : {
+      paddingTop: Platform.OS === 'ios' ? 60 : 40,
+      paddingBottom: 20,
+    }),
     paddingHorizontal: 20,
     backgroundColor: '#1a1a1a',
     borderBottomWidth: 1,

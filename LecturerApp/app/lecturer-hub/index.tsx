@@ -130,7 +130,10 @@ export default function LecturerHubScreen() {
                 flexDirection: 'row',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                height: 80,
+                ...(isWeb ? { height: 80 } : {
+                    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+                    paddingBottom: 20,
+                }),
                 paddingHorizontal: isDesktop ? 24 : 20,
                 backgroundColor: '#0a0a0a',
                 borderBottomWidth: 1,
