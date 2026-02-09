@@ -151,145 +151,147 @@ const GradingScreen = () => {
                 </View>
             </View>
 
-            {/* Statistics Cards */}
-            <View style={{
-                flexDirection: isDesktop ? 'row' : 'column',
-                flexWrap: 'wrap',
-                paddingHorizontal: isDesktop ? 24 : 20,
-                paddingTop: 20,
-                paddingBottom: 16,
-                gap: 12,
-                backgroundColor: '#1a1a1a',
-                ...(isDesktop && { maxWidth: 1400, alignSelf: 'center', width: '100%' })
-            }}>
+            {/* Statistics Cards - Desktop Only */}
+            {isDesktop && (
                 <View style={{
-                    flex: isDesktop ? 1 : undefined,
-                    minWidth: isDesktop ? 150 : undefined,
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: 12,
-                    padding: 16,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    borderWidth: 1,
-                    borderColor: 'rgba(255, 255, 255, 0.08)',
+                    flexDirection: isDesktop ? 'row' : 'column',
+                    flexWrap: 'wrap',
+                    paddingHorizontal: isDesktop ? 24 : 20,
+                    paddingTop: 20,
+                    paddingBottom: 16,
+                    gap: 12,
+                    backgroundColor: '#1a1a1a',
+                    ...(isDesktop && { maxWidth: 1400, alignSelf: 'center', width: '100%' })
                 }}>
                     <View style={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: 24,
-                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                        justifyContent: 'center',
+                        flex: isDesktop ? 1 : undefined,
+                        minWidth: isDesktop ? 150 : undefined,
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        borderRadius: 12,
+                        padding: 16,
+                        flexDirection: 'row',
                         alignItems: 'center',
-                        marginRight: 12,
+                        borderWidth: 1,
+                        borderColor: 'rgba(255, 255, 255, 0.08)',
                     }}>
-                        <Ionicons name="document-text" size={24} color="#3498db" />
+                        <View style={{
+                            width: 48,
+                            height: 48,
+                            borderRadius: 24,
+                            backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            marginRight: 12,
+                        }}>
+                            <Ionicons name="document-text" size={24} color="#3498db" />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
+                                {0}
+                            </Text>
+                            <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
+                                {t('total_assignments')}
+                            </Text>
+                        </View>
                     </View>
-                    <View style={{ flex: 1 }}>
-                        <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
-                            {0}
-                        </Text>
-                        <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
-                            {t('total_assignments')}
-                        </Text>
-                    </View>
-                </View>
 
-                <View style={{
-                    flex: isDesktop ? 1 : undefined,
-                    minWidth: isDesktop ? 150 : undefined,
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: 12,
-                    padding: 16,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    borderWidth: 1,
-                    borderColor: 'rgba(255, 255, 255, 0.08)',
-                }}>
                     <View style={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: 24,
-                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                        justifyContent: 'center',
+                        flex: isDesktop ? 1 : undefined,
+                        minWidth: isDesktop ? 150 : undefined,
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        borderRadius: 12,
+                        padding: 16,
+                        flexDirection: 'row',
                         alignItems: 'center',
-                        marginRight: 12,
+                        borderWidth: 1,
+                        borderColor: 'rgba(255, 255, 255, 0.08)',
                     }}>
-                        <Ionicons name="hourglass" size={24} color="#f1c40f" />
+                        <View style={{
+                            width: 48,
+                            height: 48,
+                            borderRadius: 24,
+                            backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            marginRight: 12,
+                        }}>
+                            <Ionicons name="hourglass" size={24} color="#f1c40f" />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
+                                {submissions.length}
+                            </Text>
+                            <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
+                                {t('pending_grades')}
+                            </Text>
+                        </View>
                     </View>
-                    <View style={{ flex: 1 }}>
-                        <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
-                            {submissions.length}
-                        </Text>
-                        <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
-                            {t('pending_grades')}
-                        </Text>
-                    </View>
-                </View>
 
-                <View style={{
-                    flex: isDesktop ? 1 : undefined,
-                    minWidth: isDesktop ? 150 : undefined,
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: 12,
-                    padding: 16,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    borderWidth: 1,
-                    borderColor: 'rgba(255, 255, 255, 0.08)',
-                }}>
                     <View style={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: 24,
-                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                        justifyContent: 'center',
+                        flex: isDesktop ? 1 : undefined,
+                        minWidth: isDesktop ? 150 : undefined,
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        borderRadius: 12,
+                        padding: 16,
+                        flexDirection: 'row',
                         alignItems: 'center',
-                        marginRight: 12,
+                        borderWidth: 1,
+                        borderColor: 'rgba(255, 255, 255, 0.08)',
                     }}>
-                        <Ionicons name="trending-up" size={24} color="#2ecc71" />
+                        <View style={{
+                            width: 48,
+                            height: 48,
+                            borderRadius: 24,
+                            backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            marginRight: 12,
+                        }}>
+                            <Ionicons name="trending-up" size={24} color="#2ecc71" />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
+                                {0}%
+                            </Text>
+                            <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
+                                {t('average_grade')}
+                            </Text>
+                        </View>
                     </View>
-                    <View style={{ flex: 1 }}>
-                        <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
-                            {0}%
-                        </Text>
-                        <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
-                            {t('average_grade')}
-                        </Text>
-                    </View>
-                </View>
 
-                <View style={{
-                    flex: isDesktop ? 1 : undefined,
-                    minWidth: isDesktop ? 150 : undefined,
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: 12,
-                    padding: 16,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    borderWidth: 1,
-                    borderColor: 'rgba(255, 255, 255, 0.08)',
-                }}>
                     <View style={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: 24,
-                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                        justifyContent: 'center',
+                        flex: isDesktop ? 1 : undefined,
+                        minWidth: isDesktop ? 150 : undefined,
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        borderRadius: 12,
+                        padding: 16,
+                        flexDirection: 'row',
                         alignItems: 'center',
-                        marginRight: 12,
+                        borderWidth: 1,
+                        borderColor: 'rgba(255, 255, 255, 0.08)',
                     }}>
-                        <Ionicons name="checkmark-circle" size={24} color="#9b59b6" />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                        <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
-                            {0}%
-                        </Text>
-                        <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
-                            {t('completion_rate')}
-                        </Text>
+                        <View style={{
+                            width: 48,
+                            height: 48,
+                            borderRadius: 24,
+                            backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            marginRight: 12,
+                        }}>
+                            <Ionicons name="checkmark-circle" size={24} color="#9b59b6" />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
+                                {0}%
+                            </Text>
+                            <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
+                                {t('completion_rate')}
+                            </Text>
+                        </View>
                     </View>
                 </View>
-            </View>
+            )}
 
             <FlatList
                 data={submissions}
@@ -320,7 +322,7 @@ const GradingScreen = () => {
                                 shadowOpacity: 0.2,
                                 shadowRadius: 4,
                                 elevation: 3,
-                                height: '100%'
+                                height: isDesktop ? '100%' : undefined
                             }}
                         >
                             {/* Header Row */}

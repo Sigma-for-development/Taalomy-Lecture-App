@@ -1023,21 +1023,24 @@ const Dashboard = () => {
                 style={{
                   flexDirection: 'row',
                   flexWrap: 'wrap',
-                  gap: isDesktop ? 16 : 0,
-                  justifyContent: isDesktop ? 'flex-start' : 'space-between',
+                  gap: isDesktop ? 16 : 12,
+                  justifyContent: isDesktop ? 'flex-start' : 'flex-start',
                 }}
               >
                 <TouchableOpacity
                   style={{
                     flex: isDesktop ? 1 : 0,
-                    minWidth: isDesktop ? 220 : (width - 60) / 2,
+                    width: isDesktop ? 'auto' : (width - 60) / 2,
+                    minWidth: isDesktop ? 220 : 0,
+                    height: isDesktop ? 'auto' : 150,
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: 16,
-                    padding: 20,
-                    marginBottom: 16,
+                    padding: isDesktop ? 20 : 16,
+                    marginBottom: isDesktop ? 16 : 0,
                     borderWidth: 1,
                     borderColor: 'rgba(255, 255, 255, 0.1)',
                     alignItems: 'center',
+                    justifyContent: 'center',
                   }}
                   onPress={() => router.push('/intakes')}
                 >
@@ -1052,12 +1055,15 @@ const Dashboard = () => {
                   }}>
                     <Ionicons name="school-outline" size={24} color="#3498db" />
                   </View>
-                  <Text style={{
-                    fontSize: 14,
-                    fontWeight: '600',
-                    color: '#ecf0f1',
-                    textAlign: 'center',
-                  }}>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: '600',
+                      color: '#ecf0f1',
+                      textAlign: 'center',
+                    }}
+                    numberOfLines={2}
+                  >
                     {t('manage_intakes')}
                   </Text>
                 </TouchableOpacity>
@@ -1065,14 +1071,17 @@ const Dashboard = () => {
                 <TouchableOpacity
                   style={{
                     flex: isDesktop ? 1 : 0,
-                    minWidth: isDesktop ? 220 : (width - 60) / 2,
+                    width: isDesktop ? 'auto' : (width - 60) / 2,
+                    minWidth: isDesktop ? 220 : 0,
+                    height: isDesktop ? 'auto' : 150,
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: 16,
-                    padding: 20,
-                    marginBottom: 16,
+                    padding: isDesktop ? 20 : 16,
+                    marginBottom: isDesktop ? 16 : 0,
                     borderWidth: 1,
                     borderColor: 'rgba(255, 255, 255, 0.1)',
                     alignItems: 'center',
+                    justifyContent: 'center',
                   }}
                   onPress={() => router.push('/upload-video/new')}
                 >
@@ -1087,12 +1096,15 @@ const Dashboard = () => {
                   }}>
                     <Ionicons name="videocam-outline" size={24} color="#d35400" />
                   </View>
-                  <Text style={{
-                    fontSize: 14,
-                    fontWeight: '600',
-                    color: '#ecf0f1',
-                    textAlign: 'center',
-                  }}>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: '600',
+                      color: '#ecf0f1',
+                      textAlign: 'center',
+                    }}
+                    numberOfLines={2}
+                  >
                     Upload Video
                   </Text>
                 </TouchableOpacity>
@@ -1100,14 +1112,17 @@ const Dashboard = () => {
                 <TouchableOpacity
                   style={{
                     flex: isDesktop ? 1 : 0,
-                    minWidth: isDesktop ? 220 : (width - 60) / 2,
+                    width: isDesktop ? 'auto' : (width - 60) / 2,
+                    minWidth: isDesktop ? 220 : 0,
+                    height: isDesktop ? 'auto' : 150,
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: 16,
-                    padding: 20,
-                    marginBottom: 16,
+                    padding: isDesktop ? 20 : 16,
+                    marginBottom: isDesktop ? 16 : 0,
                     borderWidth: 1,
                     borderColor: 'rgba(255, 255, 255, 0.1)',
                     alignItems: 'center',
+                    justifyContent: 'center',
                   }}
                   onPress={() => setShowQuizIntakeModal(true)}
                 >
@@ -1122,12 +1137,15 @@ const Dashboard = () => {
                   }}>
                     <Ionicons name="clipboard-outline" size={24} color="#e74c3c" />
                   </View>
-                  <Text style={{
-                    fontSize: 14,
-                    fontWeight: '600',
-                    color: '#ecf0f1',
-                    textAlign: 'center',
-                  }}>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: '600',
+                      color: '#ecf0f1',
+                      textAlign: 'center',
+                    }}
+                    numberOfLines={2}
+                  >
                     {t('create_start_quiz')}
                   </Text>
                 </TouchableOpacity>
@@ -1135,14 +1153,17 @@ const Dashboard = () => {
                 <TouchableOpacity
                   style={{
                     flex: isDesktop ? 1 : 0,
-                    minWidth: isDesktop ? 220 : (width - 60) / 2,
+                    width: isDesktop ? 'auto' : (width - 60) / 2,
+                    minWidth: isDesktop ? 220 : 0,
+                    height: isDesktop ? 'auto' : 150,
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: 16,
-                    padding: 20,
-                    marginBottom: 16,
+                    padding: isDesktop ? 20 : 16,
+                    marginBottom: isDesktop ? 16 : 0,
                     borderWidth: 1,
                     borderColor: 'rgba(255, 255, 255, 0.1)',
                     alignItems: 'center',
+                    justifyContent: 'center',
                   }}
                   onPress={() => handleNavigation('Send Announcement')}
                 >
@@ -1157,12 +1178,15 @@ const Dashboard = () => {
                   }}>
                     <Ionicons name="mail-outline" size={24} color="#9b59b6" />
                   </View>
-                  <Text style={{
-                    fontSize: 14,
-                    fontWeight: '600',
-                    color: '#ecf0f1',
-                    textAlign: 'center',
-                  }}>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: '600',
+                      color: '#ecf0f1',
+                      textAlign: 'center',
+                    }}
+                    numberOfLines={2}
+                  >
                     {t('send_announcement')}
                   </Text>
                 </TouchableOpacity>
@@ -1170,14 +1194,17 @@ const Dashboard = () => {
                 <TouchableOpacity
                   style={{
                     flex: isDesktop ? 1 : 0,
-                    minWidth: isDesktop ? 220 : (width - 60) / 2,
+                    width: isDesktop ? 'auto' : (width - 60) / 2,
+                    minWidth: isDesktop ? 220 : 0,
+                    height: isDesktop ? 'auto' : 150,
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: 16,
-                    padding: 20,
-                    marginBottom: 16,
+                    padding: isDesktop ? 20 : 16,
+                    marginBottom: isDesktop ? 16 : 0,
                     borderWidth: 1,
                     borderColor: 'rgba(255, 255, 255, 0.1)',
                     alignItems: 'center',
+                    justifyContent: 'center',
                   }}
                   onPress={() => router.push('/lecturer-profile')}
                 >
@@ -1192,12 +1219,15 @@ const Dashboard = () => {
                   }}>
                     <Ionicons name="briefcase-outline" size={24} color="#27ae60" />
                   </View>
-                  <Text style={{
-                    fontSize: 14,
-                    fontWeight: '600',
-                    color: '#ecf0f1',
-                    textAlign: 'center',
-                  }}>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: '600',
+                      color: '#ecf0f1',
+                      textAlign: 'center',
+                    }}
+                    numberOfLines={2}
+                  >
                     {t('professional_profile')}
                   </Text>
                 </TouchableOpacity>
@@ -1205,14 +1235,17 @@ const Dashboard = () => {
                 <TouchableOpacity
                   style={{
                     flex: isDesktop ? 1 : 0,
-                    minWidth: isDesktop ? 220 : (width - 60) / 2,
+                    width: isDesktop ? 'auto' : (width - 60) / 2,
+                    minWidth: isDesktop ? 220 : 0,
+                    height: isDesktop ? 'auto' : 150,
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: 16,
-                    padding: 20,
-                    marginBottom: 16,
+                    padding: isDesktop ? 20 : 16,
+                    marginBottom: isDesktop ? 16 : 0,
                     borderWidth: 1,
                     borderColor: 'rgba(255, 255, 255, 0.1)',
                     alignItems: 'center',
+                    justifyContent: 'center',
                   }}
                   onPress={() => router.push('/bookings')}
                 >
@@ -1249,12 +1282,15 @@ const Dashboard = () => {
                       </Text>
                     </View>
                   )}
-                  <Text style={{
-                    fontSize: 14,
-                    fontWeight: '600',
-                    color: '#ecf0f1',
-                    textAlign: 'center',
-                  }}>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: '600',
+                      color: '#ecf0f1',
+                      textAlign: 'center',
+                    }}
+                    numberOfLines={2}
+                  >
                     {t('manage_bookings')}
                   </Text>
                 </TouchableOpacity>
@@ -1262,14 +1298,17 @@ const Dashboard = () => {
                 <TouchableOpacity
                   style={{
                     flex: isDesktop ? 1 : 0,
-                    minWidth: isDesktop ? 220 : (width - 60) / 2,
+                    width: isDesktop ? 'auto' : (width - 60) / 2,
+                    minWidth: isDesktop ? 220 : 0,
+                    height: isDesktop ? 'auto' : 150,
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: 16,
-                    padding: 20,
-                    marginBottom: 16,
+                    padding: isDesktop ? 20 : 16,
+                    marginBottom: isDesktop ? 16 : 0,
                     borderWidth: 1,
                     borderColor: 'rgba(255, 255, 255, 0.1)',
                     alignItems: 'center',
+                    justifyContent: 'center',
                   }}
                   onPress={() => router.push('/attendance')}
                 >
@@ -1284,12 +1323,15 @@ const Dashboard = () => {
                   }}>
                     <Ionicons name="checkmark-circle-outline" size={24} color="#e74c3c" />
                   </View>
-                  <Text style={{
-                    fontSize: 14,
-                    fontWeight: '600',
-                    color: '#ecf0f1',
-                    textAlign: 'center',
-                  }}>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: '600',
+                      color: '#ecf0f1',
+                      textAlign: 'center',
+                    }}
+                    numberOfLines={2}
+                  >
                     {t('attendance')}
                   </Text>
                 </TouchableOpacity>
@@ -1297,14 +1339,17 @@ const Dashboard = () => {
                 <TouchableOpacity
                   style={{
                     flex: isDesktop ? 1 : 0,
-                    minWidth: isDesktop ? 220 : (width - 60) / 2,
+                    width: isDesktop ? 'auto' : (width - 60) / 2,
+                    minWidth: isDesktop ? 220 : 0,
+                    height: isDesktop ? 'auto' : 150,
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: 16,
-                    padding: 20,
-                    marginBottom: 16,
+                    padding: isDesktop ? 20 : 16,
+                    marginBottom: isDesktop ? 16 : 0,
                     borderWidth: 1,
                     borderColor: 'rgba(255, 255, 255, 0.1)',
                     alignItems: 'center',
+                    justifyContent: 'center',
                   }}
                   onPress={() => router.push('/wallet')}
                 >
@@ -1319,12 +1364,15 @@ const Dashboard = () => {
                   }}>
                     <Ionicons name="wallet-outline" size={24} color="#2980b9" />
                   </View>
-                  <Text style={{
-                    fontSize: 14,
-                    fontWeight: '600',
-                    color: '#ecf0f1',
-                    textAlign: 'center',
-                  }}>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: '600',
+                      color: '#ecf0f1',
+                      textAlign: 'center',
+                    }}
+                    numberOfLines={2}
+                  >
                     {t('wallet')}
                   </Text>
                 </TouchableOpacity>
@@ -1332,14 +1380,17 @@ const Dashboard = () => {
                 <TouchableOpacity
                   style={{
                     flex: isDesktop ? 1 : 0,
-                    minWidth: isDesktop ? 220 : (width - 60) / 2,
+                    width: isDesktop ? 'auto' : (width - 60) / 2,
+                    minWidth: isDesktop ? 220 : 0,
+                    height: isDesktop ? 'auto' : 150,
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: 16,
-                    padding: 20,
-                    marginBottom: 16,
+                    padding: isDesktop ? 20 : 16,
+                    marginBottom: isDesktop ? 16 : 0,
                     borderWidth: 1,
                     borderColor: 'rgba(255, 255, 255, 0.1)',
                     alignItems: 'center',
+                    justifyContent: 'center',
                   }}
                   onPress={() => router.push('/messages')}
                 >
@@ -1376,12 +1427,15 @@ const Dashboard = () => {
                       </View>
                     )}
                   </View>
-                  <Text style={{
-                    fontSize: 14,
-                    fontWeight: '600',
-                    color: '#ecf0f1',
-                    textAlign: 'center',
-                  }}>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: '600',
+                      color: '#ecf0f1',
+                      textAlign: 'center',
+                    }}
+                    numberOfLines={2}
+                  >
                     {t('messages')}
                   </Text>
                 </TouchableOpacity>
@@ -1389,14 +1443,17 @@ const Dashboard = () => {
                 <TouchableOpacity
                   style={{
                     flex: isDesktop ? 1 : 0,
-                    minWidth: isDesktop ? 220 : (width - 60) / 2,
+                    width: isDesktop ? 'auto' : (width - 60) / 2,
+                    minWidth: isDesktop ? 220 : 0,
+                    height: isDesktop ? 'auto' : 150,
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: 16,
-                    padding: 20,
-                    marginBottom: 16,
+                    padding: isDesktop ? 20 : 16,
+                    marginBottom: isDesktop ? 16 : 0,
                     borderWidth: 1,
                     borderColor: 'rgba(255, 255, 255, 0.1)',
                     alignItems: 'center',
+                    justifyContent: 'center',
                   }}
                   onPress={() => router.push('/lecturer-hub')}
                 >
@@ -1411,12 +1468,15 @@ const Dashboard = () => {
                   }}>
                     <Ionicons name="people-outline" size={24} color="#9b59b6" />
                   </View>
-                  <Text style={{
-                    fontSize: 14,
-                    fontWeight: '600',
-                    color: '#ecf0f1',
-                    textAlign: 'center',
-                  }}>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: '600',
+                      color: '#ecf0f1',
+                      textAlign: 'center',
+                    }}
+                    numberOfLines={2}
+                  >
                     {t('lecturer_hub.title')}
                   </Text>
                 </TouchableOpacity>

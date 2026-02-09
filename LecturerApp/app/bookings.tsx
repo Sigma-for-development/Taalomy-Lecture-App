@@ -384,50 +384,52 @@ const BookingsScreen = () => {
         {!isWeb && <View style={styles.placeholder} />}
       </View>
 
-      {/* Statistics Cards */}
-      <View style={[styles.statsContainer, isDesktop && { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 24, maxWidth: 1400, alignSelf: 'center', width: '100%' }]}>
-        <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 200, maxWidth: 300 }]}>
-          <View style={styles.statIconContainer}>
-            <Ionicons name="calendar" size={24} color="#3498db" />
+      {/* Statistics Cards - Desktop Only */}
+      {isDesktop && (
+        <View style={styles.statsContainer}>
+          <View style={styles.statCard}>
+            <View style={styles.statIconContainer}>
+              <Ionicons name="calendar" size={24} color="#3498db" />
+            </View>
+            <View style={styles.statContent}>
+              <Text style={styles.statValue}>{bookings?.length || 0}</Text>
+              <Text style={styles.statLabel}>{t('total_bookings')}</Text>
+            </View>
           </View>
-          <View style={styles.statContent}>
-            <Text style={styles.statValue}>{bookings?.length || 0}</Text>
-            <Text style={styles.statLabel}>{t('total_bookings')}</Text>
-          </View>
-        </View>
 
-        <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 200, maxWidth: 300 }]}>
-          <View style={styles.statIconContainer}>
-            <Ionicons name="time" size={24} color="#f39c12" />
+          <View style={styles.statCard}>
+            <View style={styles.statIconContainer}>
+              <Ionicons name="time" size={24} color="#f39c12" />
+            </View>
+            <View style={styles.statContent}>
+              <Text style={styles.statValue}>{bookings?.filter(b => b.status === 'pending').length || 0}</Text>
+              <Text style={styles.statLabel}>{t('pending_requests')}</Text>
+            </View>
           </View>
-          <View style={styles.statContent}>
-            <Text style={styles.statValue}>{bookings?.filter(b => b.status === 'pending').length || 0}</Text>
-            <Text style={styles.statLabel}>{t('pending_requests')}</Text>
-          </View>
-        </View>
 
-        <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 200, maxWidth: 300 }]}>
-          <View style={styles.statIconContainer}>
-            <Ionicons name="checkmark-circle" size={24} color="#2ecc71" />
+          <View style={styles.statCard}>
+            <View style={styles.statIconContainer}>
+              <Ionicons name="checkmark-circle" size={24} color="#2ecc71" />
+            </View>
+            <View style={styles.statContent}>
+              <Text style={styles.statValue}>{bookings?.filter(b => b.status === 'confirmed').length || 0}</Text>
+              <Text style={styles.statLabel}>{t('confirmed_bookings')}</Text>
+            </View>
           </View>
-          <View style={styles.statContent}>
-            <Text style={styles.statValue}>{bookings?.filter(b => b.status === 'confirmed').length || 0}</Text>
-            <Text style={styles.statLabel}>{t('confirmed_bookings')}</Text>
-          </View>
-        </View>
 
-        <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 200, maxWidth: 300 }]}>
-          <View style={styles.statIconContainer}>
-            <Ionicons name="cash" size={24} color="#9b59b6" />
-          </View>
-          <View style={styles.statContent}>
-            <Text style={styles.statValue}>
-              {formatPrice(bookings?.filter(b => b.status === 'confirmed' || b.status === 'completed').reduce((sum, b) => sum + (b.total_amount || 0), 0) || 0)}
-            </Text>
-            <Text style={styles.statLabel}>{t('total_revenue')}</Text>
+          <View style={styles.statCard}>
+            <View style={styles.statIconContainer}>
+              <Ionicons name="cash" size={24} color="#9b59b6" />
+            </View>
+            <View style={styles.statContent}>
+              <Text style={styles.statValue}>
+                {formatPrice(bookings?.filter(b => b.status === 'confirmed' || b.status === 'completed').reduce((sum, b) => sum + (b.total_amount || 0), 0) || 0)}
+              </Text>
+              <Text style={styles.statLabel}>{t('total_revenue')}</Text>
+            </View>
           </View>
         </View>
-      </View>
+      )}
 
       {/* Tab Navigation */}
       <View style={[styles.tabContainer, isDesktop && { paddingHorizontal: 24, maxWidth: 1400, alignSelf: 'center', width: '100%' }]}>
@@ -741,13 +743,16 @@ const styles = StyleSheet.create({
   statsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     paddingVertical: 16,
     gap: 12,
+    maxWidth: 1400,
+    alignSelf: 'center',
+    width: '100%',
   },
   statCard: {
     flex: 1,
-    minWidth: 150,
+    minWidth: 200,
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 12,
     padding: 16,

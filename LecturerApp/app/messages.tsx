@@ -237,7 +237,7 @@ const MessagesScreen = () => {
 
     return (
       <TouchableOpacity
-        style={styles.chatRoomItem}
+        style={[styles.chatRoomItem, { height: isDesktop ? '100%' : undefined }]}
         onPress={() => handleChatRoomPress(item)}
       >
         <View style={styles.avatarContainer}>
@@ -385,51 +385,53 @@ const MessagesScreen = () => {
         </View>
       </View>
 
-      {/* Statistics Cards */}
-      <View style={[
-        styles.statsContainer,
-        isDesktop && { paddingHorizontal: 24, maxWidth: 1400, alignSelf: 'center', width: '100%' }
-      ]}>
-        <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 150 }]}>
-          <View style={styles.statIconContainer}>
-            <Ionicons name="chatbubbles" size={24} color="#3498db" />
+      {/* Statistics Cards - Desktop Only */}
+      {isDesktop && (
+        <View style={[
+          styles.statsContainer,
+          isDesktop && { paddingHorizontal: 24, maxWidth: 1400, alignSelf: 'center', width: '100%' }
+        ]}>
+          <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 150 }]}>
+            <View style={styles.statIconContainer}>
+              <Ionicons name="chatbubbles" size={24} color="#3498db" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.statValue}>{totalConversations}</Text>
+              <Text style={styles.statLabel}>{t('total_conversations')}</Text>
+            </View>
           </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.statValue}>{totalConversations}</Text>
-            <Text style={styles.statLabel}>{t('total_conversations')}</Text>
-          </View>
-        </View>
 
-        <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 150 }]}>
-          <View style={styles.statIconContainer}>
-            <Ionicons name="mail-unread" size={24} color="#e74c3c" />
+          <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 150 }]}>
+            <View style={styles.statIconContainer}>
+              <Ionicons name="mail-unread" size={24} color="#e74c3c" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.statValue}>{unreadMessages}</Text>
+              <Text style={styles.statLabel}>{t('unread_messages')}</Text>
+            </View>
           </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.statValue}>{unreadMessages}</Text>
-            <Text style={styles.statLabel}>{t('unread_messages')}</Text>
-          </View>
-        </View>
 
-        <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 150 }]}>
-          <View style={styles.statIconContainer}>
-            <Ionicons name="checkmark-circle" size={24} color="#2ecc71" />
+          <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 150 }]}>
+            <View style={styles.statIconContainer}>
+              <Ionicons name="checkmark-circle" size={24} color="#2ecc71" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.statValue}>{activeChats}</Text>
+              <Text style={styles.statLabel}>{t('active_chats')}</Text>
+            </View>
           </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.statValue}>{activeChats}</Text>
-            <Text style={styles.statLabel}>{t('active_chats')}</Text>
-          </View>
-        </View>
 
-        <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 150 }]}>
-          <View style={styles.statIconContainer}>
-            <Ionicons name="trending-up" size={24} color="#f39c12" />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.statValue}>{responseRate}%</Text>
-            <Text style={styles.statLabel}>{t('response_rate')}</Text>
+          <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 150 }]}>
+            <View style={styles.statIconContainer}>
+              <Ionicons name="trending-up" size={24} color="#f39c12" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.statValue}>{responseRate}%</Text>
+              <Text style={styles.statLabel}>{t('response_rate')}</Text>
+            </View>
           </View>
         </View>
-      </View>
+      )}
 
       {/* Filter Bar */}
       <View style={[
@@ -627,7 +629,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: '#333',
-    height: '100%',
   },
   avatarContainer: {
     position: 'relative',

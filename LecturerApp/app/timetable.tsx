@@ -256,48 +256,59 @@ const TimetableScreen = () => {
                     />
                 }
             >
-                {/* Statistics Cards */}
-                <View style={[styles.statsContainer, isDesktop && { flexDirection: 'row', flexWrap: 'wrap' }]}>
-                    <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 200, marginRight: 12 }]}>
-                        <View style={[styles.statIconContainer, { backgroundColor: 'rgba(52, 152, 219, 0.15)' }]}>
-                            <Ionicons name="book" size={24} color="#3498db" />
+                {/* Statistics Cards - Desktop Only */}
+                {isDesktop && (
+                    <View style={{
+                        flexDirection: 'row',
+                        flexWrap: 'wrap',
+                        paddingHorizontal: 24,
+                        paddingVertical: 16,
+                        gap: 12,
+                        maxWidth: 1400,
+                        alignSelf: 'center',
+                        width: '100%'
+                    }}>
+                        <View style={[styles.statCard, { flex: 1, minWidth: 200 }]}>
+                            <View style={[styles.statIconContainer, { backgroundColor: 'rgba(52, 152, 219, 0.15)' }]}>
+                                <Ionicons name="book" size={24} color="#3498db" />
+                            </View>
+                            <View style={styles.statInfo}>
+                                <Text style={styles.statValue}>{totalClasses}</Text>
+                                <Text style={styles.statLabel}>{t('total_classes')}</Text>
+                            </View>
                         </View>
-                        <View style={styles.statInfo}>
-                            <Text style={styles.statValue}>{totalClasses}</Text>
-                            <Text style={styles.statLabel}>{t('total_classes')}</Text>
-                        </View>
-                    </View>
 
-                    <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 200, marginRight: 12 }]}>
-                        <View style={[styles.statIconContainer, { backgroundColor: 'rgba(155, 89, 182, 0.15)' }]}>
-                            <Ionicons name="people" size={24} color="#9b59b6" />
+                        <View style={[styles.statCard, { flex: 1, minWidth: 200 }]}>
+                            <View style={[styles.statIconContainer, { backgroundColor: 'rgba(155, 89, 182, 0.15)' }]}>
+                                <Ionicons name="people" size={24} color="#9b59b6" />
+                            </View>
+                            <View style={styles.statInfo}>
+                                <Text style={styles.statValue}>{totalGroups}</Text>
+                                <Text style={styles.statLabel}>{t('active_groups')}</Text>
+                            </View>
                         </View>
-                        <View style={styles.statInfo}>
-                            <Text style={styles.statValue}>{totalGroups}</Text>
-                            <Text style={styles.statLabel}>{t('active_groups')}</Text>
-                        </View>
-                    </View>
 
-                    <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 200, marginRight: 12 }]}>
-                        <View style={[styles.statIconContainer, { backgroundColor: 'rgba(46, 204, 113, 0.15)' }]}>
-                            <Ionicons name="time" size={24} color="#2ecc71" />
+                        <View style={[styles.statCard, { flex: 1, minWidth: 200 }]}>
+                            <View style={[styles.statIconContainer, { backgroundColor: 'rgba(46, 204, 113, 0.15)' }]}>
+                                <Ionicons name="time" size={24} color="#2ecc71" />
+                            </View>
+                            <View style={styles.statInfo}>
+                                <Text style={styles.statValue}>{totalHours}h</Text>
+                                <Text style={styles.statLabel}>{t('teaching_hours')}</Text>
+                            </View>
                         </View>
-                        <View style={styles.statInfo}>
-                            <Text style={styles.statValue}>{totalHours}h</Text>
-                            <Text style={styles.statLabel}>{t('teaching_hours')}</Text>
-                        </View>
-                    </View>
 
-                    <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 200 }]}>
-                        <View style={[styles.statIconContainer, { backgroundColor: 'rgba(231, 76, 60, 0.15)' }]}>
-                            <Ionicons name="trending-up" size={24} color="#e74c3c" />
-                        </View>
-                        <View style={styles.statInfo}>
-                            <Text style={styles.statValue}>{busiestDay}</Text>
-                            <Text style={styles.statLabel}>{t('busiest_day')}</Text>
+                        <View style={[styles.statCard, { flex: 1, minWidth: 200 }]}>
+                            <View style={[styles.statIconContainer, { backgroundColor: 'rgba(231, 76, 60, 0.15)' }]}>
+                                <Ionicons name="trending-up" size={24} color="#e74c3c" />
+                            </View>
+                            <View style={styles.statInfo}>
+                                <Text style={styles.statValue}>{busiestDay}</Text>
+                                <Text style={styles.statLabel}>{t('busiest_day')}</Text>
+                            </View>
                         </View>
                     </View>
-                </View>
+                )}
 
                 {/* Legend Section */}
                 <View style={styles.legendContainer}>
@@ -510,8 +521,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#1a1a1a',
     },
     statsContainer: {
-        marginBottom: 24,
-        gap: 12,
+        marginBottom: 8,
     },
     statCard: {
         flexDirection: 'row',

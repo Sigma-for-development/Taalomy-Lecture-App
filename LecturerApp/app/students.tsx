@@ -169,143 +169,147 @@ const StudentsScreen = () => {
                 </View>
             </View>
 
-            {/* Statistics Cards */}
-            <View style={{
-                flexDirection: isDesktop ? 'row' : 'column',
-                flexWrap: 'wrap',
-                paddingHorizontal: isDesktop ? 24 : 20,
-                paddingBottom: 16,
-                gap: 12,
-                ...(isDesktop && { maxWidth: 1400, alignSelf: 'center', width: '100%' })
-            }}>
+            {/* Statistics Cards - Desktop Only */}
+            {isDesktop && (
                 <View style={{
-                    flex: isDesktop ? 1 : undefined,
-                    minWidth: isDesktop ? 150 : undefined,
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: 12,
-                    padding: 16,
                     flexDirection: 'row',
-                    alignItems: 'center',
-                    borderWidth: 1,
-                    borderColor: 'rgba(255, 255, 255, 0.08)',
+                    flexWrap: 'wrap',
+                    paddingHorizontal: 24,
+                    paddingVertical: 16,
+                    gap: 12,
+                    maxWidth: 1400,
+                    alignSelf: 'center',
+                    width: '100%'
                 }}>
                     <View style={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: 24,
-                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                        justifyContent: 'center',
+                        flex: 1,
+                        minWidth: 200,
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        borderRadius: 12,
+                        padding: 16,
+                        flexDirection: 'row',
                         alignItems: 'center',
-                        marginRight: 12,
+                        borderWidth: 1,
+                        borderColor: 'rgba(255, 255, 255, 0.08)',
                     }}>
-                        <Ionicons name="people" size={24} color="#3498db" />
+                        <View style={{
+                            width: 48,
+                            height: 48,
+                            borderRadius: 24,
+                            backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            marginRight: 12,
+                        }}>
+                            <Ionicons name="people" size={24} color="#3498db" />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
+                                {students.length}
+                            </Text>
+                            <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
+                                {t('total_students')}
+                            </Text>
+                        </View>
                     </View>
-                    <View style={{ flex: 1 }}>
-                        <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
-                            {students.length}
-                        </Text>
-                        <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
-                            {t('total_students')}
-                        </Text>
-                    </View>
-                </View>
 
-                <View style={{
-                    flex: isDesktop ? 1 : undefined,
-                    minWidth: isDesktop ? 150 : undefined,
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: 12,
-                    padding: 16,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    borderWidth: 1,
-                    borderColor: 'rgba(255, 255, 255, 0.08)',
-                }}>
                     <View style={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: 24,
-                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                        justifyContent: 'center',
+                        flex: 1,
+                        minWidth: 200,
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        borderRadius: 12,
+                        padding: 16,
+                        flexDirection: 'row',
                         alignItems: 'center',
-                        marginRight: 12,
+                        borderWidth: 1,
+                        borderColor: 'rgba(255, 255, 255, 0.08)',
                     }}>
-                        <Ionicons name="checkmark-circle" size={24} color="#2ecc71" />
+                        <View style={{
+                            width: 48,
+                            height: 48,
+                            borderRadius: 24,
+                            backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            marginRight: 12,
+                        }}>
+                            <Ionicons name="checkmark-circle" size={24} color="#2ecc71" />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
+                                {students.filter(s => s.intakes && s.intakes.length > 0).length}
+                            </Text>
+                            <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
+                                {t('active_students')}
+                            </Text>
+                        </View>
                     </View>
-                    <View style={{ flex: 1 }}>
-                        <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
-                            {students.filter(s => s.intakes && s.intakes.length > 0).length}
-                        </Text>
-                        <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
-                            {t('active_students')}
-                        </Text>
-                    </View>
-                </View>
 
-                <View style={{
-                    flex: isDesktop ? 1 : undefined,
-                    minWidth: isDesktop ? 150 : undefined,
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: 12,
-                    padding: 16,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    borderWidth: 1,
-                    borderColor: 'rgba(255, 255, 255, 0.08)',
-                }}>
                     <View style={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: 24,
-                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                        justifyContent: 'center',
+                        flex: 1,
+                        minWidth: 200,
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        borderRadius: 12,
+                        padding: 16,
+                        flexDirection: 'row',
                         alignItems: 'center',
-                        marginRight: 12,
+                        borderWidth: 1,
+                        borderColor: 'rgba(255, 255, 255, 0.08)',
                     }}>
-                        <Ionicons name="school" size={24} color="#9b59b6" />
+                        <View style={{
+                            width: 48,
+                            height: 48,
+                            borderRadius: 24,
+                            backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            marginRight: 12,
+                        }}>
+                            <Ionicons name="school" size={24} color="#9b59b6" />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
+                                {[...new Set(students.flatMap(s => s.intakes?.map(i => i.id) || []))].length}
+                            </Text>
+                            <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
+                                {t('total_intakes')}
+                            </Text>
+                        </View>
                     </View>
-                    <View style={{ flex: 1 }}>
-                        <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
-                            {[...new Set(students.flatMap(s => s.intakes?.map(i => i.id) || []))].length}
-                        </Text>
-                        <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
-                            {t('total_intakes')}
-                        </Text>
-                    </View>
-                </View>
 
-                <View style={{
-                    flex: isDesktop ? 1 : undefined,
-                    minWidth: isDesktop ? 150 : undefined,
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: 12,
-                    padding: 16,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    borderWidth: 1,
-                    borderColor: 'rgba(255, 255, 255, 0.08)',
-                }}>
                     <View style={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: 24,
-                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                        justifyContent: 'center',
+                        flex: 1,
+                        minWidth: 200,
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        borderRadius: 12,
+                        padding: 16,
+                        flexDirection: 'row',
                         alignItems: 'center',
-                        marginRight: 12,
+                        borderWidth: 1,
+                        borderColor: 'rgba(255, 255, 255, 0.08)',
                     }}>
-                        <Ionicons name="analytics" size={24} color="#f39c12" />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                        <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
-                            {students.length > 0 ? Math.round(students.reduce((sum, s) => sum + (s.intakes?.length || 0), 0) / students.length * 10) / 10 : 0}
-                        </Text>
-                        <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
-                            {t('avg_intakes_per_student')}
-                        </Text>
+                        <View style={{
+                            width: 48,
+                            height: 48,
+                            borderRadius: 24,
+                            backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            marginRight: 12,
+                        }}>
+                            <Ionicons name="analytics" size={24} color="#f39c12" />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Text style={{ fontSize: 20, fontWeight: '700', color: '#fff', marginBottom: 2 }}>
+                                {students.length > 0 ? Math.round(students.reduce((sum, s) => sum + (s.intakes?.length || 0), 0) / students.length * 10) / 10 : 0}
+                            </Text>
+                            <Text style={{ fontSize: 12, color: '#95a5a6', fontWeight: '500' }}>
+                                {t('avg_intakes_per_student')}
+                            </Text>
+                        </View>
                     </View>
                 </View>
-            </View>
+            )}
 
             <FlatList
                 data={filteredStudents}
@@ -341,7 +345,7 @@ const StudentsScreen = () => {
                                 alignItems: isDesktop ? 'flex-start' : 'center',
                                 borderWidth: 1,
                                 borderColor: '#333',
-                                height: '100%'
+                                height: isDesktop ? '100%' : undefined
                             }}
                         >
                             <View style={{ marginEnd: isDesktop ? 0 : 16, marginBottom: isDesktop ? 12 : 0, alignSelf: isDesktop ? 'center' : 'flex-start' }}>

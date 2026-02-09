@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, StyleSheet, Platform, KeyboardAvoidingView, Animated, Easing, Text, Image } from 'react-native';
+import { View, StyleSheet, Platform, KeyboardAvoidingView, Animated, Easing, Text, Image, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
 import { GiftedChat, Bubble, Send, InputToolbar, Composer, Avatar } from 'react-native-gifted-chat';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -99,6 +100,7 @@ const CustomTypingIndicator = () => {
 const AIAssistantScreen = () => {
     const { t, i18n } = useTranslation();
     const { isDesktop } = useResponsive();
+    const router = useRouter();
     const isRTL = i18n.dir() === 'rtl';
     const [messages, setMessages] = useState<any[]>([]);
     const [isTyping, setIsTyping] = useState(false);
@@ -180,18 +182,17 @@ const AIAssistantScreen = () => {
         if (props.position === 'right') return null;
 
         return (
-            <View style={{ marginBottom: 5 }}>
-                <Image
-                    source={require('../assets/aibot.png')}
-                    style={{
-                        width: 50,
-                        height: 50,
-                        borderRadius: 25,
-                        backgroundColor: 'rgba(255,255,255,0.05)'
-                    }}
-                    resizeMode="cover"
-                />
-            </View>
+            <Image
+                source={require('../assets/aibot.png')}
+                style={{
+                    width: isDesktop ? 50 : 40,
+                    height: isDesktop ? 50 : 40,
+                    borderRadius: isDesktop ? 25 : 20,
+                    backgroundColor: 'rgba(255,255,255,0.05)',
+                    marginBottom: 5,
+                }}
+                resizeMode="cover"
+            />
         );
     };
 
@@ -206,7 +207,7 @@ const AIAssistantScreen = () => {
                         padding: 10,
                         borderWidth: 1,
                         borderColor: 'rgba(255, 255, 255, 0.1)',
-                        maxWidth: isDesktop ? '70%' : '85%',
+                        maxWidth: isDesktop ? '70%' : '92%',
                         marginBottom: 14,
                     },
                     left: {
@@ -215,7 +216,7 @@ const AIAssistantScreen = () => {
                         padding: 10,
                         borderWidth: 1,
                         borderColor: 'rgba(255, 255, 255, 0.1)',
-                        maxWidth: isDesktop ? '70%' : '85%',
+                        maxWidth: isDesktop ? '70%' : '92%',
                         marginBottom: 14,
                         marginLeft: isRTL ? 0 : undefined,
                         marginRight: isRTL ? 0 : undefined,
@@ -307,7 +308,7 @@ const AIAssistantScreen = () => {
                     paddingTop: 10,
                     paddingBottom: 10,
                     marginRight: 10,
-                    fontSize: 15,
+                    fontSize: isDesktop ? 15 : 16,
                     lineHeight: 20,
                     minHeight: 40,
                     maxHeight: 200,
@@ -336,8 +337,11 @@ const AIAssistantScreen = () => {
     };
 
     const renderChatHeader = () => (
-        <View style={styles.headerContainer}>
-            <View style={styles.headerBlur}>
+        <View style={[styles.headerContainer, { top: isDesktop ? 25 : (Platform.OS === 'ios' ? 70 : 50) }]}>
+            <View style={[styles.headerBlur, {
+                paddingVertical: isDesktop ? 12 : 8,
+                paddingHorizontal: isDesktop ? 24 : 16,
+            }]}>
                 <Image
                     source={require('../assets/aibot.png')}
                     style={styles.headerAvatar}
@@ -350,6 +354,50 @@ const AIAssistantScreen = () => {
                     </View>
                 </View>
             </View>
+        </View>
+    );
+
+    const mainChatContent = (
+        <View style={{ flex: 1 }}>
+            <GiftedChat
+                messages={messages}
+                text={inputText}
+                onInputTextChanged={setInputText}
+                onSend={(newMessages) => onSend(newMessages)}
+                user={{ _id: 1 }}
+                renderBubble={renderBubble}
+                renderSend={renderSend}
+                renderInputToolbar={renderInputToolbar}
+                renderComposer={renderComposer}
+                placeholder={t('ai_placeholder')}
+                isTyping={isTyping}
+                renderFooter={() => isTyping ? <CustomTypingIndicator /> : null}
+                renderUsernameOnMessage={false}
+                showAvatarForEveryMessage={true}
+                showUserAvatar={false}
+                renderAvatar={renderAvatar}
+                alwaysShowSend
+                messagesContainerStyle={{ paddingTop: isDesktop ? 100 : (Platform.OS === 'ios' ? 125 : 120) }}
+                bottomOffset={isDesktop ? 0 : 0}
+            />
+            {welcomeVisible && messages.length <= 1 && (
+                <Animated.View
+                    style={[styles.welcomeContainer, {
+                        opacity: welcomeFadeAnim,
+                        paddingHorizontal: isDesktop ? 40 : 24,
+                        bottom: isDesktop ? 100 : 120
+                    }]}
+                    pointerEvents="none"
+                >
+                    <Ionicons name="sparkles-outline" size={48} color="rgba(52, 152, 219, 0.3)" style={{ marginBottom: 20 }} />
+                    <Text style={styles.welcomeText}>
+                        {t('ai_welcome_intro')}
+                    </Text>
+                    <Text style={[styles.welcomeText, { marginTop: 12, fontSize: 13, opacity: 0.15 }]}>
+                        {t('ai_welcome_note')}
+                    </Text>
+                </Animated.View>
+            )}
         </View>
     );
 
@@ -372,41 +420,30 @@ const AIAssistantScreen = () => {
                 resizeMode="cover"
             />
             {renderChatHeader()}
-            <GiftedChat
-                messages={messages}
-                text={inputText}
-                onInputTextChanged={setInputText}
-                onSend={(newMessages) => onSend(newMessages)}
-                user={{ _id: 1 }}
-                renderBubble={renderBubble}
-                renderSend={renderSend}
-                renderInputToolbar={renderInputToolbar}
-                renderComposer={renderComposer}
-                placeholder={t('ai_placeholder')}
-                isTyping={isTyping}
-                renderFooter={() => isTyping ? <CustomTypingIndicator /> : null}
-                renderUsernameOnMessage={false}
-                showAvatarForEveryMessage={true}
-                showUserAvatar={false}
-                renderAvatar={renderAvatar}
-                alwaysShowSend
-                messagesContainerStyle={{ paddingTop: 100 }}
-            />
-            {welcomeVisible && (
-                <Animated.View
-                    style={[styles.welcomeContainer, { opacity: welcomeFadeAnim }]}
-                    pointerEvents="none"
+            {!isDesktop && (
+                <TouchableOpacity
+                    onPress={() => router.back()}
+                    style={[styles.backButton, {
+                        top: Platform.OS === 'ios' ? 64 : 49,
+                        [isRTL ? 'right' : 'left']: 20
+                    }]}
                 >
-                    <Ionicons name="sparkles-outline" size={48} color="rgba(52, 152, 219, 0.3)" style={{ marginBottom: 20 }} />
-                    <Text style={styles.welcomeText}>
-                        {t('ai_welcome_intro')}
-                    </Text>
-                    <Text style={[styles.welcomeText, { marginTop: 12, fontSize: 13, opacity: 0.15 }]}>
-                        {t('ai_welcome_note')}
-                    </Text>
-                </Animated.View>
+                    <Ionicons
+                        name={isRTL ? "arrow-forward" : "arrow-back"}
+                        size={24}
+                        color="#fff"
+                    />
+                </TouchableOpacity>
             )}
-            {Platform.OS === 'android' && <KeyboardAvoidingView behavior="padding" />}
+            {!isDesktop ? (
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                    style={{ flex: 1 }}
+                    keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+                >
+                    {mainChatContent}
+                </KeyboardAvoidingView>
+            ) : mainChatContent}
         </View>
     );
 };
@@ -418,7 +455,6 @@ const styles = StyleSheet.create({
     },
     headerContainer: {
         position: 'absolute',
-        top: 25,
         left: 0,
         right: 0,
         zIndex: 100,
@@ -427,8 +463,6 @@ const styles = StyleSheet.create({
     headerBlur: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 12,
-        paddingHorizontal: 24,
         backgroundColor: 'rgba(255, 255, 255, 0.05)',
         borderRadius: 36,
         borderWidth: 1,
@@ -478,7 +512,6 @@ const styles = StyleSheet.create({
         bottom: 100,
         justifyContent: 'center',
         alignItems: 'center',
-        paddingHorizontal: 40,
         zIndex: 1,
     },
     welcomeText: {
@@ -488,6 +521,23 @@ const styles = StyleSheet.create({
         opacity: 0.25,
         lineHeight: 24,
         maxWidth: 400,
+    },
+    backButton: {
+        position: 'absolute',
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 101,
+        ...Platform.select({
+            web: {
+                backdropFilter: 'blur(10px)',
+            },
+        }) as any,
     },
 });
 

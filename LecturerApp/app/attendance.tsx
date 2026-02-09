@@ -56,51 +56,53 @@ const AttendanceScreen = () => {
           isDesktop && { paddingHorizontal: 24, maxWidth: 1400, alignSelf: 'center', width: '100%' }
         ]}
       >
-        {/* Statistics Cards */}
-        <View style={[
-          styles.statsContainer,
-          isDesktop && { flexDirection: 'row', flexWrap: 'wrap', gap: 12 }
-        ]}>
-          <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 150 }]}>
-            <View style={styles.statIconContainer}>
-              <Ionicons name="library" size={24} color="#3498db" />
+        {/* Statistics Cards - Desktop Only */}
+        {isDesktop && (
+          <View style={[
+            styles.statsContainer,
+            isDesktop && { flexDirection: 'row', flexWrap: 'wrap', gap: 12 }
+          ]}>
+            <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 150 }]}>
+              <View style={styles.statIconContainer}>
+                <Ionicons name="library" size={24} color="#3498db" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.statValue}>{0}</Text>
+                <Text style={styles.statLabel}>{t('total_classes')}</Text>
+              </View>
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.statValue}>{0}</Text>
-              <Text style={styles.statLabel}>{t('total_classes')}</Text>
-            </View>
-          </View>
 
-          <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 150 }]}>
-            <View style={styles.statIconContainer}>
-              <Ionicons name="calendar" size={24} color="#2ecc71" />
+            <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 150 }]}>
+              <View style={styles.statIconContainer}>
+                <Ionicons name="calendar" size={24} color="#2ecc71" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.statValue}>{0}</Text>
+                <Text style={styles.statLabel}>{t('classes_this_week')}</Text>
+              </View>
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.statValue}>{0}</Text>
-              <Text style={styles.statLabel}>{t('classes_this_week')}</Text>
-            </View>
-          </View>
 
-          <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 150 }]}>
-            <View style={styles.statIconContainer}>
-              <Ionicons name="stats-chart" size={24} color="#9b59b6" />
+            <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 150 }]}>
+              <View style={styles.statIconContainer}>
+                <Ionicons name="stats-chart" size={24} color="#9b59b6" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.statValue}>{0}%</Text>
+                <Text style={styles.statLabel}>{t('avg_attendance_rate')}</Text>
+              </View>
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.statValue}>{0}%</Text>
-              <Text style={styles.statLabel}>{t('avg_attendance_rate')}</Text>
-            </View>
-          </View>
 
-          <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 150 }]}>
-            <View style={styles.statIconContainer}>
-              <Ionicons name="people" size={24} color="#f39c12" />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.statValue}>{0}</Text>
-              <Text style={styles.statLabel}>{t('students_tracked')}</Text>
+            <View style={[styles.statCard, isDesktop && { flex: 1, minWidth: 150 }]}>
+              <View style={styles.statIconContainer}>
+                <Ionicons name="people" size={24} color="#f39c12" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.statValue}>{0}</Text>
+                <Text style={styles.statLabel}>{t('students_tracked')}</Text>
+              </View>
             </View>
           </View>
-        </View>
+        )}
 
         <Text style={[styles.sectionTitle, { textAlign: i18n.language === 'ar' ? 'right' : 'left' }]}>
           {t('attendance_options')}
