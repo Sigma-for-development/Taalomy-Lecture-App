@@ -13,6 +13,7 @@ import Toast from 'react-native-toast-message';
 import { tokenStorage } from '../utils/tokenStorage';
 import { useTranslation } from 'react-i18next'; // Added import
 import { useResponsive } from '../src/hooks/useResponsive';
+import { SeoHead } from '../src/components/SeoHead';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -340,6 +341,12 @@ const Register = () => {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#0a0a0a' }}>
+      <SeoHead
+        title="Lecturer Registration"
+        description="Create a Taalomy Lecturer account to manage classes, attendance, and student communication."
+        path="/register"
+        index={false}
+      />
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
       <KeyboardAvoidingView

@@ -24,6 +24,7 @@ import { API_CONFIG } from '../src/config/api';
 import Toast from 'react-native-toast-message';
 import { useResponsive } from '../src/hooks/useResponsive';
 import { TwinklingDotsBackground } from '../src/components/TwinklingDotsBackground';
+import { SeoHead } from '../src/components/SeoHead';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -211,6 +212,12 @@ const Login: React.FC = () => {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#0a0a0a' }}>
+      <SeoHead
+        title="Lecturer Login"
+        description="Sign in to Taalomy Lecturer to manage classes, attendance, and student communication."
+        path="/login"
+        index={false}
+      />
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
       <KeyboardAvoidingView
