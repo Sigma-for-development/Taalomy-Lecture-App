@@ -318,7 +318,7 @@ export default function Index() {
               ))}
             </View>
             <Text style={{ color: '#64748b', fontSize: 15, fontWeight: '500' }}>
-              Trusted by 500+ Educators
+              Trusted by Educators
             </Text>
           </View>
         </Animated.View>
