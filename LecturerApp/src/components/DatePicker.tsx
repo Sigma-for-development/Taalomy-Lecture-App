@@ -11,6 +11,7 @@ interface DatePickerProps {
     disabled?: boolean;
     placeholder?: string;
     mode?: 'date' | 'time' | 'datetime';
+    style?: any;
 }
 
 const DatePicker: React.FC<DatePickerProps> = ({
@@ -21,6 +22,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
     disabled = false,
     placeholder = "Select Date",
     mode = 'date',
+    style,
 }) => {
     const [showPicker, setShowPicker] = useState(false);
     const [tempDate, setTempDate] = useState<Date>(value || new Date());
@@ -255,6 +257,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
             <TouchableOpacity
                 style={[
                     styles.datePickerButton,
+                    style,
                     disabled && styles.datePickerButtonDisabled,
                 ]}
                 onPress={() => !disabled && setShowPicker(true)}
@@ -336,9 +339,9 @@ const DatePicker: React.FC<DatePickerProps> = ({
 const styles = StyleSheet.create({
     datePickerButton: {
         backgroundColor: 'rgba(255, 255, 255, 0.08)',
-        borderRadius: 12,
-        paddingHorizontal: 16,
-        paddingVertical: 14,
+        borderRadius: 8,
+        paddingHorizontal: 12,
+        paddingVertical: 10,
         borderWidth: 1,
         borderColor: 'rgba(255, 255, 255, 0.1)',
         flexDirection: 'row',
@@ -352,7 +355,7 @@ const styles = StyleSheet.create({
     },
     datePickerText: {
         flex: 1,
-        fontSize: 16,
+        fontSize: 14,
         color: '#ecf0f1',
     },
     datePickerPlaceholder: {

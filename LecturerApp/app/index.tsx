@@ -10,7 +10,15 @@ import axios from 'axios';
 import { API_CONFIG } from '../src/config/api';
 import { SeoHead } from '../src/components/SeoHead';
 import { useResponsive } from '../src/hooks/useResponsive';
-import Animated, { FadeInUp, FadeInDown, FadeInLeft, FadeInRight, FadeIn } from 'react-native-reanimated';
+import Animated, {
+  FadeInUp,
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withTiming,
+  withDelay,
+  interpolate
+} from 'react-native-reanimated';
 import { TwinklingDotsBackground } from '../src/components/TwinklingDotsBackground';
 
 export default function Index() {
@@ -98,6 +106,52 @@ export default function Index() {
     }
   };
 
+  // Background Animation Shared Values
+  const drift1X = useSharedValue(0);
+  const drift1Y = useSharedValue(0);
+  const drift2X = useSharedValue(0);
+  const drift2Y = useSharedValue(0);
+
+  useEffect(() => {
+    // Main Glow Drift
+    drift1X.value = withRepeat(
+      withTiming(40, { duration: 25000 }),
+      -1,
+      true
+    );
+    drift1Y.value = withRepeat(
+      withTiming(-60, { duration: 30000 }),
+      -1,
+      true
+    );
+
+    // Secondary Glow Drift
+    drift2X.value = withRepeat(
+      withDelay(2000, withTiming(-50, { duration: 22000 })),
+      -1,
+      true
+    );
+    drift2Y.value = withRepeat(
+      withDelay(1000, withTiming(80, { duration: 28000 })),
+      -1,
+      true
+    );
+  }, []);
+
+  const animatedGlow1 = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: drift1X.value },
+      { translateY: drift1Y.value },
+    ],
+  }));
+
+  const animatedGlow2 = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: drift2X.value },
+      { translateY: drift2Y.value },
+    ],
+  }));
+
   if (!isWeb && isLoading) {
     return (
       <View style={{ flex: 1, backgroundColor: '#0a0a0a' }}>
@@ -168,33 +222,39 @@ export default function Index() {
         keywords="lecturer dashboard, class management software, attendance tracker web, teacher tools, Taalomy"
       />
 
-      {/* Dynamic Visual Background - Unfied Coverage */}
+      {/* Dynamic Visual Background - Unified Coverage */}
       <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#0a0a0f', overflow: 'hidden' }}>
         {/* Vibrant Radial Glow - Centered Circle */}
-        <LinearGradient
-          colors={['rgba(52, 152, 219, 0.18)', 'transparent']}
-          style={{
-            position: 'absolute',
-            width: 1400,
-            height: 1400,
-            top: -700,
-            left: '50%',
-            marginLeft: -700,
-            borderRadius: 700,
-          }}
-        />
+        <Animated.View style={[{
+          position: 'absolute',
+          width: 1400,
+          height: 1400,
+          top: -700,
+          left: '50%',
+          marginLeft: -700,
+          borderRadius: 700,
+        }, animatedGlow1]}>
+          <LinearGradient
+            colors={['rgba(52, 152, 219, 0.18)', 'transparent']}
+            style={{ flex: 1, borderRadius: 700 }}
+          />
+        </Animated.View>
+
         {/* Secondary Glow - Accent Circle */}
-        <LinearGradient
-          colors={['rgba(52, 152, 219, 0.08)', 'transparent']}
-          style={{
-            position: 'absolute',
-            width: 800,
-            height: 800,
-            top: 200,
-            right: -300,
-            borderRadius: 400,
-          }}
-        />
+        <Animated.View style={[{
+          position: 'absolute',
+          width: 800,
+          height: 800,
+          top: 200,
+          right: -300,
+          borderRadius: 400,
+        }, animatedGlow2]}>
+          <LinearGradient
+            colors={['rgba(52, 152, 219, 0.08)', 'transparent']}
+            style={{ flex: 1, borderRadius: 400 }}
+          />
+        </Animated.View>
+
         {isWeb && <TwinklingDotsBackground spacing={30} maxAlpha={0.15} dotColor="#ffffff" />}
       </View>
 
