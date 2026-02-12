@@ -14,7 +14,7 @@ import { tokenStorage } from '../utils/tokenStorage';
 import { useTranslation } from 'react-i18next'; // Added import
 import { useResponsive } from '../src/hooks/useResponsive';
 import { SeoHead } from '../src/components/SeoHead';
-import { TwinklingDotsBackground } from '../src/components/TwinklingDotsBackground';
+
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -391,8 +391,7 @@ const Register = () => {
                   }}
                 />
 
-                {/* Twinkling Dots Background */}
-                {isDesktop && <TwinklingDotsBackground />}
+
 
                 {/* Bold Branding Section */}
                 <View style={{ alignItems: 'flex-start', marginBottom: 50, zIndex: 1, maxWidth: 550 }}>
@@ -467,74 +466,7 @@ const Register = () => {
                     Create your lecturer account today and start transforming the way you educate and engage with students.
                   </Text>
 
-                  {/* Value Props - Bold Grid */}
-                  <View style={{ width: '100%' }}>
-                    {[
-                      {
-                        icon: 'rocket-outline',
-                        title: 'Easy Setup',
-                        desc: 'Get started in minutes with our intuitive registration'
-                      },
-                      {
-                        icon: 'shield-checkmark-outline',
-                        title: 'Verified Access',
-                        desc: 'Secure institutional access for academic staff'
-                      },
-                      {
-                        icon: 'globe-outline',
-                        title: 'Global Reach',
-                        desc: 'Connect with students across borders seamlessly'
-                      },
-                    ].map((item, index) => (
-                      <View key={index} style={{
-                        marginBottom: 20,
-                        paddingLeft: 20,
-                        borderLeftWidth: 2,
-                        borderLeftColor: index === 0 ? '#3498db' : 'rgba(52, 152, 219, 0.3)',
-                      }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
-                          <Ionicons
-                            name={item.icon as any}
-                            size={20}
-                            color={index === 0 ? '#3498db' : '#7f8c8d'}
-                            style={{ marginRight: 10 }}
-                          />
-                          <Text style={{
-                            fontSize: 17,
-                            fontWeight: '700',
-                            color: '#ecf0f1',
-                          }}>{item.title}</Text>
-                        </View>
-                        <Text style={{
-                          fontSize: 14,
-                          color: '#95a5a6',
-                          lineHeight: 20,
-                          paddingLeft: 30,
-                        }}>{item.desc}</Text>
-                      </View>
-                    ))}
-                  </View>
 
-                  {/* Trust Badge */}
-                  <View style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    marginTop: 30,
-                    paddingTop: 30,
-                    borderTopWidth: 1,
-                    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-                    width: '100%',
-                  }}>
-                    <Ionicons name="shield-checkmark" size={22} color="#2ecc71" />
-                    <Text style={{
-                      fontSize: 13,
-                      color: '#7f8c8d',
-                      marginLeft: 10,
-                      fontWeight: '500',
-                    }}>
-                      Secure Registration • Institutional Verification
-                    </Text>
-                  </View>
                 </View>
               </Animated.View>
 

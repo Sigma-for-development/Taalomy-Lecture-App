@@ -19,7 +19,7 @@ import Animated, {
   withDelay,
   interpolate
 } from 'react-native-reanimated';
-import { TwinklingDotsBackground } from '../src/components/TwinklingDotsBackground';
+
 
 export default function Index() {
   const { t, i18n } = useTranslation();
@@ -255,7 +255,7 @@ export default function Index() {
           />
         </Animated.View>
 
-        {isWeb && <TwinklingDotsBackground spacing={30} maxAlpha={0.15} dotColor="#ffffff" />}
+
       </View>
 
       {/* Centered Hero Section */}

@@ -23,7 +23,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { API_CONFIG } from '../src/config/api';
 import Toast from 'react-native-toast-message';
 import { useResponsive } from '../src/hooks/useResponsive';
-import { TwinklingDotsBackground } from '../src/components/TwinklingDotsBackground';
+
 import { SeoHead } from '../src/components/SeoHead';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
@@ -261,8 +261,7 @@ const Login: React.FC = () => {
                   }}
                 />
 
-                {/* Twinkling Dots Background */}
-                {isDesktop && <TwinklingDotsBackground />}
+
 
                 {/* Bold Branding Section */}
                 <View style={{ alignItems: 'flex-start', marginBottom: 50, zIndex: 1, maxWidth: 550 }}>
@@ -337,74 +336,7 @@ const Login: React.FC = () => {
                     A comprehensive platform designed to streamline your academic workflow and enhance student engagement.
                   </Text>
 
-                  {/* Value Props - Bold Grid */}
-                  <View style={{ width: '100%' }}>
-                    {[
-                      {
-                        icon: 'flash',
-                        title: 'Instant Insights',
-                        desc: 'Real-time analytics and performance tracking'
-                      },
-                      {
-                        icon: 'people',
-                        title: 'Student-Centric',
-                        desc: 'Manage classes and connect seamlessly'
-                      },
-                      {
-                        icon: 'rocket',
-                        title: 'Boost Productivity',
-                        desc: 'Organize schedules and automate workflows'
-                      },
-                    ].map((item, index) => (
-                      <View key={index} style={{
-                        marginBottom: 20,
-                        paddingLeft: 20,
-                        borderLeftWidth: 2,
-                        borderLeftColor: index === 0 ? '#3498db' : 'rgba(52, 152, 219, 0.3)',
-                      }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
-                          <Ionicons
-                            name={item.icon as any}
-                            size={20}
-                            color={index === 0 ? '#3498db' : '#7f8c8d'}
-                            style={{ marginRight: 10 }}
-                          />
-                          <Text style={{
-                            fontSize: 17,
-                            fontWeight: '700',
-                            color: '#ecf0f1',
-                          }}>{item.title}</Text>
-                        </View>
-                        <Text style={{
-                          fontSize: 14,
-                          color: '#95a5a6',
-                          lineHeight: 20,
-                          paddingLeft: 30,
-                        }}>{item.desc}</Text>
-                      </View>
-                    ))}
-                  </View>
 
-                  {/* Trust Badge */}
-                  <View style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    marginTop: 30,
-                    paddingTop: 30,
-                    borderTopWidth: 1,
-                    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-                    width: '100%',
-                  }}>
-                    <Ionicons name="shield-checkmark" size={22} color="#2ecc71" />
-                    <Text style={{
-                      fontSize: 13,
-                      color: '#7f8c8d',
-                      marginLeft: 10,
-                      fontWeight: '500',
-                    }}>
-                      Trusted by educators • Secure & Reliable
-                    </Text>
-                  </View>
                 </View>
               </Animated.View>
 
