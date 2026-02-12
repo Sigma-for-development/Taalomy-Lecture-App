@@ -479,7 +479,7 @@ const InvitationsScreen = () => {
                                             {t(invitation.payment_plan)}
                                         </Text>
                                         <Text style={{ color: '#3498db', fontSize: 18, fontWeight: '700' }}>
-                                            {invitation.amount.toFixed(2)} {t('currency')}
+                                            {(Number(invitation.amount) || 0).toFixed(2)} {t('currency')}
                                         </Text>
                                     </View>
                                 </View>

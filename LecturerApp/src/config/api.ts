@@ -70,6 +70,8 @@ api.interceptors.request.use(
     // Check if it's a chat endpoint and switch baseURL if needed
     if (config.url?.startsWith('chat/') || config.url?.startsWith('rooms/') || config.url?.startsWith('messages/')) {
       config.baseURL = API_CONFIG.CHAT_BASE_URL;
+    } else if (config.url?.startsWith('ai-assistant/')) {
+      config.baseURL = API_CONFIG.BASE_URL;
     }
 
     const token = await tokenStorage.getItem('access_token');

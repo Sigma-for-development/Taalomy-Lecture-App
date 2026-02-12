@@ -12,8 +12,11 @@ export interface ChatMessage {
   profile_picture_url?: string;
   message: string;
   timestamp: string;
-  type: 'message';
+  type: 'message' | 'image' | 'file';
   recipient_id?: number; // Add recipient_id for direct messages
+  file_url?: string;
+  message_type?: 'message' | 'image' | 'file';
+  use_for_quizzes?: boolean;
 }
 
 export interface TypingEvent {
@@ -206,8 +209,11 @@ class SocketIOManager {
 
   async sendMessage(message: string, metadata?: any) {
     // Add validation to prevent sending empty messages
-    if (!message || !message.trim()) {
-      console.warn('Attempted to send empty message');
+    // Allow empty message if metadata is present (e.g. for file uploads)
+    const hasMetadata = metadata && Object.keys(metadata).length > 0;
+
+    if ((!message || !message.trim()) && !hasMetadata) {
+      console.warn('Attempted to send empty message without metadata');
       // Emit error event for empty messages
       this.errorCallbacks.forEach(callback => callback('Cannot send empty message'));
       return;

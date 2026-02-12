@@ -65,8 +65,10 @@ const MiniAIChat: React.FC<MiniAIChatProps> = ({ isVisible, onClose }) => {
         setIsLoading(true);
 
         try {
-            const response = await aiService.getChatResponse(newMessages);
-            setMessages([...newMessages, { role: 'assistant', content: response }]);
+            const responseObj = await aiService.getChatResponse(null, newMessages);
+            const responseText = typeof responseObj === 'string' ? responseObj : responseObj.text;
+
+            setMessages([...newMessages, { role: 'assistant', content: responseText }]);
         } catch (error) {
             setMessages([...newMessages, { role: 'assistant', content: t('ai_error_msg') }]);
         } finally {

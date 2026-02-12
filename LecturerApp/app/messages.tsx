@@ -59,6 +59,18 @@ interface ChatRoom {
   updated_at: string;
 }
 
+interface ClassGroup {
+  type: 'header';
+  id: string; // class_id
+  name: string;
+  unread_count: number;
+  updated_at: string;
+  channels: ChatRoom[];
+  isExpanded?: boolean;
+}
+
+type ListItem = ChatRoom | ClassGroup;
+
 type FilterType = 'all' | 'class' | 'group' | 'direct';
 
 const MessagesScreen = () => {
@@ -71,6 +83,7 @@ const MessagesScreen = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+  const [expandedClasses, setExpandedClasses] = useState<Record<string, boolean>>({});
 
   const loadChatRooms = async () => {
     try {
@@ -133,10 +146,69 @@ const MessagesScreen = () => {
     }, [])
   );
 
-  const filteredChatRooms = useMemo(() => {
-    if (activeFilter === 'all') return chatRooms;
-    return chatRooms.filter(room => room.chat_type === activeFilter);
-  }, [chatRooms, activeFilter]);
+  // Grouping Logic
+  const groupedList = useMemo(() => {
+    let filtered = chatRooms;
+    if (activeFilter !== 'all') {
+      filtered = chatRooms.filter(room => room.chat_type === activeFilter);
+    }
+
+    // if filter is active (except 'all'), maybe we don't want grouping? 
+    // User requested: "hide under the actual class name". 
+    // So we should group 'class' type rooms.
+
+    const classGroups: Record<number, ClassGroup> = {};
+    const directAndOthers: ChatRoom[] = [];
+
+    filtered.forEach(room => {
+      if (room.chat_type === 'class' && room.class_obj) {
+        const classId = room.class_obj.id;
+        if (!classGroups[classId]) {
+          classGroups[classId] = {
+            type: 'header',
+            id: classId.toString(),
+            name: room.class_obj.name,
+            unread_count: 0,
+            updated_at: room.updated_at,
+            channels: [],
+            isExpanded: expandedClasses[classId.toString()] || false,
+          };
+        }
+        classGroups[classId].channels.push(room);
+        classGroups[classId].unread_count += room.unread_count;
+        // Update group timestamp if this room is newer
+        if (new Date(room.updated_at) > new Date(classGroups[classId].updated_at)) {
+          classGroups[classId].updated_at = room.updated_at;
+        }
+      } else {
+        directAndOthers.push(room);
+      }
+    });
+
+    const combined: ListItem[] = [...directAndOthers];
+
+    // Add groups
+    Object.values(classGroups).forEach(group => {
+      // Sort channels within group
+      group.channels.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+      combined.push(group);
+
+      // If expanded, insert channels after header in the flat list if we were doing a flat list with different types
+      // BUT, implementing expanding in a grid/list might be cleaner if we render the group item as a container that expands.
+      // Let's keep the list flat at root level, and 'ListItem' can be a Group (which acts as header + optional children) or a Standalone ChatRoom.
+    });
+
+    // Sort everything by updated_at
+    return combined.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+
+  }, [chatRooms, activeFilter, expandedClasses]);
+
+  const toggleClass = (classId: string) => {
+    setExpandedClasses(prev => ({
+      ...prev,
+      [classId]: !prev[classId]
+    }));
+  };
 
   // Calculate statistics
   const totalConversations = chatRooms.length;
@@ -146,7 +218,7 @@ const MessagesScreen = () => {
 
   const handleChatRoomPress = (room: ChatRoom) => {
     if (room.chat_type === 'class' && room.class_obj && room.class_obj.id) {
-      router.push(`/class-chat/${room.class_obj.id}`);
+      router.push(`/class-chat/channel/${room.id}`);
     } else if (room.chat_type === 'group' && room.group_obj && room.group_obj.id) {
       // Assuming group-chat exists in Lecturer App as well
       router.push(`/group-chat/${room.group_obj.id}`);
@@ -229,7 +301,48 @@ const MessagesScreen = () => {
     </TouchableOpacity>
   );
 
-  const renderChatRoom = ({ item }: { item: ChatRoom }) => {
+  const renderItem = ({ item }: { item: ListItem }) => {
+    // Check if it's a Class Group Header
+    if ('type' in item && item.type === 'header') {
+      return (
+        <View style={styles.groupContainer}>
+          <TouchableOpacity
+            style={[styles.groupHeader, isDesktop && styles.desktopGroupHeader]}
+            onPress={() => toggleClass(item.id)}
+          >
+            <View style={styles.groupHeaderContent}>
+              <View style={styles.groupIconContainer}>
+                <Ionicons name={item.isExpanded ? "chevron-down" : "chevron-forward"} size={16} color="#7f8c8d" />
+                <Ionicons name="school" size={20} color="#3498db" style={{ marginLeft: 8 }} />
+              </View>
+              <Text style={styles.groupTitle}>{item.name}</Text>
+              {item.unread_count > 0 && (
+                <View style={styles.groupBadge}>
+                  <Text style={styles.groupBadgeText}>{item.unread_count}</Text>
+                </View>
+              )}
+            </View>
+            <Text style={styles.groupSubtext}>{item.channels.length} {t('channels_count') || "channels"}</Text>
+          </TouchableOpacity>
+
+          {item.isExpanded && (
+            <View style={styles.groupChildren}>
+              {item.channels.map(channel => (
+                <View key={channel.id} style={{ marginBottom: 10 }}>
+                  {renderChatRoom({ item: channel, isChild: true })}
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+      );
+    }
+
+    // Regular Chat Room
+    return renderChatRoom({ item: item as ChatRoom });
+  };
+
+  const renderChatRoom = ({ item, isChild = false }: { item: ChatRoom, isChild?: boolean }) => {
     const lastMessage = item.last_message;
     const unreadCount = item.unread_count;
     const chatName = getChatName(item);
@@ -237,7 +350,11 @@ const MessagesScreen = () => {
 
     return (
       <TouchableOpacity
-        style={[styles.chatRoomItem, { height: isDesktop ? '100%' : undefined }]}
+        style={[
+          styles.chatRoomItem,
+          { height: isDesktop && !isChild ? '100%' : undefined },
+          isChild && styles.childChatRoomItem
+        ]}
         onPress={() => handleChatRoomPress(item)}
       >
         <View style={styles.avatarContainer}>
@@ -452,16 +569,14 @@ const MessagesScreen = () => {
 
       {/* Chat Rooms List */}
       <FlatList
-        data={filteredChatRooms}
-        key={isDesktop ? 'desktop-3-col' : 'mobile-1-col'}
-        numColumns={isDesktop ? 3 : 1}
-        keyExtractor={(item) => item.id.toString()}
+        data={groupedList}
+        numColumns={1}
+        keyExtractor={(item) => 'id' in item ? item.id.toString() : Math.random().toString()}
         style={styles.chatList}
         contentContainerStyle={[
           styles.chatListContent,
           isDesktop && { paddingHorizontal: 18, maxWidth: 1400, alignSelf: 'center', width: '100%' }
         ]}
-        columnWrapperStyle={isDesktop ? { marginBottom: 12 } : undefined}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -471,8 +586,8 @@ const MessagesScreen = () => {
           />
         }
         renderItem={({ item }) => (
-          <View style={{ width: isDesktop ? '33.33%' : '100%', paddingHorizontal: isDesktop ? 6 : 0, marginBottom: isDesktop ? 0 : 12 }}>
-            {renderChatRoom({ item })}
+          <View style={{ marginBottom: 12, width: '100%' }}>
+            {renderItem({ item })}
           </View>
         )}
         ListEmptyComponent={
@@ -723,6 +838,70 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 4,
   },
+  groupContainer: {
+    marginBottom: 8,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: 'transparent',
+  },
+  groupHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    backgroundColor: '#2c2c2c',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  desktopGroupHeader: {
+    paddingVertical: 20,
+    backgroundColor: '#252525',
+  },
+  groupHeaderContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  groupIconContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  groupTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#ecf0f1',
+  },
+  groupBadge: {
+    backgroundColor: '#e74c3c',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 6,
+    marginLeft: 10,
+  },
+  groupBadgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+  groupSubtext: {
+    color: '#7f8c8d',
+    fontSize: 14,
+  },
+  groupChildren: {
+    marginTop: 10,
+    paddingLeft: 20,
+    borderLeftWidth: 2,
+    borderLeftColor: '#333',
+    marginLeft: 20,
+  },
+  childChatRoomItem: {
+    backgroundColor: '#252525', // Slightly darker differentiation
+    borderColor: 'rgba(255,255,255,0.05)',
+  }
 });
 
 export default MessagesScreen;
