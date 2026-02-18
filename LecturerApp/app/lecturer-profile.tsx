@@ -26,6 +26,7 @@ import { useTranslation } from 'react-i18next'; // Added import
 import { SeoHead } from '../src/components/SeoHead';
 import { useResponsive } from '../src/hooks/useResponsive';
 import { HoverCard } from '../src/components/HoverCard';
+import { Skeleton } from '../src/components/Skeleton';
 
 interface LecturerProfile {
   id?: number;
@@ -267,16 +268,74 @@ const LecturerProfileScreen = () => {
     </View>
   );
 
-  if (isLoading) {
-    return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <LinearGradient
-          colors={['#0a0a0a', '#1a1a1a', '#2d2d2d']}
-          style={styles.backgroundGradient}
-        />
-        <ActivityIndicator size="large" color="#3498db" />
+  // Skeleton Loading Component
+  const ProfileSkeleton = () => (
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+
+      {/* Hero Skeleton */}
+      <View style={styles.heroContainer}>
+        <View style={styles.heroContent}>
+          {/* Left Col Skeleton */}
+          <View style={styles.heroLeftCol}>
+            <Skeleton width={100} height={100} borderRadius={50} style={{ marginRight: 20 }} />
+            <View>
+              <Skeleton width={200} height={28} style={{ marginBottom: 10 }} />
+              <Skeleton width={100} height={20} />
+            </View>
+          </View>
+
+          {/* Right Col Skeleton (Stats) - Desktop Only */}
+          {isDesktop && (
+            <View style={styles.heroRightCol}>
+              <View style={[styles.heroStatsGroup, { backgroundColor: 'transparent', borderWidth: 0 }]}>
+                <Skeleton width={80} height={40} style={{ marginHorizontal: 10 }} />
+                <Skeleton width={80} height={40} style={{ marginHorizontal: 10 }} />
+                <Skeleton width={80} height={40} style={{ marginHorizontal: 10 }} />
+              </View>
+            </View>
+          )}
+        </View>
       </View>
-    );
+
+      <ScrollView style={styles.content} contentContainerStyle={isDesktop ? styles.desktopContainer : { paddingBottom: 40 }}>
+        <View style={isDesktop ? styles.desktopGrid : {}}>
+          {/* Main Column Skeleton */}
+          <View style={isDesktop ? styles.desktopMainCol : { paddingHorizontal: 20 }}>
+            {/* Basic Info Skeleton */}
+            <View style={[styles.section, isDesktop && styles.card, { height: 300 }]}>
+              <Skeleton width={150} height={24} style={{ marginBottom: 20 }} />
+              <Skeleton width="100%" height={100} style={{ marginBottom: 15 }} />
+              <Skeleton width="100%" height={50} style={{ marginBottom: 15 }} />
+              <Skeleton width="100%" height={50} />
+            </View>
+
+            {/* Teaching Info Skeleton */}
+            <View style={[styles.section, isDesktop && styles.card, { height: 250, marginTop: 20 }]}>
+              <Skeleton width={150} height={24} style={{ marginBottom: 20 }} />
+              <Skeleton width="100%" height={50} style={{ marginBottom: 15 }} />
+              <Skeleton width="100%" height={100} />
+            </View>
+          </View>
+
+          {/* Sidebar Column Skeleton */}
+          <View style={isDesktop ? styles.desktopSidebarCol : { paddingHorizontal: 20, marginTop: 20 }}>
+            {/* Pricing Skeleton */}
+            <View style={[styles.section, isDesktop && styles.card, { height: 400 }]}>
+              <Skeleton width={150} height={24} style={{ marginBottom: 20 }} />
+              <Skeleton width="100%" height={50} style={{ marginBottom: 15 }} />
+              <Skeleton width="100%" height={50} style={{ marginBottom: 15 }} />
+              <Skeleton width="100%" height={50} style={{ marginBottom: 15 }} />
+              <Skeleton width="100%" height={50} />
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+    </View>
+  );
+
+  if (isLoading) {
+    return <ProfileSkeleton />;
   }
 
   // Hero Section

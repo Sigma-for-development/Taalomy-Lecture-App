@@ -1529,5 +1529,7 @@
     "status_in_progress": "In Progress",
     "status_failed": "Failed",
     "status_success": "Success",
+    "setup_complete": "Setup Complete",
+    "setup_complete_desc": "You can now use the app",
     "message_error": "Failed to send message"
 }

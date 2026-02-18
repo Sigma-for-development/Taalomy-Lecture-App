@@ -740,7 +740,7 @@ const styles = StyleSheet.create({
       paddingTop: Platform.OS === 'ios' ? 60 : 40,
       paddingBottom: 20,
     }),
-    paddingHorizontal: 20,
+    paddingHorizontal: 24, // Standardized 24px padding
     backgroundColor: '#1a1a1a',
     borderBottomWidth: 1,
     borderBottomColor: '#2c2c2c',

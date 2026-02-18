@@ -17,6 +17,7 @@ const AsyncStorage = tokenStorage;
 import { lecturerAPI } from '../src/utils/api';
 import { useTranslation } from 'react-i18next';
 import { useResponsive } from '../src/hooks/useResponsive';
+import { Skeleton } from '../src/components/Skeleton';
 
 // Unified interface for display
 interface ScheduleItem {
@@ -207,23 +208,93 @@ const TimetableScreen = () => {
     const totalHours = calculateTotalHours();
     const busiestDay = getBusiestDay();
 
-    if (loading) {
-        return (
-            <View style={styles.container}>
-                <View style={[styles.header, isWeb && { paddingHorizontal: 24 }]}>
-                    {!isWeb && (
-                        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                            <Ionicons name="arrow-back" size={24} color="#fff" />
-                        </TouchableOpacity>
-                    )}
-                    <Text style={[styles.headerTitle, isWeb && { marginLeft: 0 }]}>{t('my_timetable_title')}</Text>
-                    {!isWeb && <View style={{ width: 40 }} />}
-                </View>
-                <View style={styles.centered}>
-                    <ActivityIndicator size="large" color="#3498db" />
-                </View>
+    // Skeleton Loading Component
+    const TimetableSkeleton = () => (
+        <View style={styles.container}>
+            <StatusBar barStyle="light-content" backgroundColor="#1a1a1a" />
+
+            {/* Header Skeleton */}
+            <View style={[styles.header, isWeb && { paddingHorizontal: 24, justifyContent: 'flex-start' }]}>
+                {!isWeb && <Skeleton width={40} height={40} borderRadius={20} style={{ marginRight: 15 }} />}
+                <Skeleton width={150} height={32} />
             </View>
-        );
+
+            <ScrollView
+                style={styles.content}
+                contentContainerStyle={[
+                    styles.scrollContent,
+                    isDesktop && { paddingHorizontal: 24, maxWidth: 1400, alignSelf: 'center', width: '100%' }
+                ]}
+            >
+                {/* Desktop Stats Skeleton */}
+                {isDesktop && (
+                    <View style={{ flexDirection: 'row', gap: 16, marginBottom: 24 }}>
+                        {[1, 2, 3, 4].map(i => (
+                            <View key={i} style={[styles.statCard, { flex: 1, minWidth: 200, height: 84 }]}>
+                                <Skeleton width={50} height={50} borderRadius={12} style={{ marginRight: 14 }} />
+                                <View style={{ flex: 1 }}>
+                                    <Skeleton width={40} height={24} style={{ marginBottom: 4 }} />
+                                    <Skeleton width={80} height={16} />
+                                </View>
+                            </View>
+                        ))}
+                    </View>
+                )}
+
+                {/* Legend Skeleton */}
+                <View style={[styles.legendContainer, { height: 100 }]}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
+                        <Skeleton width={20} height={20} borderRadius={10} style={{ marginRight: 8 }} />
+                        <Skeleton width={80} height={20} />
+                    </View>
+                    <View style={{ flexDirection: 'row', gap: 20 }}>
+                        <Skeleton width={100} height={16} />
+                        <Skeleton width={100} height={16} />
+                    </View>
+                </View>
+
+                {/* Days Skeleton */}
+                {[1, 2].map(day => (
+                    <View key={day} style={[styles.daySection, isDesktop && { marginBottom: 40 }]}>
+                        {/* Day Header */}
+                        <View style={styles.dayHeaderContainer}>
+                            <Skeleton width={60} height={32} borderRadius={8} style={{ marginRight: 12 }} />
+                            <Skeleton width={100} height={24} />
+                        </View>
+
+                        {/* Timeline Items */}
+                        <View style={styles.timelineContainer}>
+                            {[1, 2].map(item => (
+                                <View key={item} style={styles.itemCardWrapper}>
+                                    <View style={styles.timelineLine} />
+                                    <View style={[styles.timelineDot, { backgroundColor: '#333', borderColor: '#333' }]} />
+
+                                    <View style={[styles.itemCard, { height: 100 }]}>
+                                        {/* Time Column */}
+                                        <View style={[styles.timeContainer, { width: 95 }]}>
+                                            <Skeleton width={60} height={16} style={{ marginBottom: 8 }} />
+                                            <Skeleton width={40} height={12} style={{ marginBottom: 8 }} />
+                                            <Skeleton width={60} height={16} />
+                                        </View>
+
+                                        {/* Info Column */}
+                                        <View style={styles.itemInfo}>
+                                            <Skeleton width={60} height={16} borderRadius={4} style={{ marginBottom: 10 }} />
+                                            <Skeleton width={180} height={20} style={{ marginBottom: 8 }} />
+                                            <Skeleton width={120} height={16} />
+                                        </View>
+                                    </View>
+                                </View>
+                            ))}
+                        </View>
+                    </View>
+                ))}
+            </ScrollView>
+        </View>
+    );
+
+    if (loading) {
+        return <TimetableSkeleton />;
     }
 
     return (

@@ -38,27 +38,28 @@ export const HoverCard: React.FC<HoverCardProps> = ({
     const handleHoverIn = () => {
         if (disabled) return;
         hover.value = withTiming(1, { duration: 200 });
-        scale.value = withSpring(activeScale, { damping: 15, stiffness: 150 });
+        // Critically damped spring for professional feel (no bounce)
+        scale.value = withSpring(activeScale, { damping: 50, stiffness: 400 });
     };
 
     const handleHoverOut = () => {
         if (disabled) return;
         hover.value = withTiming(0, { duration: 200 });
-        scale.value = withSpring(1, { damping: 15, stiffness: 150 });
+        scale.value = withSpring(1, { damping: 50, stiffness: 400 });
     };
 
     const handlePressIn = () => {
         pressed.value = withTiming(1, { duration: 100 });
-        scale.value = withSpring(0.98, { damping: 15, stiffness: 200 });
+        scale.value = withSpring(0.98, { damping: 50, stiffness: 400 });
     };
 
     const handlePressOut = () => {
         pressed.value = withTiming(0, { duration: 100 });
         // If on web and still hovering, return to active scale, else 1
         if (isWeb && hover.value === 1) {
-            scale.value = withSpring(activeScale, { damping: 15, stiffness: 150 });
+            scale.value = withSpring(activeScale, { damping: 50, stiffness: 400 });
         } else {
-            scale.value = withSpring(1, { damping: 15, stiffness: 150 });
+            scale.value = withSpring(1, { damping: 50, stiffness: 400 });
         }
     };
 

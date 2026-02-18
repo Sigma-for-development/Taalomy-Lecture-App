@@ -1575,6 +1575,7 @@
     "status_active": "نشط",
     "status_in_progress": "قيد التنفيذ",
     "status_failed": "فشل",
-    "status_success": "نجاح",
+    "setup_complete": "تم الإعداد",
+    "setup_complete_desc": "يمكنك الآن استخدام التطبيق",
     "message_error": "فشل في إرسال الرسالة"
 }

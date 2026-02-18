@@ -22,6 +22,7 @@ import { API_CONFIG } from '../src/config/api';
 import { useTranslation } from 'react-i18next';
 import ProfilePicture from '../src/components/ProfilePicture';
 import { useResponsive } from '../src/hooks/useResponsive';
+import { HoverCard } from '../src/components/HoverCard';
 
 interface Student {
     id: number;
@@ -92,7 +93,7 @@ const StudentsScreen = () => {
     }
 
     return (
-        <View style={{ flex: 1, backgroundColor: '#1a1a1a' }}>
+        <View style={{ flex: 1, backgroundColor: '#1b1b1b' }}>
             <StatusBar barStyle="light-content" />
 
             {/* Header */}
@@ -105,8 +106,8 @@ const StudentsScreen = () => {
                         paddingTop: Platform.OS === 'ios' ? 60 : 40,
                         paddingBottom: 20,
                     }),
-                    paddingHorizontal: isDesktop ? 24 : 20,
-                    backgroundColor: '#1a1a1a',
+                    paddingHorizontal: 24, // Standardized 24px padding
+                    backgroundColor: '#1b1b1b',
                     borderBottomWidth: 1,
                     borderBottomColor: '#2c2c2c',
                 }}
@@ -138,9 +139,9 @@ const StudentsScreen = () => {
 
             {/* Search Bar */}
             <View style={{
-                paddingHorizontal: isDesktop ? 24 : 20,
+                paddingHorizontal: 24, // Standardized 24px padding
                 paddingVertical: 16,
-                backgroundColor: '#1a1a1a',
+                backgroundColor: '#1b1b1b', // Match sidebar background
                 ...(isDesktop && { maxWidth: 1400, alignSelf: 'center', width: '100%' })
             }}>
                 <View style={{
@@ -181,7 +182,7 @@ const StudentsScreen = () => {
                     alignSelf: 'center',
                     width: '100%'
                 }}>
-                    <View style={{
+                    <HoverCard style={{
                         flex: 1,
                         minWidth: 200,
                         backgroundColor: 'rgba(255, 255, 255, 0.05)',
@@ -211,9 +212,9 @@ const StudentsScreen = () => {
                                 {t('total_students')}
                             </Text>
                         </View>
-                    </View>
+                    </HoverCard>
 
-                    <View style={{
+                    <HoverCard style={{
                         flex: 1,
                         minWidth: 200,
                         backgroundColor: 'rgba(255, 255, 255, 0.05)',
@@ -243,9 +244,9 @@ const StudentsScreen = () => {
                                 {t('active_students')}
                             </Text>
                         </View>
-                    </View>
+                    </HoverCard>
 
-                    <View style={{
+                    <HoverCard style={{
                         flex: 1,
                         minWidth: 200,
                         backgroundColor: 'rgba(255, 255, 255, 0.05)',
@@ -275,9 +276,9 @@ const StudentsScreen = () => {
                                 {t('total_intakes')}
                             </Text>
                         </View>
-                    </View>
+                    </HoverCard>
 
-                    <View style={{
+                    <HoverCard style={{
                         flex: 1,
                         minWidth: 200,
                         backgroundColor: 'rgba(255, 255, 255, 0.05)',
@@ -307,7 +308,7 @@ const StudentsScreen = () => {
                                 {t('avg_intakes_per_student')}
                             </Text>
                         </View>
-                    </View>
+                    </HoverCard>
                 </View>
             )}
 
@@ -335,18 +336,19 @@ const StudentsScreen = () => {
                 }
                 renderItem={({ item: student }) => (
                     <View style={{ width: isDesktop ? '33.33%' : '100%', paddingHorizontal: isDesktop ? 6 : 0, marginBottom: isDesktop ? 0 : 12 }}>
-                        <TouchableOpacity
+                        <HoverCard
                             onPress={() => router.push(`/student-details/${student.id}`)}
                             style={{
-                                backgroundColor: '#252525',
+                                backgroundColor: 'rgba(255, 255, 255, 0.03)',
                                 borderRadius: 16,
                                 padding: 16,
                                 flexDirection: isDesktop ? 'column' : 'row',
                                 alignItems: isDesktop ? 'flex-start' : 'center',
                                 borderWidth: 1,
-                                borderColor: '#333',
+                                borderColor: 'rgba(255, 255, 255, 0.08)',
                                 height: isDesktop ? '100%' : undefined
                             }}
+                            activeScale={0.98}
                         >
                             <View style={{ marginEnd: isDesktop ? 0 : 16, marginBottom: isDesktop ? 12 : 0, alignSelf: isDesktop ? 'center' : 'flex-start' }}>
                                 <ProfilePicture
@@ -395,7 +397,7 @@ const StudentsScreen = () => {
                                     <Ionicons name="chevron-forward" size={16} color="#fff" />
                                 </View>
                             )}
-                        </TouchableOpacity>
+                        </HoverCard>
                     </View>
                 )}
                 ListEmptyComponent={

@@ -38,6 +38,7 @@ interface Intake {
 
 import { HoverCard } from '../src/components/HoverCard';
 import { HoverIcon } from '../src/components/HoverIcon';
+import { Skeleton } from '../src/components/Skeleton';
 
 const IntakesScreen = () => {
   const { t, i18n } = useTranslation();
@@ -193,13 +194,130 @@ const IntakesScreen = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#1a1a1a' }}>
-        <ActivityIndicator size="large" color="#3498db" />
-        <Text style={{ color: '#fff', marginTop: 16 }}>{t('loading')}</Text>
+  // Skeleton Loading Component
+  const IntakeSkeleton = () => (
+    <View style={{ flex: 1, backgroundColor: '#1a1a1a' }}>
+      <StatusBar barStyle="light-content" />
+
+      {/* Header Skeleton */}
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          ...(isWeb ? { height: 80 } : {
+            paddingTop: Platform.OS === 'ios' ? 60 : 40,
+            paddingBottom: 20,
+          }),
+          paddingHorizontal: isDesktop ? 24 : 20,
+          borderBottomWidth: 1,
+          borderBottomColor: '#2c2c2c',
+        }}
+      >
+        <Skeleton width={120} height={32} />
+        <Skeleton width={32} height={32} borderRadius={16} />
       </View>
-    );
+
+      {/* Search Bar Skeleton */}
+      <View style={{
+        paddingHorizontal: isDesktop ? 24 : 20,
+        paddingVertical: 16,
+        ...(isDesktop && { maxWidth: 1400, alignSelf: 'center', width: '100%' })
+      }}>
+        <Skeleton width="100%" height={45} borderRadius={12} />
+      </View>
+
+      {/* Desktop Stats Skeleton */}
+      {isDesktop && (
+        <View style={{
+          flexDirection: 'row',
+          paddingHorizontal: 24,
+          paddingVertical: 16,
+          gap: 12,
+          maxWidth: 1400,
+          alignSelf: 'center',
+          width: '100%'
+        }}>
+          {[1, 2, 3, 4].map(key => (
+            <View key={key} style={{
+              flex: 1,
+              height: 80,
+              backgroundColor: '#252525',
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: '#333',
+              padding: 16,
+              flexDirection: 'row',
+              alignItems: 'center'
+            }}>
+              <Skeleton width={48} height={48} borderRadius={24} style={{ marginRight: 12 }} />
+              <View>
+                <Skeleton width={30} height={20} style={{ marginBottom: 4 }} />
+                <Skeleton width={80} height={12} />
+              </View>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {/* Grid/List Header Skeleton */}
+      <View style={{
+        paddingHorizontal: isDesktop ? 24 : 20,
+        marginTop: 20,
+        marginBottom: 16,
+        ...(isDesktop && { maxWidth: 1400, alignSelf: 'center', width: '100%' })
+      }}>
+        <Skeleton width={150} height={24} />
+      </View>
+
+      {/* Grid/List Content Skeleton */}
+      <View style={{
+        paddingHorizontal: isDesktop ? 18 : 20,
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        ...(isDesktop && { maxWidth: 1400, alignSelf: 'center', width: '100%' })
+      }}>
+        {[1, 2, 3, 4, 5, 6].map(key => (
+          <View key={key} style={{
+            width: isDesktop ? '33.33%' : '100%',
+            paddingHorizontal: isDesktop ? 6 : 0,
+            marginBottom: 15
+          }}>
+            <View style={{
+              backgroundColor: '#252525',
+              borderRadius: 16,
+              padding: 20,
+              borderWidth: 1,
+              borderColor: '#333',
+              height: 250 // Approx card height
+            }}>
+              {/* Card Header: Title + Badge */}
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 }}>
+                <Skeleton width="60%" height={24} />
+                <Skeleton width={60} height={24} borderRadius={8} />
+              </View>
+
+              {/* Description Area */}
+              <Skeleton width="100%" height={16} style={{ marginBottom: 8 }} />
+              <Skeleton width="90%" height={16} style={{ marginBottom: 20 }} />
+
+              {/* Date Row */}
+              <Skeleton width="100%" height={45} borderRadius={10} style={{ marginBottom: 20 }} />
+
+              {/* Footer: Students + Arrow */}
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
+                <Skeleton width={100} height={16} />
+                <Skeleton width={32} height={32} borderRadius={16} />
+              </View>
+            </View>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+
+  if (loading) {
+    return <IntakeSkeleton />;
   }
 
   return (

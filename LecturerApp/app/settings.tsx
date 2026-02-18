@@ -18,9 +18,13 @@ import { changeLanguage as i18nChangeLanguage } from '../src/i18n';
 import { I18nManager } from 'react-native';
 import { tokenStorage } from '../utils/tokenStorage';
 import { BlurView } from 'expo-blur';
+import { HoverCard } from '../src/components/HoverCard';
+import { useResponsive } from '../src/hooks/useResponsive';
 
 export default function SettingsScreen() {
     const { t, i18n } = useTranslation();
+    const { isDesktop } = useResponsive();
+    const isWeb = Platform.OS === 'web';
     const [isLanguageModalVisible, setIsLanguageModalVisible] = React.useState(false);
 
     const changeLanguage = async (lang: 'en' | 'ar') => {
@@ -51,7 +55,13 @@ export default function SettingsScreen() {
         onPress: () => void,
         color: string = '#3498db'
     ) => (
-        <TouchableOpacity style={styles.settingItem} onPress={onPress}>
+        <HoverCard
+            style={[styles.settingItem, { marginBottom: 12 }]} // Distinct cards
+            onPress={onPress}
+            activeScale={0.98}
+            hoverBorderColor="#3498db" // Highlight border on hover
+            baseBorderColor="rgba(255, 255, 255, 0.05)"
+        >
             <View style={styles.settingIconContainer}>
                 <Ionicons name={icon} size={22} color={color} />
             </View>
@@ -61,7 +71,7 @@ export default function SettingsScreen() {
                 size={20}
                 color="#95a5a6"
             />
-        </TouchableOpacity>
+        </HoverCard>
     );
 
     const handleLogout = async () => {
@@ -108,10 +118,10 @@ export default function SettingsScreen() {
     return (
         <View style={styles.container}>
             <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
-            <LinearGradient
+            {/* <LinearGradient
                 colors={['#0a0a0a', '#1a1a1a', '#2d2d2d']}
                 style={styles.backgroundGradient}
-            />
+            /> */}
 
             <Stack.Screen
                 options={{
@@ -120,15 +130,25 @@ export default function SettingsScreen() {
             />
 
             {/* Custom Header */}
-            <View style={styles.header}>
-                <TouchableOpacity
-                    style={styles.backButton}
-                    onPress={() => router.back()}
-                >
-                    <Ionicons name="arrow-back" size={24} color="#fff" />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>{t('settings')}</Text>
-                <View style={{ width: 40 }} />
+            <View style={[
+                styles.header,
+                isWeb && {
+                    justifyContent: 'flex-start',
+                    height: 80,
+                    paddingTop: 0,
+                    paddingBottom: 0,
+                }
+            ]}>
+                {!isWeb && (
+                    <TouchableOpacity
+                        style={styles.backButton}
+                        onPress={() => router.back()}
+                    >
+                        <Ionicons name="arrow-back" size={24} color="#fff" />
+                    </TouchableOpacity>
+                )}
+                <Text style={[styles.headerTitle, isWeb && { textAlign: 'left', marginLeft: 0 }]}>{t('settings')}</Text>
+                {!isWeb && <View style={{ width: 40 }} />}
             </View>
 
             <ScrollView style={styles.content}>
@@ -184,10 +204,13 @@ export default function SettingsScreen() {
                 </View>
 
                 {/* Logout Section */}
-                <View style={[styles.section, { borderColor: 'rgba(231, 76, 60, 0.3)' }]}>
-                    <TouchableOpacity
-                        style={[styles.settingItem, { borderBottomWidth: 0 }]}
+                <View style={styles.section}>
+                    <HoverCard
+                        style={[styles.settingItem, { marginBottom: 12 }]}
                         onPress={handleLogout}
+                        activeScale={0.98}
+                        hoverBorderColor="#e74c3c"
+                        baseBorderColor="rgba(231, 76, 60, 0.3)"
                     >
                         <View style={[styles.settingIconContainer, { backgroundColor: 'rgba(231, 76, 60, 0.1)' }]}>
                             <Ionicons name="log-out-outline" size={22} color="#e74c3c" />
@@ -195,7 +218,7 @@ export default function SettingsScreen() {
                         <Text style={[styles.settingText, { color: '#e74c3c', textAlign: i18n.dir() === 'rtl' ? 'right' : 'left' }]}>
                             {t('logout')}
                         </Text>
-                    </TouchableOpacity>
+                    </HoverCard>
                 </View>
             </ScrollView>
 
@@ -251,7 +274,7 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0a0a0a',
+        backgroundColor: '#1b1b1b', // Match Sidebar Background
     },
     backgroundGradient: {
         position: 'absolute',
@@ -264,11 +287,13 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 20,
+        paddingHorizontal: 24, // Standardized 24px padding
         paddingTop: 60,
         paddingBottom: 20,
-        backgroundColor: 'rgba(10, 10, 10, 0.5)',
+        backgroundColor: '#1b1b1b', // Match Sidebar Background
         zIndex: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#2c2c2c',
     },
     backButton: {
         width: 40,
@@ -281,21 +306,27 @@ const styles = StyleSheet.create({
         borderColor: 'rgba(255, 255, 255, 0.1)',
     },
     headerTitle: {
-        fontSize: 20,
+        fontSize: 24, // Increased to 24 to match Intakes
         fontWeight: '700',
         color: '#fff',
     },
     content: {
         flex: 1,
         padding: 20,
+        ...(Platform.OS === 'web' && {
+            maxWidth: 1000,
+            width: '100%',
+            alignSelf: 'center',
+            paddingTop: 40,
+        })
     },
     section: {
         marginBottom: 30,
-        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-        borderRadius: 16,
-        padding: 10,
-        borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.1)',
+        // backgroundColor: 'rgba(255, 255, 255, 0.05)', // Removed section background
+        // borderRadius: 16,
+        padding: 0, // Removed padding
+        // borderWidth: 1,
+        // borderColor: 'rgba(255, 255, 255, 0.1)',
     },
     sectionTitle: {
         fontSize: 14,
@@ -311,9 +342,9 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         paddingVertical: 15,
-        paddingHorizontal: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+        paddingHorizontal: 16, // Increased padding
+        // borderBottomWidth: 1, // Removed for card style
+        // borderBottomColor: 'rgba(255, 255, 255, 0.05)',
     },
     settingIconContainer: {
         width: 36,
