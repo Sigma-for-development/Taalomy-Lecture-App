@@ -11,6 +11,7 @@ import {
   TextInput,
   Switch,
   Image,
+  Platform,
 } from 'react-native';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -23,6 +24,8 @@ import axios from 'axios';
 import { useLocalization } from '../src/context/LocalizationContext';
 import { useTranslation } from 'react-i18next'; // Added import
 import { SeoHead } from '../src/components/SeoHead';
+import { useResponsive } from '../src/hooks/useResponsive';
+import { HoverCard } from '../src/components/HoverCard';
 
 interface LecturerProfile {
   id?: number;
@@ -53,6 +56,10 @@ interface LecturerProfile {
   linkedin_url?: string;
   twitter_url?: string;
   youtube_url?: string;
+  lecturer?: {
+    first_name?: string;
+    last_name?: string;
+  }
 }
 
 interface Review {
@@ -67,7 +74,9 @@ interface Review {
 
 const LecturerProfileScreen = () => {
   const { currencySymbol } = useLocalization();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { isDesktop } = useResponsive();
+  const isWeb = Platform.OS === 'web';
   const [profile, setProfile] = useState<LecturerProfile>({
     bio: '',
     experience_years: 0,
@@ -208,18 +217,13 @@ const LecturerProfileScreen = () => {
           text1: t('save_success'),
           text2: t('profile_saved_success')
         });
-
-        // Navigate back to previous page after successful save
-        setTimeout(() => {
-          router.back();
-        }, 1000); // Give user time to see the success message
       }
     } catch (error: any) {
       console.error('Error saving profile:', error);
       Toast.show({
         type: 'error',
         text1: t('error'),
-        text2: error.response?.data?.detail || t('failed_save_profile')
+        text2: error.response?.data?.error || t('failed_save_profile')
       });
     } finally {
       setIsSaving(false);
@@ -239,7 +243,7 @@ const LecturerProfileScreen = () => {
   const renderField = (label: string, field: keyof LecturerProfile, placeholder: string, multiline: boolean = false, numeric: boolean = false, toggleKey?: keyof LecturerProfile) => (
     <View style={styles.fieldContainer}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <Text style={{ fontSize: 14, color: '#bdc3c7' }}>{label}</Text>
+        <Text style={{ fontSize: 13, color: '#bdc3c7', fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 }}>{label}</Text>
         {toggleKey && (
           <Switch
             value={!!profile[toggleKey]}
@@ -255,7 +259,7 @@ const LecturerProfileScreen = () => {
         value={String(profile[field] || '')}
         onChangeText={(text) => updateField(field, numeric ? (text === '' ? 0 : parseFloat(text) || 0) : text)}
         placeholder={placeholder}
-        placeholderTextColor="#95a5a6"
+        placeholderTextColor="#555"
         multiline={multiline}
         numberOfLines={multiline ? 4 : 1}
         keyboardType={numeric ? 'numeric' : 'default'}
@@ -275,6 +279,258 @@ const LecturerProfileScreen = () => {
     );
   }
 
+  // Hero Section
+  const HeroSection = () => (
+    <View style={styles.heroContainer}>
+      <LinearGradient
+        colors={['#1b1b1b', '#1b1b1b']} // Match sidebar color
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={styles.heroGradient}
+      />
+      <View style={styles.heroContent}>
+        {/* Left Column Aligned with Main Content (65%) */}
+        <View style={styles.heroLeftCol}>
+          <View style={styles.heroAvatarContainer}>
+            {profile.lecturer_profile_picture ? (
+              <Image
+                source={{
+                  uri: profile.lecturer_profile_picture?.startsWith('http')
+                    ? profile.lecturer_profile_picture
+                    : `${API_CONFIG.ROOT_URL}${profile.lecturer_profile_picture?.startsWith('/') ? '' : '/'}${profile.lecturer_profile_picture}`
+                }}
+                style={styles.heroAvatar}
+              />
+            ) : (
+              <View style={[styles.heroAvatar, styles.placeholderImage]}>
+                <Ionicons name="person" size={35} color="#fff" />
+              </View>
+            )}
+          </View>
+          <View style={styles.heroInfo}>
+            <Text style={styles.heroName}>
+              {profile.lecturer?.first_name ? `${profile.lecturer.first_name} ${profile.lecturer.last_name || ''}` : 'Lecturer Name'}
+            </Text>
+            <View style={[styles.heroStatusBadge, profile.is_verified && styles.verifiedBadge]}>
+              <Ionicons name={profile.is_verified ? "checkmark-circle" : "time"} size={14} color="#fff" />
+              <Text style={styles.heroStatusText}>{profile.is_verified ? t('verified') : t('pending')}</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Right Column Aligned with Sidebar (35%) */}
+        <View style={styles.heroRightCol}>
+          {/* Stats Group */}
+          <View style={styles.heroStatsGroup}>
+            <View style={styles.heroStatsItem}>
+              <Text style={styles.heroStatValue}>{typeof profile.rating === 'number' ? profile.rating.toFixed(1) : parseFloat(profile.rating).toFixed(1)}</Text>
+              <Text style={styles.heroStatLabel}>{t('rating')}</Text>
+            </View>
+            <View style={styles.heroStatsDivider} />
+            <View style={styles.heroStatsItem}>
+              <Text style={styles.heroStatValue}>{profile.total_reviews}</Text>
+              <Text style={styles.heroStatLabel}>{t('reviews_section').split(' ')[0]}</Text> {/* "Reviews" */}
+            </View>
+            <View style={styles.heroStatsDivider} />
+            <View style={styles.heroStatsItem}>
+              <Text style={styles.heroStatValue}>{profile.experience_years}+</Text>
+              <Text style={styles.heroStatLabel}>{t('experience_years_label').split(' ')[0]}</Text> {/* "Experience" */}
+            </View>
+          </View>
+
+          <HoverCard
+            style={styles.heroSaveButton}
+            onPress={saveProfile}
+            disabled={isSaving}
+            activeScale={0.98}
+          >
+            {isSaving ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.saveButtonText}>{t('save')}</Text>
+            )}
+          </HoverCard>
+        </View>
+      </View>
+    </View>
+  );
+
+  const BasicInfoSection = () => (
+    <Wrapper title={t('basic_info')} isDesktop={isDesktop}>
+      <ProfileField
+        label={t('bio_label')}
+        value={profile.bio}
+        onChangeText={(text) => updateField('bio', text)}
+        placeholder={t('bio_placeholder')}
+        multiline={true}
+      />
+      <View style={isDesktop ? styles.row : {}}>
+        <View style={isDesktop ? { flex: 1, marginEnd: 15 } : {}}>
+          <ProfileField
+            label={t('speciality_label')}
+            value={profile.speciality}
+            onChangeText={(text) => updateField('speciality', text)}
+            placeholder={t('speciality_placeholder')}
+          />
+        </View>
+        <View style={isDesktop ? { flex: 1 } : {}}>
+          <ProfileField
+            label={t('education_label')}
+            value={profile.education}
+            onChangeText={(text) => updateField('education', text)}
+            placeholder={t('education_placeholder')}
+          />
+        </View>
+      </View>
+      <ProfileField
+        label={t('experience_years_label')}
+        value={profile.experience_years}
+        onChangeText={(text) => updateField('experience_years', text)}
+        placeholder="0"
+        numeric={true}
+      />
+    </Wrapper>
+  );
+
+  const TeachingDetailsSection = () => (
+    <Wrapper title={t('teaching_details')} isDesktop={isDesktop}>
+      <ProfileField
+        label={t('subjects_taught_label')}
+        value={profile.subjects_taught}
+        onChangeText={(text) => updateField('subjects_taught', text)}
+        placeholder={t('subjects_taught_placeholder')}
+      />
+      <ProfileField
+        label={t('teaching_style_label')}
+        value={profile.teaching_style}
+        onChangeText={(text) => updateField('teaching_style', text)}
+        placeholder={t('teaching_style_placeholder')}
+        multiline={true}
+      />
+      <ProfileField
+        label={t('languages_label')}
+        value={profile.languages}
+        onChangeText={(text) => updateField('languages', text)}
+        placeholder={t('languages_placeholder')}
+      />
+    </Wrapper>
+  );
+
+  const ProfessionalInfoSection = () => (
+    <Wrapper title={t('professional_info')} isDesktop={isDesktop}>
+      <ProfileField
+        label={t('certifications_label')}
+        value={profile.certifications}
+        onChangeText={(text) => updateField('certifications', text)}
+        placeholder={t('certifications_placeholder')}
+        multiline={true}
+      />
+      <ProfileField
+        label={t('achievements_label')}
+        value={profile.achievements}
+        onChangeText={(text) => updateField('achievements', text)}
+        placeholder={t('achievements_placeholder')}
+        multiline={true}
+      />
+      <ProfileField
+        label={t('working_hours_label')}
+        value={profile.working_hours}
+        onChangeText={(text) => updateField('working_hours', text)}
+        placeholder={t('working_hours_placeholder')}
+      />
+    </Wrapper>
+  );
+
+  const SocialPortfolioSection = () => (
+    <Wrapper title={t('social_portfolio')} isDesktop={isDesktop}>
+      <ProfileField
+        label={t('portfolio_website_label')}
+        value={profile.portfolio_website || ''}
+        onChangeText={(text) => updateField('portfolio_website', text)}
+        placeholder="https://..."
+      />
+      <ProfileField
+        label={t('linkedin_url_label')}
+        value={profile.linkedin_url || ''}
+        onChangeText={(text) => updateField('linkedin_url', text)}
+        placeholder="Linkedin URL"
+      />
+      <ProfileField
+        label={t('twitter_url_label')}
+        value={profile.twitter_url || ''}
+        onChangeText={(text) => updateField('twitter_url', text)}
+        placeholder="Twitter URL"
+      />
+      <ProfileField
+        label={t('youtube_url_label')}
+        value={profile.youtube_url || ''}
+        onChangeText={(text) => updateField('youtube_url', text)}
+        placeholder="Youtube URL"
+      />
+    </Wrapper>
+  );
+
+  const PricingAvailabilitySection = () => (
+    <Wrapper title={t('pricing_availability')} isDesktop={isDesktop}>
+      <ProfileField
+        label={t('hourly_rate_label', { symbol: currencySymbol })}
+        value={profile.hourly_rate}
+        onChangeText={(text) => updateField('hourly_rate', text)}
+        placeholder="0"
+        numeric={true}
+        toggleKey="show_hourly_rate"
+        isToggled={profile.show_hourly_rate}
+        onToggle={(val) => updateField('show_hourly_rate', val)}
+      />
+      <ProfileField
+        label={t('class_price_label', { symbol: currencySymbol })}
+        value={profile.class_rate}
+        onChangeText={(text) => updateField('class_rate', text)}
+        placeholder="0"
+        numeric={true}
+        toggleKey="show_class_rate"
+        isToggled={profile.show_class_rate}
+        onToggle={(val) => updateField('show_class_rate', val)}
+      />
+      <ProfileField
+        label={t('term_price_label', { symbol: currencySymbol })}
+        value={profile.term_rate}
+        onChangeText={(text) => updateField('term_rate', text)}
+        placeholder="0"
+        numeric={true}
+        toggleKey="show_term_rate"
+        isToggled={profile.show_term_rate}
+        onToggle={(val) => updateField('show_term_rate', val)}
+      />
+      <ProfileField
+        label={t('demo_price_label', { symbol: currencySymbol })}
+        value={profile.demo_price}
+        onChangeText={(text) => updateField('demo_price', text)}
+        placeholder="0"
+        numeric={true}
+        toggleKey="is_demo_offered"
+        isToggled={profile.is_demo_offered}
+        onToggle={(val) => updateField('is_demo_offered', val)}
+      />
+      <View style={styles.switchContainer}>
+        <Text style={styles.switchLabel}>{t('available_for_bookings')}</Text>
+        <Switch
+          value={isAvailable}
+          onValueChange={setIsAvailable}
+          trackColor={{ false: '#767577', true: '#3498db' }}
+          thumbColor={isAvailable ? '#fff' : '#f4f3f4'}
+        />
+      </View>
+    </Wrapper>
+  );
+
+  const ReviewsSection = () => (
+    <Wrapper title={t('reviews_section')} isDesktop={isDesktop}>
+      {renderReviews()}
+    </Wrapper>
+  );
+
+
   return (
     <View style={styles.container}>
       <SeoHead
@@ -285,155 +541,71 @@ const LecturerProfileScreen = () => {
       />
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
-      <LinearGradient
-        colors={['#0a0a0a', '#1a1a1a', '#2d2d2d']}
-        style={styles.backgroundGradient}
-      />
+      {isDesktop ? (
+        <>
+          {HeroSection()}
+          <ScrollView style={styles.content} contentContainerStyle={styles.desktopContainer} showsVerticalScrollIndicator={false}>
+            <View style={styles.desktopGrid}>
+              {/* Left Column (Main - 65%) */}
+              <View style={styles.desktopMainCol}>
+                {BasicInfoSection()}
+                {TeachingDetailsSection()}
+                {ProfessionalInfoSection()}
+                {ReviewsSection()}
+              </View>
 
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={24} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('professional_profile_title')}</Text>
-        <TouchableOpacity
-          style={styles.saveButton}
-          onPress={saveProfile}
-          disabled={isSaving}
-        >
-          {isSaving ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <Text style={styles.saveButtonText}>{t('save')}</Text>
-          )}
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Profile Picture */}
-        <View style={styles.profileImageContainer}>
-          {profile.lecturer_profile_picture ? (
-            <Image
-              source={{
-                uri: profile.lecturer_profile_picture?.startsWith('http')
-                  ? profile.lecturer_profile_picture
-                  : `${API_CONFIG.ROOT_URL}${profile.lecturer_profile_picture?.startsWith('/') ? '' : '/'}${profile.lecturer_profile_picture}`
-              }}
-              style={styles.profileImage}
-            />
-          ) : (
-            <View style={[styles.profileImage, styles.placeholderImage]}>
-              <Ionicons name="person" size={60} color="#bdc3c7" />
+              {/* Right Column (Sidebar - 35%) */}
+              <View style={styles.desktopSidebarCol}>
+                {PricingAvailabilitySection()}
+                {SocialPortfolioSection()}
+              </View>
             </View>
-          )}
-        </View>
-
-        {/* Basic Information */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('basic_info')}</Text>
-
-          {renderField(t('bio_label'), 'bio', t('bio_placeholder'), true)}
-          {renderField(t('speciality_label'), 'speciality', t('speciality_placeholder'), false)}
-          {renderField(t('experience_years_label'), 'experience_years', '0', false, true)}
-          {renderField(t('education_label'), 'education', t('education_placeholder'), true)}
-        </View>
-
-        {/* Teaching Details */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('teaching_details')}</Text>
-
-          {renderField(t('subjects_taught_label'), 'subjects_taught', t('subjects_taught_placeholder'), false)}
-          {renderField(t('teaching_style_label'), 'teaching_style', t('teaching_style_placeholder'), true)}
-          {renderField(t('languages_label'), 'languages', t('languages_placeholder'), false)}
-        </View>
-
-        {/* Professional Information */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('professional_info')}</Text>
-
-          {renderField(t('certifications_label'), 'certifications', t('certifications_placeholder'), true)}
-          {renderField(t('achievements_label'), 'achievements', t('achievements_placeholder'), true)}
-          {renderField(t('working_hours_label'), 'working_hours', t('working_hours_placeholder'), false)}
-        </View>
-
-        {/* Social & Portfolio */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('social_portfolio')}</Text>
-
-          {renderField(t('portfolio_website_label'), 'portfolio_website', t('portfolio_placeholder'), false)}
-          {renderField(t('linkedin_url_label'), 'linkedin_url', t('linkedin_placeholder'), false)}
-          {renderField(t('twitter_url_label'), 'twitter_url', t('twitter_placeholder'), false)}
-          {renderField(t('youtube_url_label'), 'youtube_url', t('youtube_placeholder'), false)}
-        </View>
-
-        {/* Pricing & Availability */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('pricing_availability')}</Text>
-
-          {renderField(t('hourly_rate_label', { symbol: currencySymbol }), 'hourly_rate', '0', false, true, 'show_hourly_rate')}
-          {renderField(t('class_price_label', { symbol: currencySymbol }), 'class_rate', '0', false, true, 'show_class_rate')}
-          {renderField(t('term_price_label', { symbol: currencySymbol }), 'term_rate', '0', false, true, 'show_term_rate')}
-          {renderField(t('demo_price_label', { symbol: currencySymbol }), 'demo_price', '0', false, true, 'is_demo_offered')}
-
-          <View style={styles.switchContainer}>
-            <Text style={styles.switchLabel}>{t('available_for_bookings')}</Text>
-            <Switch
-              value={isAvailable}
-              onValueChange={setIsAvailable}
-              trackColor={{ false: '#767577', true: '#3498db' }}
-              thumbColor={isAvailable ? '#fff' : '#f4f3f4'}
-            />
+          </ScrollView>
+        </>
+      ) : (
+        <>
+          <LinearGradient
+            colors={['#1b1b1b', '#1b1b1b', '#2d2d2d']}
+            style={styles.backgroundGradient}
+          />
+          {/* Mobile Header */}
+          <View style={styles.mobileHeader}>
+            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+              <Ionicons name={i18n.language === 'ar' ? "chevron-forward" : "chevron-back"} size={22} color="#fff" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>{t('professional_profile_title')}</Text>
+            <TouchableOpacity onPress={saveProfile} style={styles.saveButtonMobile}>
+              {isSaving ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.saveButtonText}>{t('save')}</Text>}
+            </TouchableOpacity>
           </View>
-        </View>
 
-        {/* Profile Status */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('profile_status')}</Text>
-
-          <View style={styles.statusContainer}>
-            <View style={styles.statusItem}>
-              <Text style={styles.statusLabel}>{t('verification_status')}</Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <View style={[styles.statusBadge, profile.is_verified ? styles.verifiedBadge : styles.unverifiedBadge, { marginEnd: 10 }]}>
-                  <Text style={styles.statusText}>
-                    {profile.is_verified ? t('verified') : t('pending')}
-                  </Text>
+          <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
+            {ProfileImageSection({ profile })}
+            {BasicInfoSection()}
+            {TeachingDetailsSection()}
+            {ProfessionalInfoSection()}
+            {SocialPortfolioSection()}
+            {PricingAvailabilitySection()}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>{t('profile_status')}</Text>
+              <View style={styles.statusContainer}>
+                <View style={styles.statusItem}>
+                  <Text style={styles.statusLabel}>{t('verification_status')}</Text>
+                  <View style={[styles.statusBadge, profile.is_verified ? styles.verifiedBadge : styles.unverifiedBadge]}>
+                    <Text style={styles.statusText}>{profile.is_verified ? t('verified') : t('pending')}</Text>
+                  </View>
                 </View>
-                {!profile.is_verified && (
-                  <TouchableOpacity
-                    style={styles.verifyButton}
-                    onPress={() => router.push('/verification-request')}
-                  >
-                    <Text style={styles.verifyButtonText}>{t('get_verified')}</Text>
-                  </TouchableOpacity>
-                )}
+                {/* Mobile review summary */}
+                <View style={styles.statusItem}>
+                  <Text style={styles.statusLabel}>{t('rating')}</Text>
+                  <Text style={styles.ratingText}>★ {typeof profile.rating === 'number' ? profile.rating.toFixed(1) : parseFloat(profile.rating).toFixed(1)} ({profile.total_reviews})</Text>
+                </View>
               </View>
             </View>
-
-            <View style={styles.statusItem}>
-              <Text style={styles.statusLabel}>{t('rating')}</Text>
-              <View style={styles.ratingContainer}>
-                <Ionicons name="star" size={16} color="#f39c12" />
-                <Text style={styles.ratingText}>
-                  {typeof profile.rating === 'number'
-                    ? profile.rating.toFixed(1)
-                    : (parseFloat(profile.rating) || 0).toFixed(1)}
-                </Text>
-                <Text style={styles.reviewsText}>{t('reviews_count', { count: profile.total_reviews || 0 })}</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-
-        {/* Reviews Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('reviews_section')}</Text>
-          {renderReviews()}
-        </View>
-      </ScrollView>
+            {ReviewsSection()}
+          </ScrollView>
+        </>
+      )}
     </View>
   );
 
@@ -496,10 +668,90 @@ const LecturerProfileScreen = () => {
   }
 };
 
+// Extracted components to prevent re-renders on every keystroke (Fixes Focus Loss)
+const ProfileField = React.memo(({
+  label,
+  value,
+  onChangeText,
+  placeholder,
+  multiline = false,
+  numeric = false,
+  toggleKey,
+  isToggled,
+  onToggle
+}: {
+  label: string;
+  value: string | number;
+  onChangeText: (text: string) => void;
+  placeholder: string;
+  multiline?: boolean;
+  numeric?: boolean;
+  toggleKey?: string;
+  isToggled?: boolean;
+  onToggle?: (val: boolean) => void;
+}) => (
+  <View style={styles.fieldContainer}>
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+      <Text style={{ fontSize: 13, color: '#bdc3c7', fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 }}>{label}</Text>
+      {toggleKey && onToggle && (
+        <Switch
+          value={!!isToggled}
+          onValueChange={onToggle}
+          trackColor={{ false: '#767577', true: '#3498db' }}
+          thumbColor={isToggled ? '#fff' : '#f4f3f4'}
+          style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }}
+        />
+      )}
+    </View>
+    <TextInput
+      style={[styles.textInput, multiline && styles.multilineInput]}
+      value={String(value || '')}
+      onChangeText={(text) => onChangeText(numeric ? (text === '' ? '0' : text) : text)} // Pass raw text for now, convert in parent if needed
+      placeholder={placeholder}
+      placeholderTextColor="#555"
+      multiline={multiline}
+      numberOfLines={multiline ? 4 : 1}
+      keyboardType={numeric ? 'numeric' : 'default'}
+    />
+  </View>
+));
+
+const Wrapper = ({ children, title, isDesktop }: { children: React.ReactNode, title: string, isDesktop: boolean }) => (
+  <View style={[styles.section, isDesktop && styles.card]}>
+    <Text style={styles.sectionTitle}>{title}</Text>
+    {children}
+  </View>
+);
+
+const ProfileImageSection = ({ profile }: { profile: LecturerProfile }) => (
+  <View style={styles.profileImageContainer}>
+    {profile.lecturer_profile_picture ? (
+      <Image
+        source={{
+          uri: profile.lecturer_profile_picture?.startsWith('http')
+            ? profile.lecturer_profile_picture
+            : `${API_CONFIG.ROOT_URL}${profile.lecturer_profile_picture?.startsWith('/') ? '' : '/'}${profile.lecturer_profile_picture}`
+        }}
+        style={styles.profileImage}
+      />
+    ) : (
+      <View style={[styles.profileImage, styles.placeholderImage]}>
+        <Ionicons name="person" size={60} color="#fff" />
+      </View>
+    )}
+    <View style={{ marginTop: 10 }}>
+      {/* Placeholder for future upload functionality */}
+      <TouchableOpacity style={styles.verifyButton}>
+        <Text style={styles.verifyButtonText}>Change Photo</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+);
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0a0a0a',
+    backgroundColor: '#1b1b1b', // Match sidebar background
   },
   backgroundGradient: {
     position: 'absolute',
@@ -508,51 +760,164 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
   },
-  header: {
+  mobileHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: 60,
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
     paddingBottom: 20,
-  },
-  backButton: {
-    padding: 8,
+    backgroundColor: '#1b1b1b',
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#fff',
   },
-  saveButton: {
+  saveButtonMobile: {
+    backgroundColor: '#3498db',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  // Hero Styles - Corrected Alignment
+  heroContainer: {
+    height: 80,
+    width: '100%',
+    position: 'relative',
+    marginBottom: 20,
+    justifyContent: 'center', // Align center vertically
+    paddingHorizontal: 24, // Match sidebar logo container
+    borderBottomWidth: 1, // Add border
+    borderBottomColor: '#2d2d2d', // Add border color
+  },
+  heroGradient: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+  },
+  heroContent: {
+    flexDirection: 'row',
+    alignItems: 'center', // Changed from flex-end to center
+    maxWidth: 1200,
+    width: '100%',
+    alignSelf: 'center',
+    gap: 30, // Match Grid Gap
+  },
+  heroLeftCol: {
+    flex: 2, // 66% - Align with Main Content
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingLeft: 24, // Matches Card's internal padding (24px)
+  },
+  heroRightCol: {
+    flex: 1, // 33% - Align with Sidebar
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    // removed background/padding to look cleaner in 80px header
+    marginRight: 24,
+  },
+  heroAvatarContainer: {
+    marginRight: 15,
+  },
+  heroAvatar: {
+    width: 50, // Reduced from 70 to 50
+    height: 50,
+    borderRadius: 25,
+    borderWidth: 2,
+    borderColor: '#fff',
+  },
+  heroInfo: {
+    justifyContent: 'center',
+  },
+  heroName: {
+    fontSize: 20, // Reduced from 24
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 4,
+  },
+  heroStatusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+    alignSelf: 'flex-start',
+  },
+  heroStatusText: {
+    color: '#fff',
+    marginLeft: 5,
+    fontWeight: '600',
+    fontSize: 11,
+  },
+  // Right Col Content
+  heroStatsGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  heroStatsItem: {
+    alignItems: 'center',
+    marginHorizontal: 10,
+  },
+  heroStatValue: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  heroStatLabel: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: 11,
+  },
+  heroStatsDivider: {
+    width: 1,
+    height: 15,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  heroSaveButton: {
     backgroundColor: '#3498db',
     paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingVertical: 8,
     borderRadius: 20,
+    marginLeft: 15,
   },
   saveButtonText: {
     color: '#fff',
     fontWeight: '600',
+    fontSize: 14,
   },
-  profileImageContainer: {
-    alignItems: 'center',
-    marginVertical: 20,
-  },
-  profileImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 3,
-    borderColor: '#3498db',
-  },
-  placeholderImage: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+  // Layout
   content: {
     flex: 1,
     paddingHorizontal: 20,
+  },
+  desktopContainer: {
+    maxWidth: 1200,
+    width: '100%',
+    alignSelf: 'center',
+    paddingBottom: 40,
+  },
+  desktopGrid: {
+    flexDirection: 'row',
+    gap: 30,
+    alignItems: 'flex-start',
+  },
+  desktopMainCol: {
+    flex: 2, // 66%
+  },
+  desktopSidebarCol: {
+    flex: 1, // 33%
+  },
+  card: {
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    padding: 24,
+    marginBottom: 20,
   },
   section: {
     marginBottom: 30,
@@ -561,28 +926,26 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: 15,
+    marginBottom: 20,
+  },
+  row: {
+    flexDirection: 'row',
   },
   fieldContainer: {
     marginBottom: 20,
-  },
-  fieldLabel: {
-    fontSize: 14,
-    color: '#bdc3c7',
-    marginBottom: 8,
   },
   textInput: {
     fontSize: 16,
     color: '#fff',
     paddingHorizontal: 15,
-    paddingVertical: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 10,
+    paddingVertical: 15,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)', // Darker input bg
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   multilineInput: {
-    height: 100,
+    height: 120,
     textAlignVertical: 'top',
   },
   switchContainer: {
@@ -590,14 +953,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 15,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    paddingHorizontal: 15,
     borderRadius: 10,
   },
   switchLabel: {
     fontSize: 16,
     color: '#fff',
+    fontWeight: '600',
   },
+  // Status components (Mobile mainly)
   statusContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 10,
@@ -729,6 +1092,28 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
+  profileImageContainer: {
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  profileImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 3,
+    borderColor: '#3498db',
+  },
+  placeholderImage: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  saveButton: {
+    // Intentionally empty if not used elsewhere, but kept to prevent errors
+  },
+  backButton: {
+    padding: 8,
+  }
 });
 
 export default LecturerProfileScreen;

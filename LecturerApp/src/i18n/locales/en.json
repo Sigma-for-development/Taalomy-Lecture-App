@@ -1524,5 +1524,10 @@
     "retry_button": "Retry",
     "quiz_toggle": "Quiz Toggle",
     "quiz_toggle_description": "Enable or disable quizzes for this class",
+    "status_pending_payment": "Pending Payment",
+    "status_active": "Active",
+    "status_in_progress": "In Progress",
+    "status_failed": "Failed",
+    "status_success": "Success",
     "message_error": "Failed to send message"
 }

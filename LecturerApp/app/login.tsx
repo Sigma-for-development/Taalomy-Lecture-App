@@ -26,6 +26,7 @@ import { useResponsive } from '../src/hooks/useResponsive';
 
 import { SeoHead } from '../src/components/SeoHead';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import { LoginSuccessAnimation } from '../src/components/LoginSuccessAnimation';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -37,6 +38,7 @@ const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isGoogleHovered, setIsGoogleHovered] = useState<boolean>(false);
+  const [isLoginSuccess, setIsLoginSuccess] = useState<boolean>(false);
   const baseurl = API_CONFIG.ACCOUNTS_BASE_URL;
 
   const [request, response, promptAsync] = Google.useAuthRequest({
@@ -140,7 +142,11 @@ const Login: React.FC = () => {
         text2: t('welcome_back_message')
       });
 
-      router.push('/dashboard');
+      if (Platform.OS === 'web') {
+        setIsLoginSuccess(true);
+      } else {
+        router.push('/dashboard');
+      }
     } catch (error: any) {
       console.error('Login error:', error.response?.data);
 
@@ -199,7 +205,11 @@ const Login: React.FC = () => {
         text2: t('welcome_back_message')
       });
 
-      router.push('/dashboard');
+      if (Platform.OS === 'web') {
+        setIsLoginSuccess(true);
+      } else {
+        router.push('/dashboard');
+      }
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || t('google_login_failed');
       Toast.show({
@@ -221,6 +231,9 @@ const Login: React.FC = () => {
         keywords="lecturer login, teacher sign in, Taalomy login, academic portal access"
         index={true}
       />
+      {isLoginSuccess && Platform.OS === 'web' && (
+        <LoginSuccessAnimation onComplete={() => router.push('/dashboard')} />
+      )}
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
       <KeyboardAvoidingView

@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   TextInput,
   Alert,
+  Platform,
 } from 'react-native';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -23,6 +24,8 @@ import WalletInfoSlides from '../src/components/WalletInfoSlides';
 import { useLocalization } from '../src/context/LocalizationContext';
 import { useTranslation } from 'react-i18next';
 import { aiContextCache } from '../src/utils/aiContextCache';
+import { useResponsive } from '../src/hooks/useResponsive';
+import { HoverCard } from '../src/components/HoverCard';
 
 interface Wallet {
   id: number;
@@ -52,7 +55,9 @@ interface BankDetails {
 
 const WalletScreen = () => {
   const { formatPrice, currencySymbol } = useLocalization();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { isDesktop } = useResponsive();
+  const isWeb = Platform.OS === 'web';
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -258,184 +263,408 @@ const WalletScreen = () => {
       />
 
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={24} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('wallet_title')}</Text>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          ...(isWeb ? { height: 80 } : {
+            paddingTop: Platform.OS === 'ios' ? 60 : 40,
+            paddingBottom: 20,
+          }),
+          paddingHorizontal: isDesktop ? 24 : 20,
+          backgroundColor: '#1a1a1a', // Consistent with Intakes
+          borderBottomWidth: 1,
+          borderBottomColor: '#2c2c2c',
+          zIndex: 10,
+        }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          {!isWeb && (
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                backgroundColor: '#252525',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginEnd: 15,
+                borderWidth: 1,
+                borderColor: '#333'
+              }}
+            >
+              <Ionicons name={i18n.language === 'ar' ? "chevron-forward" : "chevron-back"} size={22} color="#fff" />
+            </TouchableOpacity>
+          )}
+          <Text style={{ fontSize: 24, fontWeight: '700', color: '#fff' }}>
+            {t('wallet_title')}
+          </Text>
+        </View>
         <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Wallet Balance */}
-        <View style={styles.glassCard}>
-          <Text style={styles.balanceLabel}>{t('wallet_balance_label')}</Text>
-          <Text style={styles.balanceAmount}>
-            {wallet?.balance !== undefined ? formatPrice(typeof wallet.balance === 'number' ? wallet.balance : parseFloat(String(wallet.balance))) : formatPrice(0)}
-          </Text>
-        </View>
-
-        {/* Wallet Info Slides */}
-        <WalletInfoSlides />
-
-        {/* Bank Details Section */}
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>{t('bank_details_section')}</Text>
-          <View style={styles.glassCard}>
-            {isBankDetailsLocked ? (
-              <View style={styles.lockedContainer}>
-                <View style={styles.infoRow}>
-                  <Text style={styles.fieldLabel}>{t('bank_name_label')}:</Text>
-                  <Text style={styles.infoText}>{bankDetails.bank_name}</Text>
-                </View>
-                <View style={styles.infoRow}>
-                  <Text style={styles.fieldLabel}>{t('account_holder_label_short')}</Text>
-                  <Text style={styles.infoText}>{bankDetails.account_holder_name}</Text>
-                </View>
-                <View style={styles.infoRow}>
-                  <Text style={styles.fieldLabel}>{t('account_number_label_short')}</Text>
-                  <Text style={styles.infoText}>****{bankDetails.account_number.slice(-4)}</Text>
-                </View>
-                <View style={styles.infoRow}>
-                  <Text style={styles.fieldLabel}>{t('iban_label')}:</Text>
-                  <Text style={styles.infoText}>****{bankDetails.iban.slice(-4)}</Text>
-                </View>
-
-                <View style={styles.lockedMessage}>
-                  <Ionicons name="lock-closed" size={20} color="#f39c12" />
-                  <Text style={styles.lockedText}>
-                    {t('bank_details_locked_msg')}
+      <ScrollView style={styles.content} contentContainerStyle={isDesktop ? styles.desktopContainer : undefined} showsVerticalScrollIndicator={false}>
+        {isDesktop ? (
+          // DESKTOP LAYOUT (2x2 Grid)
+          <View style={styles.desktopGrid}>
+            {/* Top Row: Balance + Slides */}
+            <View style={styles.desktopRow}>
+              <View style={styles.desktopColSmall}>
+                <View style={[styles.glassCard, styles.balanceCard]}>
+                  <Text style={styles.balanceLabel}>{t('wallet_balance_label')}</Text>
+                  <Text style={styles.balanceAmount}>
+                    {wallet?.balance !== undefined ? formatPrice(typeof wallet.balance === 'number' ? wallet.balance : parseFloat(String(wallet.balance))) : formatPrice(0)}
                   </Text>
                 </View>
               </View>
-            ) : (
-              <>
-                <View style={styles.fieldContainer}>
-                  <Text style={styles.fieldLabel}>{t('bank_name_label')}</Text>
-                  <TextInput
-                    style={styles.glassInput}
-                    value={bankDetails.bank_name}
-                    onChangeText={(text) => setBankDetails({ ...bankDetails, bank_name: text })}
-                    placeholder={t('placeholder_bank_name')}
-                    placeholderTextColor="#7f8c8d"
-                  />
-                </View>
 
-                <View style={styles.fieldContainer}>
-                  <Text style={styles.fieldLabel}>{t('account_holder_label')}</Text>
-                  <TextInput
-                    style={styles.glassInput}
-                    value={bankDetails.account_holder_name}
-                    onChangeText={(text) => setBankDetails({ ...bankDetails, account_holder_name: text })}
-                    placeholder={t('placeholder_account_holder')}
-                    placeholderTextColor="#7f8c8d"
-                  />
-                </View>
-
-                <View style={styles.fieldContainer}>
-                  <Text style={styles.fieldLabel}>{t('account_number_label')}</Text>
-                  <TextInput
-                    style={styles.glassInput}
-                    value={bankDetails.account_number}
-                    onChangeText={(text) => setBankDetails({ ...bankDetails, account_number: text })}
-                    placeholder={t('placeholder_account_number')}
-                    placeholderTextColor="#7f8c8d"
-                    keyboardType="numeric"
-                  />
-                </View>
-
-                <View style={styles.fieldContainer}>
-                  <Text style={styles.fieldLabel}>{t('iban_label')}</Text>
-                  <TextInput
-                    style={styles.glassInput}
-                    value={bankDetails.iban}
-                    onChangeText={(text) => setBankDetails({ ...bankDetails, iban: text })}
-                    placeholder={t('placeholder_iban')}
-                    placeholderTextColor="#7f8c8d"
-                  />
-                </View>
-
-                <View style={styles.fieldContainer}>
-                  <Text style={styles.fieldLabel}>{t('bank_statement_label')}</Text>
-                  <TouchableOpacity style={styles.fileButton} onPress={pickDocument}>
-                    <Ionicons name={selectedFile ? "checkmark-circle" : "cloud-upload-outline"} size={24} color={selectedFile ? "#2ecc71" : "#3498db"} />
-                    <Text style={[styles.fileButtonText, selectedFile && { color: '#2ecc71' }]}>
-                      {selectedFile ? t('file_selected') : t('upload_statement')}
-                    </Text>
-                  </TouchableOpacity>
-                  {selectedFile && (
-                    <Text style={styles.fileName}>{selectedFile.name}</Text>
-                  )}
-                </View>
-
-                <TouchableOpacity
-                  style={[styles.saveButton, isSavingBankDetails && styles.saveButtonDisabled]}
-                  onPress={saveBankDetails}
-                  disabled={isSavingBankDetails}
-                >
-                  {isSavingBankDetails ? (
-                    <ActivityIndicator size="small" color="#fff" />
-                  ) : (
-                    <>
-                      <Ionicons name="save-outline" size={20} color="#fff" />
-                      <Text style={styles.saveButtonText}>{t('save_details_button')}</Text>
-                    </>
-                  )}
-                </TouchableOpacity>
-              </>
-            )}
-          </View>
-        </View>
-
-        {/* Transaction History */}
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>{t('transactions_history_title')}</Text>
-
-          {transactions.length === 0 ? (
-            <View style={[styles.glassCard, styles.emptyContainer]}>
-              <View style={{
-                width: 70, height: 70, borderRadius: 35,
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                justifyContent: 'center', alignItems: 'center', marginBottom: 15
-              }}>
-                <Ionicons name="receipt-outline" size={32} color="#7f8c8d" />
+              <View style={styles.desktopColLarge}>
+                <WalletInfoSlides />
               </View>
-              <Text style={styles.emptyText}>{t('no_transactions')}</Text>
             </View>
-          ) : (
-            transactions.map((transaction) => (
-              <View key={transaction.id} style={styles.transactionCard}>
-                <View style={styles.transactionHeader}>
-                  <View style={[styles.transactionTypeBadge, { backgroundColor: `${getTransactionTypeColor(transaction.transaction_type)}20` }]}>
-                    <Text style={[styles.transactionTypeText, { color: getTransactionTypeColor(transaction.transaction_type) }]}>
-                      {getTransactionTypeLabel(transaction.transaction_type)}
-                    </Text>
-                  </View>
-                  <Text style={[styles.transactionAmount, { color: transaction.amount >= 0 ? '#27ae60' : '#e74c3c' }]}>
-                    {transaction.amount >= 0 ? '+' : ''}{formatPrice(Math.abs(transaction.amount))}
-                  </Text>
-                </View>
 
-                <Text style={styles.transactionDescription}>{transaction.description}</Text>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
-                  <Text style={styles.transactionDate}>
-                    {new Date(transaction.created_at).toLocaleDateString('en-GB', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric'
-                    })}
-                  </Text>
-                  <Text style={styles.transactionTime}>
-                    {new Date(transaction.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </Text>
+            {/* Bottom Row: Bank Details + Transactions */}
+            <View style={[styles.desktopRow, { alignItems: 'flex-start' }]}>
+              {/* Bank Details */}
+              <View style={styles.desktopColSmall}>
+                <View style={styles.sectionContainer}>
+                  <Text style={styles.sectionTitle}>{t('bank_details_section')}</Text>
+                  <View style={styles.glassCard}>
+                    {isBankDetailsLocked ? (
+                      <View style={styles.lockedContainer}>
+                        <View style={styles.infoRow}>
+                          <Text style={styles.fieldLabel}>{t('bank_name_label')}:</Text>
+                          <Text style={styles.infoText}>{bankDetails.bank_name}</Text>
+                        </View>
+                        <View style={styles.infoRow}>
+                          <Text style={styles.fieldLabel}>{t('account_holder_label_short')}</Text>
+                          <Text style={styles.infoText}>{bankDetails.account_holder_name}</Text>
+                        </View>
+                        <View style={styles.infoRow}>
+                          <Text style={styles.fieldLabel}>{t('account_number_label_short')}</Text>
+                          <Text style={styles.infoText}>****{bankDetails.account_number.slice(-4)}</Text>
+                        </View>
+                        <View style={styles.infoRow}>
+                          <Text style={styles.fieldLabel}>{t('iban_label')}:</Text>
+                          <Text style={styles.infoText}>****{bankDetails.iban.slice(-4)}</Text>
+                        </View>
+
+                        <View style={styles.lockedMessage}>
+                          <Ionicons name="lock-closed" size={20} color="#f39c12" />
+                          <Text style={styles.lockedText}>
+                            {t('bank_details_locked_msg')}
+                          </Text>
+                        </View>
+                      </View>
+                    ) : (
+                      <>
+                        <View style={styles.fieldContainer}>
+                          <Text style={styles.fieldLabel}>{t('bank_name_label')}</Text>
+                          <TextInput
+                            style={styles.glassInput}
+                            value={bankDetails.bank_name}
+                            onChangeText={(text) => setBankDetails({ ...bankDetails, bank_name: text })}
+                            placeholder={t('placeholder_bank_name')}
+                            placeholderTextColor="#7f8c8d"
+                          />
+                        </View>
+
+                        <View style={styles.fieldContainer}>
+                          <Text style={styles.fieldLabel}>{t('account_holder_label')}</Text>
+                          <TextInput
+                            style={styles.glassInput}
+                            value={bankDetails.account_holder_name}
+                            onChangeText={(text) => setBankDetails({ ...bankDetails, account_holder_name: text })}
+                            placeholder={t('placeholder_account_holder')}
+                            placeholderTextColor="#7f8c8d"
+                          />
+                        </View>
+
+                        <View style={styles.fieldContainer}>
+                          <Text style={styles.fieldLabel}>{t('account_number_label')}</Text>
+                          <TextInput
+                            style={styles.glassInput}
+                            value={bankDetails.account_number}
+                            onChangeText={(text) => setBankDetails({ ...bankDetails, account_number: text })}
+                            placeholder={t('placeholder_account_number')}
+                            placeholderTextColor="#7f8c8d"
+                            keyboardType="numeric"
+                          />
+                        </View>
+
+                        <View style={styles.fieldContainer}>
+                          <Text style={styles.fieldLabel}>{t('iban_label')}</Text>
+                          <TextInput
+                            style={styles.glassInput}
+                            value={bankDetails.iban}
+                            onChangeText={(text) => setBankDetails({ ...bankDetails, iban: text })}
+                            placeholder={t('placeholder_iban')}
+                            placeholderTextColor="#7f8c8d"
+                          />
+                        </View>
+
+                        <View style={styles.fieldContainer}>
+                          <Text style={styles.fieldLabel}>{t('bank_statement_label')}</Text>
+                          <TouchableOpacity style={styles.fileButton} onPress={pickDocument}>
+                            <Ionicons name={selectedFile ? "checkmark-circle" : "cloud-upload-outline"} size={24} color={selectedFile ? "#2ecc71" : "#3498db"} />
+                            <Text style={[styles.fileButtonText, selectedFile && { color: '#2ecc71' }]}>
+                              {selectedFile ? t('file_selected') : t('upload_statement')}
+                            </Text>
+                          </TouchableOpacity>
+                          {selectedFile && (
+                            <Text style={styles.fileName}>{selectedFile.name}</Text>
+                          )}
+                        </View>
+
+                        <HoverCard
+                          style={[styles.saveButton, isSavingBankDetails && styles.saveButtonDisabled]}
+                          onPress={saveBankDetails}
+                          disabled={isSavingBankDetails}
+                          hoverBorderColor="#3498db"
+                          baseBorderColor="transparent"
+                          activeScale={1.02}
+                        >
+                          {isSavingBankDetails ? (
+                            <ActivityIndicator size="small" color="#fff" />
+                          ) : (
+                            <>
+                              <Ionicons name="save-outline" size={20} color="#fff" />
+                              <Text style={styles.saveButtonText}>{t('save_details_button')}</Text>
+                            </>
+                          )}
+                        </HoverCard>
+                      </>
+                    )}
+                  </View>
                 </View>
               </View>
-            ))
-          )}
-        </View>
+
+              {/* Transaction History */}
+              <View style={styles.desktopColLarge}>
+                <View style={styles.sectionContainer}>
+                  <Text style={styles.sectionTitle}>{t('transactions_history_title')}</Text>
+
+                  {transactions.length === 0 ? (
+                    <View style={[styles.glassCard, styles.emptyContainer]}>
+                      <View style={{
+                        width: 70, height: 70, borderRadius: 35,
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        justifyContent: 'center', alignItems: 'center', marginBottom: 15
+                      }}>
+                        <Ionicons name="receipt-outline" size={32} color="#7f8c8d" />
+                      </View>
+                      <Text style={styles.emptyText}>{t('no_transactions')}</Text>
+                    </View>
+                  ) : (
+                    transactions.map((transaction) => (
+                      <View key={transaction.id} style={styles.transactionCard}>
+                        <View style={styles.transactionHeader}>
+                          <View style={[styles.transactionTypeBadge, { backgroundColor: `${getTransactionTypeColor(transaction.transaction_type)}20` }]}>
+                            <Text style={[styles.transactionTypeText, { color: getTransactionTypeColor(transaction.transaction_type) }]}>
+                              {getTransactionTypeLabel(transaction.transaction_type)}
+                            </Text>
+                          </View>
+                          <Text style={[styles.transactionAmount, { color: transaction.amount >= 0 ? '#27ae60' : '#e74c3c' }]}>
+                            {transaction.amount >= 0 ? '+' : ''}{formatPrice(Math.abs(transaction.amount))}
+                          </Text>
+                        </View>
+
+                        <Text style={styles.transactionDescription}>{transaction.description}</Text>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+                          <Text style={styles.transactionDate}>
+                            {new Date(transaction.created_at).toLocaleDateString('en-GB', {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric'
+                            })}
+                          </Text>
+                          <Text style={styles.transactionTime}>
+                            {new Date(transaction.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </Text>
+                        </View>
+                      </View>
+                    ))
+                  )}
+                </View>
+              </View>
+            </View>
+          </View>
+        ) : (
+          // MOBILE LAYOUT (Original Stack)
+          <>
+            {/* Wallet Balance */}
+            <View style={styles.glassCard}>
+              <Text style={styles.balanceLabel}>{t('wallet_balance_label')}</Text>
+              <Text style={styles.balanceAmount}>
+                {wallet?.balance !== undefined ? formatPrice(typeof wallet.balance === 'number' ? wallet.balance : parseFloat(String(wallet.balance))) : formatPrice(0)}
+              </Text>
+            </View>
+
+            {/* Wallet Info Slides */}
+            <WalletInfoSlides />
+
+            {/* Bank Details Section */}
+            <View style={styles.sectionContainer}>
+              <Text style={styles.sectionTitle}>{t('bank_details_section')}</Text>
+              <View style={styles.glassCard}>
+                {isBankDetailsLocked ? (
+                  <View style={styles.lockedContainer}>
+                    <View style={styles.infoRow}>
+                      <Text style={styles.fieldLabel}>{t('bank_name_label')}:</Text>
+                      <Text style={styles.infoText}>{bankDetails.bank_name}</Text>
+                    </View>
+                    <View style={styles.infoRow}>
+                      <Text style={styles.fieldLabel}>{t('account_holder_label_short')}</Text>
+                      <Text style={styles.infoText}>{bankDetails.account_holder_name}</Text>
+                    </View>
+                    <View style={styles.infoRow}>
+                      <Text style={styles.fieldLabel}>{t('account_number_label_short')}</Text>
+                      <Text style={styles.infoText}>****{bankDetails.account_number.slice(-4)}</Text>
+                    </View>
+                    <View style={styles.infoRow}>
+                      <Text style={styles.fieldLabel}>{t('iban_label')}:</Text>
+                      <Text style={styles.infoText}>****{bankDetails.iban.slice(-4)}</Text>
+                    </View>
+
+                    <View style={styles.lockedMessage}>
+                      <Ionicons name="lock-closed" size={20} color="#f39c12" />
+                      <Text style={styles.lockedText}>
+                        {t('bank_details_locked_msg')}
+                      </Text>
+                    </View>
+                  </View>
+                ) : (
+                  <>
+                    <View style={styles.fieldContainer}>
+                      <Text style={styles.fieldLabel}>{t('bank_name_label')}</Text>
+                      <TextInput
+                        style={styles.glassInput}
+                        value={bankDetails.bank_name}
+                        onChangeText={(text) => setBankDetails({ ...bankDetails, bank_name: text })}
+                        placeholder={t('placeholder_bank_name')}
+                        placeholderTextColor="#7f8c8d"
+                      />
+                    </View>
+
+                    <View style={styles.fieldContainer}>
+                      <Text style={styles.fieldLabel}>{t('account_holder_label')}</Text>
+                      <TextInput
+                        style={styles.glassInput}
+                        value={bankDetails.account_holder_name}
+                        onChangeText={(text) => setBankDetails({ ...bankDetails, account_holder_name: text })}
+                        placeholder={t('placeholder_account_holder')}
+                        placeholderTextColor="#7f8c8d"
+                      />
+                    </View>
+
+                    <View style={styles.fieldContainer}>
+                      <Text style={styles.fieldLabel}>{t('account_number_label')}</Text>
+                      <TextInput
+                        style={styles.glassInput}
+                        value={bankDetails.account_number}
+                        onChangeText={(text) => setBankDetails({ ...bankDetails, account_number: text })}
+                        placeholder={t('placeholder_account_number')}
+                        placeholderTextColor="#7f8c8d"
+                        keyboardType="numeric"
+                      />
+                    </View>
+
+                    <View style={styles.fieldContainer}>
+                      <Text style={styles.fieldLabel}>{t('iban_label')}</Text>
+                      <TextInput
+                        style={styles.glassInput}
+                        value={bankDetails.iban}
+                        onChangeText={(text) => setBankDetails({ ...bankDetails, iban: text })}
+                        placeholder={t('placeholder_iban')}
+                        placeholderTextColor="#7f8c8d"
+                      />
+                    </View>
+
+                    <View style={styles.fieldContainer}>
+                      <Text style={styles.fieldLabel}>{t('bank_statement_label')}</Text>
+                      <TouchableOpacity style={styles.fileButton} onPress={pickDocument}>
+                        <Ionicons name={selectedFile ? "checkmark-circle" : "cloud-upload-outline"} size={24} color={selectedFile ? "#2ecc71" : "#3498db"} />
+                        <Text style={[styles.fileButtonText, selectedFile && { color: '#2ecc71' }]}>
+                          {selectedFile ? t('file_selected') : t('upload_statement')}
+                        </Text>
+                      </TouchableOpacity>
+                      {selectedFile && (
+                        <Text style={styles.fileName}>{selectedFile.name}</Text>
+                      )}
+                    </View>
+
+                    <HoverCard
+                      style={[styles.saveButton, isSavingBankDetails && styles.saveButtonDisabled]}
+                      onPress={saveBankDetails}
+                      disabled={isSavingBankDetails}
+                      hoverBorderColor="#3498db"
+                      baseBorderColor="transparent"
+                      activeScale={1.02}
+                    >
+                      {isSavingBankDetails ? (
+                        <ActivityIndicator size="small" color="#fff" />
+                      ) : (
+                        <>
+                          <Ionicons name="save-outline" size={20} color="#fff" />
+                          <Text style={styles.saveButtonText}>{t('save_details_button')}</Text>
+                        </>
+                      )}
+                    </HoverCard>
+                  </>
+                )}
+              </View>
+            </View>
+
+            {/* Transaction History */}
+            <View style={styles.sectionContainer}>
+              <Text style={styles.sectionTitle}>{t('transactions_history_title')}</Text>
+
+              {transactions.length === 0 ? (
+                <View style={[styles.glassCard, styles.emptyContainer]}>
+                  <View style={{
+                    width: 70, height: 70, borderRadius: 35,
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    justifyContent: 'center', alignItems: 'center', marginBottom: 15
+                  }}>
+                    <Ionicons name="receipt-outline" size={32} color="#7f8c8d" />
+                  </View>
+                  <Text style={styles.emptyText}>{t('no_transactions')}</Text>
+                </View>
+              ) : (
+                transactions.map((transaction) => (
+                  <View key={transaction.id} style={styles.transactionCard}>
+                    <View style={styles.transactionHeader}>
+                      <View style={[styles.transactionTypeBadge, { backgroundColor: `${getTransactionTypeColor(transaction.transaction_type)}20` }]}>
+                        <Text style={[styles.transactionTypeText, { color: getTransactionTypeColor(transaction.transaction_type) }]}>
+                          {getTransactionTypeLabel(transaction.transaction_type)}
+                        </Text>
+                      </View>
+                      <Text style={[styles.transactionAmount, { color: transaction.amount >= 0 ? '#27ae60' : '#e74c3c' }]}>
+                        {transaction.amount >= 0 ? '+' : ''}{formatPrice(Math.abs(transaction.amount))}
+                      </Text>
+                    </View>
+
+                    <Text style={styles.transactionDescription}>{transaction.description}</Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+                      <Text style={styles.transactionDate}>
+                        {new Date(transaction.created_at).toLocaleDateString('en-GB', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric'
+                        })}
+                      </Text>
+                      <Text style={styles.transactionTime}>
+                        {new Date(transaction.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </Text>
+                    </View>
+                  </View>
+                ))
+              )}
+            </View>
+          </>
+        )}
       </ScrollView>
     </View>
   );
@@ -453,31 +682,7 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 20,
-    backgroundColor: 'rgba(10, 10, 10, 0.5)',
-    zIndex: 10,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#fff',
-  },
+
 
   content: {
     flex: 1,
@@ -508,6 +713,10 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#fff',
     textAlign: 'center',
+  },
+  balanceCard: {
+    height: 200, // Match slide height + paginator roughly
+    justifyContent: 'center',
   },
   sectionContainer: {
     marginTop: 20,
@@ -668,6 +877,28 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 8,
     textAlign: 'center',
+  },
+  desktopContainer: {
+    maxWidth: 1400,
+    alignSelf: 'center',
+    width: '100%',
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+  },
+  desktopGrid: {
+    gap: 20,
+  },
+  desktopRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 20,
+    marginBottom: 10,
+  },
+  desktopColSmall: {
+    width: '40%',
+  },
+  desktopColLarge: {
+    width: '58%',
   },
 });
 

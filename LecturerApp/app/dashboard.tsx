@@ -10,7 +10,8 @@ import {
   Dimensions,
   Platform,
   Animated,
-  PanResponder
+  PanResponder,
+  Image
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { router, useFocusEffect } from 'expo-router';
@@ -26,7 +27,8 @@ import { appEventEmitter } from '../src/utils/eventEmitter';
 import { lecturerAPI } from '../src/utils/api';
 import { aiContextCache } from '../src/utils/aiContextCache';
 import MiniAIChat from '../src/components/MiniAIChat';
-import { Image } from 'react-native';
+import { HoverCard } from '../src/components/HoverCard';
+import { HoverIcon } from '../src/components/HoverIcon';
 
 // Width will be handled by the hook inside the component
 
@@ -602,46 +604,22 @@ const Dashboard = () => {
                   </Text>
                 </View>
                 <View style={{ flexDirection: 'row', gap: 12 }}>
-                  <TouchableOpacity
+                  <HoverIcon
+                    name="settings-outline"
                     onPress={() => router.push('/settings')}
-                    style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 22,
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Ionicons name="settings-outline" size={24} color="#ecf0f1" />
-                  </TouchableOpacity>
-                  <TouchableOpacity
+                    color="#ecf0f1"
+                  />
+                  <HoverIcon
+                    name="person-outline"
                     onPress={() => router.push('/profile-edit')}
-                    style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 22,
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Ionicons name="person-outline" size={24} color="#3498db" />
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
+                    color="#3498db"
+                  />
+                  <HoverIcon
+                    name="log-out-outline"
                     onPress={handleLogout}
-                    style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 22,
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Ionicons name="log-out-outline" size={24} color="#e74c3c" />
-                  </TouchableOpacity>
+                    color="#e74c3c"
+                    hoverBackgroundColor="rgba(231, 76, 60, 0.2)"
+                  />
                 </View>
               </View>
 
@@ -767,18 +745,17 @@ const Dashboard = () => {
                 gap: isDesktop ? 16 : 0,
                 justifyContent: isDesktop ? 'flex-start' : 'space-between',
               }}>
-                <TouchableOpacity
+                <HoverCard
                   onPress={() => router.push('/intakes')}
                   style={{
                     flex: isDesktop ? 1 : 0,
                     minWidth: isDesktop ? 280 : (width - 60) / 2,
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: 16,
                     padding: 24,
                     marginBottom: 16,
-                    borderWidth: 1,
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
-                  }}>
+                    height: 'auto'
+                  }}
+                  hoverBorderColor="#3498db"
+                >
                   <View style={{
                     width: 40,
                     height: 40,
@@ -804,20 +781,20 @@ const Dashboard = () => {
                   }}>
                     {t('active_intakes')}
                   </Text>
-                </TouchableOpacity>
+                </HoverCard>
 
-                <TouchableOpacity
+                <HoverCard
                   onPress={() => router.push('/demo-sessions')}
                   style={{
                     flex: isDesktop ? 1 : 0,
                     minWidth: isDesktop ? 280 : (width - 60) / 2,
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: 16,
                     padding: 24,
                     marginBottom: 16,
-                    borderWidth: 1,
-                    borderColor: '#2ecc71', // Green border for Demos
-                  }}>
+                    height: 'auto'
+                  }}
+                  baseBorderColor="#2ecc71"
+                  hoverBorderColor="#2ecc71"
+                >
                   <View style={{
                     width: 40,
                     height: 40,
@@ -843,20 +820,19 @@ const Dashboard = () => {
                   }}>
                     {t('trial_sessions')}
                   </Text>
-                </TouchableOpacity>
+                </HoverCard>
 
-                <TouchableOpacity
+                <HoverCard
                   onPress={() => router.push('/students')}
                   style={{
                     flex: isDesktop ? 1 : 0,
                     minWidth: isDesktop ? 280 : (width - 60) / 2,
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: 16,
                     padding: 24,
                     marginBottom: 16,
-                    borderWidth: 1,
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
-                  }}>
+                    height: 'auto'
+                  }}
+                  hoverBorderColor="#2ecc71"
+                >
                   <View style={{
                     width: 40,
                     height: 40,
@@ -882,20 +858,19 @@ const Dashboard = () => {
                   }}>
                     {t('total_students')}
                   </Text>
-                </TouchableOpacity>
+                </HoverCard>
 
-                <TouchableOpacity
+                <HoverCard
                   onPress={() => router.push('/grading')}
                   style={{
                     flex: isDesktop ? 1 : 0,
                     minWidth: isDesktop ? 280 : (width - 60) / 2,
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: 16,
                     padding: 24,
                     marginBottom: 16,
-                    borderWidth: 1,
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
-                  }}>
+                    height: 'auto'
+                  }}
+                  hoverBorderColor="#f1c40f"
+                >
                   <View style={{
                     width: 40,
                     height: 40,
@@ -921,20 +896,19 @@ const Dashboard = () => {
                   }}>
                     {t('pending_grades')}
                   </Text>
-                </TouchableOpacity>
+                </HoverCard>
 
-                <TouchableOpacity
+                <HoverCard
                   onPress={() => router.push('/timetable')}
                   style={{
                     flex: isDesktop ? 1 : 0,
                     minWidth: isDesktop ? 280 : (width - 60) / 2,
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: 16,
                     padding: 24,
                     marginBottom: 16,
-                    borderWidth: 1,
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
-                  }}>
+                    height: 'auto'
+                  }}
+                  hoverBorderColor="#9b59b6"
+                >
                   <View style={{
                     width: 40,
                     height: 40,
@@ -960,21 +934,22 @@ const Dashboard = () => {
                   }}>
                     {t('classes_today')}
                   </Text>
-                </TouchableOpacity>
+                </HoverCard>
 
                 {/* AI Companion Widget */}
-                <TouchableOpacity
+                <HoverCard
                   onPress={() => router.push('/ai-assistant')}
                   style={{
                     flex: isDesktop ? 1 : 0,
                     minWidth: isDesktop ? 280 : (width - 60) / 2,
-                    backgroundColor: 'rgba(52, 152, 219, 0.15)',
-                    borderRadius: 16,
                     padding: 24,
                     marginBottom: 16,
-                    borderWidth: 1,
-                    borderColor: 'rgba(52, 152, 219, 0.4)',
-                  }}>
+                    height: 'auto',
+                    backgroundColor: 'rgba(52, 152, 219, 0.15)',
+                  }}
+                  baseBorderColor="rgba(52, 152, 219, 0.4)"
+                  hoverBorderColor="#3498db"
+                >
                   <View style={{
                     width: 56,
                     height: 56,
@@ -1005,7 +980,7 @@ const Dashboard = () => {
                   }}>
                     Companion
                   </Text>
-                </TouchableOpacity>
+                </HoverCard>
               </View>
             </View>
 
@@ -1027,22 +1002,20 @@ const Dashboard = () => {
                   justifyContent: isDesktop ? 'flex-start' : 'flex-start',
                 }}
               >
-                <TouchableOpacity
+                <HoverCard
                   style={{
                     flex: isDesktop ? 1 : 0,
                     width: isDesktop ? 'auto' : (width - 60) / 2,
                     minWidth: isDesktop ? 220 : 0,
                     height: isDesktop ? 'auto' : 150,
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: 16,
                     padding: isDesktop ? 20 : 16,
                     marginBottom: isDesktop ? 16 : 0,
-                    borderWidth: 1,
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
                   onPress={() => router.push('/intakes')}
+                  baseBorderColor="rgba(255, 255, 255, 0.1)"
+                  hoverBorderColor="#3498db"
                 >
                   <View style={{
                     width: 50,
@@ -1066,24 +1039,22 @@ const Dashboard = () => {
                   >
                     {t('manage_intakes')}
                   </Text>
-                </TouchableOpacity>
+                </HoverCard>
 
-                <TouchableOpacity
+                <HoverCard
                   style={{
                     flex: isDesktop ? 1 : 0,
                     width: isDesktop ? 'auto' : (width - 60) / 2,
                     minWidth: isDesktop ? 220 : 0,
                     height: isDesktop ? 'auto' : 150,
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: 16,
                     padding: isDesktop ? 20 : 16,
                     marginBottom: isDesktop ? 16 : 0,
-                    borderWidth: 1,
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
                   onPress={() => router.push('/upload-video/new')}
+                  baseBorderColor="rgba(255, 255, 255, 0.1)"
+                  hoverBorderColor="#d35400"
                 >
                   <View style={{
                     width: 50,
@@ -1107,24 +1078,22 @@ const Dashboard = () => {
                   >
                     Upload Video
                   </Text>
-                </TouchableOpacity>
+                </HoverCard>
 
-                <TouchableOpacity
+                <HoverCard
                   style={{
                     flex: isDesktop ? 1 : 0,
                     width: isDesktop ? 'auto' : (width - 60) / 2,
                     minWidth: isDesktop ? 220 : 0,
                     height: isDesktop ? 'auto' : 150,
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: 16,
                     padding: isDesktop ? 20 : 16,
                     marginBottom: isDesktop ? 16 : 0,
-                    borderWidth: 1,
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
                   onPress={() => setShowQuizIntakeModal(true)}
+                  baseBorderColor="rgba(255, 255, 255, 0.1)"
+                  hoverBorderColor="#e74c3c"
                 >
                   <View style={{
                     width: 50,
@@ -1148,24 +1117,22 @@ const Dashboard = () => {
                   >
                     {t('create_start_quiz')}
                   </Text>
-                </TouchableOpacity>
+                </HoverCard>
 
-                <TouchableOpacity
+                <HoverCard
                   style={{
                     flex: isDesktop ? 1 : 0,
                     width: isDesktop ? 'auto' : (width - 60) / 2,
                     minWidth: isDesktop ? 220 : 0,
                     height: isDesktop ? 'auto' : 150,
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: 16,
                     padding: isDesktop ? 20 : 16,
                     marginBottom: isDesktop ? 16 : 0,
-                    borderWidth: 1,
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
                   onPress={() => handleNavigation('Send Announcement')}
+                  baseBorderColor="rgba(255, 255, 255, 0.1)"
+                  hoverBorderColor="#9b59b6"
                 >
                   <View style={{
                     width: 50,
@@ -1189,24 +1156,22 @@ const Dashboard = () => {
                   >
                     {t('send_announcement')}
                   </Text>
-                </TouchableOpacity>
+                </HoverCard>
 
-                <TouchableOpacity
+                <HoverCard
                   style={{
                     flex: isDesktop ? 1 : 0,
                     width: isDesktop ? 'auto' : (width - 60) / 2,
                     minWidth: isDesktop ? 220 : 0,
                     height: isDesktop ? 'auto' : 150,
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: 16,
                     padding: isDesktop ? 20 : 16,
                     marginBottom: isDesktop ? 16 : 0,
-                    borderWidth: 1,
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
                   onPress={() => router.push('/lecturer-profile')}
+                  baseBorderColor="rgba(255, 255, 255, 0.1)"
+                  hoverBorderColor="#27ae60"
                 >
                   <View style={{
                     width: 50,
@@ -1230,24 +1195,22 @@ const Dashboard = () => {
                   >
                     {t('professional_profile')}
                   </Text>
-                </TouchableOpacity>
+                </HoverCard>
 
-                <TouchableOpacity
+                <HoverCard
                   style={{
                     flex: isDesktop ? 1 : 0,
                     width: isDesktop ? 'auto' : (width - 60) / 2,
                     minWidth: isDesktop ? 220 : 0,
                     height: isDesktop ? 'auto' : 150,
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: 16,
                     padding: isDesktop ? 20 : 16,
                     marginBottom: isDesktop ? 16 : 0,
-                    borderWidth: 1,
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
                   onPress={() => router.push('/bookings')}
+                  baseBorderColor="rgba(255, 255, 255, 0.1)"
+                  hoverBorderColor="#f39c12"
                 >
                   <View style={{
                     width: 50,
@@ -1293,24 +1256,22 @@ const Dashboard = () => {
                   >
                     {t('manage_bookings')}
                   </Text>
-                </TouchableOpacity>
+                </HoverCard>
 
-                <TouchableOpacity
+                <HoverCard
                   style={{
                     flex: isDesktop ? 1 : 0,
                     width: isDesktop ? 'auto' : (width - 60) / 2,
                     minWidth: isDesktop ? 220 : 0,
                     height: isDesktop ? 'auto' : 150,
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: 16,
                     padding: isDesktop ? 20 : 16,
                     marginBottom: isDesktop ? 16 : 0,
-                    borderWidth: 1,
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
                   onPress={() => router.push('/attendance')}
+                  baseBorderColor="rgba(255, 255, 255, 0.1)"
+                  hoverBorderColor="#e74c3c"
                 >
                   <View style={{
                     width: 50,
@@ -1334,24 +1295,22 @@ const Dashboard = () => {
                   >
                     {t('attendance')}
                   </Text>
-                </TouchableOpacity>
+                </HoverCard>
 
-                <TouchableOpacity
+                <HoverCard
                   style={{
                     flex: isDesktop ? 1 : 0,
                     width: isDesktop ? 'auto' : (width - 60) / 2,
                     minWidth: isDesktop ? 220 : 0,
                     height: isDesktop ? 'auto' : 150,
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: 16,
                     padding: isDesktop ? 20 : 16,
                     marginBottom: isDesktop ? 16 : 0,
-                    borderWidth: 1,
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
                   onPress={() => router.push('/wallet')}
+                  baseBorderColor="rgba(255, 255, 255, 0.1)"
+                  hoverBorderColor="#2980b9"
                 >
                   <View style={{
                     width: 50,
@@ -1375,57 +1334,33 @@ const Dashboard = () => {
                   >
                     {t('wallet')}
                   </Text>
-                </TouchableOpacity>
+                </HoverCard>
 
-                <TouchableOpacity
+                <HoverCard
                   style={{
                     flex: isDesktop ? 1 : 0,
                     width: isDesktop ? 'auto' : (width - 60) / 2,
                     minWidth: isDesktop ? 220 : 0,
                     height: isDesktop ? 'auto' : 150,
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: 16,
                     padding: isDesktop ? 20 : 16,
                     marginBottom: isDesktop ? 16 : 0,
-                    borderWidth: 1,
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
                   onPress={() => router.push('/messages')}
+                  baseBorderColor="rgba(255, 255, 255, 0.1)"
+                  hoverBorderColor="#2980b9"
                 >
                   <View style={{
                     width: 50,
                     height: 50,
                     borderRadius: 25,
-                    backgroundColor: 'rgba(0, 122, 255, 0.2)',
+                    backgroundColor: 'rgba(52, 152, 219, 0.2)',
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginBottom: 12,
                   }}>
-                    <Ionicons name="chatbubble-ellipses-outline" size={24} color="#007AFF" />
-                    {unreadMessages > 0 && (
-                      <View style={{
-                        position: 'absolute',
-                        top: -5,
-                        right: -5,
-                        backgroundColor: '#e74c3c',
-                        borderRadius: 10,
-                        minWidth: 20,
-                        height: 20,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        paddingHorizontal: 5,
-                      }}>
-                        <Text style={{
-                          color: '#fff',
-                          fontSize: 12,
-                          fontWeight: 'bold',
-                        }}>
-                          {unreadMessages > 99 ? '99+' : unreadMessages}
-                        </Text>
-                      </View>
-                    )}
+                    <Ionicons name="chatbubbles-outline" size={24} color="#3498db" />
                   </View>
                   <Text
                     style={{
@@ -1438,24 +1373,44 @@ const Dashboard = () => {
                   >
                     {t('messages')}
                   </Text>
-                </TouchableOpacity>
+                  {unreadMessages > 0 && (
+                    <View style={{
+                      position: 'absolute',
+                      top: 10,
+                      right: 10,
+                      backgroundColor: '#e74c3c',
+                      borderRadius: 10,
+                      minWidth: 20,
+                      height: 20,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      paddingHorizontal: 4,
+                    }}>
+                      <Text style={{
+                        color: '#fff',
+                        fontSize: 10,
+                        fontWeight: 'bold',
+                      }}>
+                        {unreadMessages}
+                      </Text>
+                    </View>
+                  )}
+                </HoverCard>
 
-                <TouchableOpacity
+                <HoverCard
                   style={{
                     flex: isDesktop ? 1 : 0,
                     width: isDesktop ? 'auto' : (width - 60) / 2,
                     minWidth: isDesktop ? 220 : 0,
                     height: isDesktop ? 'auto' : 150,
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: 16,
                     padding: isDesktop ? 20 : 16,
                     marginBottom: isDesktop ? 16 : 0,
-                    borderWidth: 1,
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
                   onPress={() => router.push('/lecturer-hub')}
+                  baseBorderColor="rgba(255, 255, 255, 0.1)"
+                  hoverBorderColor="#9b59b6"
                 >
                   <View style={{
                     width: 50,
@@ -1479,7 +1434,7 @@ const Dashboard = () => {
                   >
                     {t('lecturer_hub.title')}
                   </Text>
-                </TouchableOpacity>
+                </HoverCard>
               </View>
             </View>
           </View>
@@ -1510,17 +1465,21 @@ const Dashboard = () => {
                     {t('today_schedule')}
                   </Text>
                 </View>
-                <TouchableOpacity
+                <HoverCard
                   onPress={() => router.push('/timetable')}
                   style={{
                     backgroundColor: 'rgba(52, 152, 219, 0.1)',
                     paddingHorizontal: 12,
                     paddingVertical: 6,
                     borderRadius: 20,
+                    borderWidth: 0,
+                    height: 'auto',
                   }}
+                  activeScale={1.05}
+                  hoverBorderColor="rgba(52, 152, 219, 0.3)"
                 >
                   <Text style={{ color: '#3498db', fontSize: 13, fontWeight: '700' }}>{t('view_all')}</Text>
-                </TouchableOpacity>
+                </HoverCard>
               </View>
 
               <View style={{ gap: 12 }}>
@@ -1537,7 +1496,7 @@ const Dashboard = () => {
                   </View>
                 ) : todaySchedule.length > 0 ? (
                   todaySchedule.map((item, index) => (
-                    <TouchableOpacity
+                    <HoverCard
                       key={`${item.type}-${item.id}`}
                       onPress={() => router.push(item.type === 'class' ? `/class-details/${item.id}` : `/group-details/${item.id}`)}
                       style={{
@@ -1548,7 +1507,9 @@ const Dashboard = () => {
                         padding: 14,
                         borderWidth: 1,
                         borderColor: 'rgba(255, 255, 255, 0.08)',
+                        height: 'auto',
                       }}
+                      hoverBorderColor={item.type === 'class' ? '#3498db' : '#9b59b6'}
                     >
                       <LinearGradient
                         colors={['#3498db', '#2980b9']}
@@ -1619,7 +1580,7 @@ const Dashboard = () => {
                       }}>
                         <Ionicons name={isRTL ? "chevron-back" : "chevron-forward"} size={20} color="#ffffff" />
                       </View>
-                    </TouchableOpacity>
+                    </HoverCard>
                   ))
                 ) : (
                   <View style={{
@@ -1679,17 +1640,21 @@ const Dashboard = () => {
                     {t('pending_bookings')}
                   </Text>
                 </View>
-                <TouchableOpacity
+                <HoverCard
                   onPress={() => router.push('/bookings')}
                   style={{
                     backgroundColor: 'rgba(243, 156, 18, 0.1)',
                     paddingHorizontal: 12,
                     paddingVertical: 6,
                     borderRadius: 20,
+                    borderWidth: 0,
+                    height: 'auto',
                   }}
+                  activeScale={1.05}
+                  hoverBorderColor="rgba(243, 156, 18, 0.3)"
                 >
                   <Text style={{ color: '#f39c12', fontSize: 13, fontWeight: '700' }}>{t('view_all')}</Text>
-                </TouchableOpacity>
+                </HoverCard>
               </View>
 
               <View style={{ gap: 12 }}>
@@ -1754,7 +1719,7 @@ const Dashboard = () => {
                       </View>
 
                       <View style={{ flexDirection: 'row', gap: 10 }}>
-                        <TouchableOpacity
+                        <HoverCard
                           onPress={() => handleDashboardBookingAction(booking.id, 'confirm')}
                           style={{
                             flex: 1,
@@ -1766,10 +1731,11 @@ const Dashboard = () => {
                             borderWidth: 1,
                             borderColor: 'rgba(46, 204, 113, 0.2)',
                           }}
+                          hoverBorderColor="#2ecc71"
                         >
                           <Text style={{ color: '#2ecc71', fontSize: 13, fontWeight: '700' }}>{t('confirm')}</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
+                        </HoverCard>
+                        <HoverCard
                           onPress={() => handleDashboardBookingAction(booking.id, 'cancel')}
                           style={{
                             flex: 1,
@@ -1781,9 +1747,10 @@ const Dashboard = () => {
                             borderWidth: 1,
                             borderColor: 'rgba(231, 76, 60, 0.2)',
                           }}
+                          hoverBorderColor="#e74c3c"
                         >
                           <Text style={{ color: '#e74c3c', fontSize: 13, fontWeight: '700' }}>{t('decline')}</Text>
-                        </TouchableOpacity>
+                        </HoverCard>
                       </View>
                     </View>
                   ))
@@ -1829,7 +1796,7 @@ const Dashboard = () => {
                   </View>
                 ) : recentActivities.length > 0 ? (
                   recentActivities.map((activity) => (
-                    <View
+                    <HoverCard
                       key={`${activity.type}-${activity.id}`}
                       style={{
                         flexDirection: 'row',
@@ -1839,7 +1806,10 @@ const Dashboard = () => {
                         padding: 14,
                         borderWidth: 1,
                         borderColor: 'rgba(255, 255, 255, 0.05)',
+                        height: 'auto',
                       }}
+                      disabled={true} // Just for visual consistency or maybe enable later
+                      hoverBorderColor="rgba(255, 255, 255, 0.2)"
                     >
                       <View style={{
                         width: 44,
@@ -1899,7 +1869,7 @@ const Dashboard = () => {
                           </View>
                         </View>
                       </View>
-                    </View>
+                    </HoverCard>
                   ))
                 ) : (
                   <View style={{

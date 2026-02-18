@@ -61,6 +61,8 @@ interface Intake {
   current_students: number;
 }
 
+import { HoverCard } from '../src/components/HoverCard';
+
 const BookingsScreen = () => {
   const { formatPrice } = useLocalization();
   const { t } = useTranslation();
@@ -71,6 +73,7 @@ const BookingsScreen = () => {
   const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'confirmed' | 'completed'>('all');
   const [intakes, setIntakes] = useState<Intake[]>([]);
   const [showIntakeModal, setShowIntakeModal] = useState(false);
+
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [selectedIntake, setSelectedIntake] = useState<number | null>(null);
   const [createNewIntake, setCreateNewIntake] = useState(false);
@@ -266,8 +269,10 @@ const BookingsScreen = () => {
   };
 
   const renderBookingCard = ({ item }: { item: Booking }) => (
-    <View style={[styles.bookingCardWrapper, isDesktop && { width: '33.33%', paddingHorizontal: 6 }]}>
-      <View style={styles.bookingCard}>
+    <View style={{ width: isDesktop ? '33.33%' : '100%', paddingHorizontal: isDesktop ? 6 : 0, marginBottom: 12 }}>
+      <View
+        style={styles.bookingCard}
+      >
         <View style={styles.bookingHeader}>
           <View style={styles.studentInfo}>
             <Text style={styles.studentName}>{item.student_name}</Text>
@@ -315,32 +320,41 @@ const BookingsScreen = () => {
 
         {item.status === 'pending' && (
           <View style={styles.actionButtons}>
-            <TouchableOpacity
+            <HoverCard
               style={[styles.actionButton, styles.confirmButton]}
               onPress={() => handleBookingAction(item.id, 'confirm')}
+              activeScale={1.05}
+              hoverBorderColor="#5faee3"
+              baseBorderColor="transparent"
             >
               <Ionicons name="checkmark" size={16} color="#fff" />
               <Text style={styles.actionButtonText}>{t('action_confirm')}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+            </HoverCard>
+            <HoverCard
               style={[styles.actionButton, styles.cancelButton]}
               onPress={() => handleBookingAction(item.id, 'cancel')}
+              activeScale={1.05}
+              hoverBorderColor="#ef746f"
+              baseBorderColor="transparent"
             >
               <Ionicons name="close" size={16} color="#fff" />
               <Text style={styles.actionButtonText}>{t('action_cancel')}</Text>
-            </TouchableOpacity>
+            </HoverCard>
           </View>
         )}
 
         {item.status === 'confirmed' && (
           <View style={styles.actionButtons}>
-            <TouchableOpacity
+            <HoverCard
               style={[styles.actionButton, styles.completeButton]}
               onPress={() => handleBookingAction(item.id, 'complete')}
+              activeScale={1.05}
+              hoverBorderColor="#58d68d"
+              baseBorderColor="transparent"
             >
               <Ionicons name="checkmark-circle" size={16} color="#fff" />
               <Text style={styles.actionButtonText}>{t('action_mark_complete')}</Text>
-            </TouchableOpacity>
+            </HoverCard>
           </View>
         )}
       </View>
@@ -387,7 +401,9 @@ const BookingsScreen = () => {
       {/* Statistics Cards - Desktop Only */}
       {isDesktop && (
         <View style={styles.statsContainer}>
-          <View style={styles.statCard}>
+          <View
+            style={styles.statCard}
+          >
             <View style={styles.statIconContainer}>
               <Ionicons name="calendar" size={24} color="#3498db" />
             </View>
@@ -397,7 +413,9 @@ const BookingsScreen = () => {
             </View>
           </View>
 
-          <View style={styles.statCard}>
+          <View
+            style={styles.statCard}
+          >
             <View style={styles.statIconContainer}>
               <Ionicons name="time" size={24} color="#f39c12" />
             </View>
@@ -407,7 +425,9 @@ const BookingsScreen = () => {
             </View>
           </View>
 
-          <View style={styles.statCard}>
+          <View
+            style={styles.statCard}
+          >
             <View style={styles.statIconContainer}>
               <Ionicons name="checkmark-circle" size={24} color="#2ecc71" />
             </View>
@@ -417,7 +437,9 @@ const BookingsScreen = () => {
             </View>
           </View>
 
-          <View style={styles.statCard}>
+          <View
+            style={styles.statCard}
+          >
             <View style={styles.statIconContainer}>
               <Ionicons name="cash" size={24} color="#9b59b6" />
             </View>
@@ -897,23 +919,23 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   notesContainer: {
-    backgroundColor: 'rgba(243, 156, 18, 0.1)',
-    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    borderRadius: 8,
     padding: 12,
     marginBottom: 16,
-    borderLeftWidth: 3,
-    borderLeftColor: '#f39c12',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
   },
   notesLabel: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#f39c12',
+    color: '#bdc3c7',
     marginBottom: 4,
     textTransform: 'uppercase',
   },
   notesText: {
     fontSize: 13,
-    color: '#f39c12',
+    color: '#ecf0f1',
     fontStyle: 'italic',
   },
   actionButtons: {
@@ -925,7 +947,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
+    paddingVertical: 10,
     borderRadius: 12,
   },
   confirmButton: {

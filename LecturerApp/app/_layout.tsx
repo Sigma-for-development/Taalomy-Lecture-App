@@ -9,6 +9,7 @@ import { tokenStorage } from '../utils/tokenStorage';
 import initI18n from '../src/i18n';
 import * as SplashScreen from 'expo-splash-screen';
 import { WebLayout } from '../src/components/WebLayout';
+import { standardWebTransition, slideWebTransition, modalWebTransition } from '../src/utils/webTransitions';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -141,6 +142,7 @@ export default function Layout() {
           screenOptions={{
             headerShown: false,
             contentStyle: { backgroundColor: '#0a0a0a' },
+            ...standardWebTransition, // Apply default web transition
           }}
         >
           <Stack.Screen name="index" />
@@ -151,30 +153,30 @@ export default function Layout() {
           <Stack.Screen name="auth/otp" />
           <Stack.Screen name="onboarding" options={{ headerShown: false }} />
           <Stack.Screen name="dashboard" />
-          <Stack.Screen name="profile-edit" />
-          <Stack.Screen name="lecturer-profile" />
-          <Stack.Screen name="settings" />
-          <Stack.Screen name="notification-settings" />
-          <Stack.Screen name="privacy-settings" options={{ headerShown: false }} />
-          <Stack.Screen name="verification-request" options={{ headerShown: false }} />
-          <Stack.Screen name="intakes" />
-          <Stack.Screen name="intake-details/[id]" />
-          <Stack.Screen name="intake-details/quizzes" />
-          <Stack.Screen name="intake-details/quiz-submissions/[id]" />
-          <Stack.Screen name="attendance" />
-          <Stack.Screen name="class-attendance" />
-          <Stack.Screen name="group-attendance" />
-          <Stack.Screen name="class-details/[id]" />
-          <Stack.Screen name="group-details/[id]" />
-          <Stack.Screen name="class-chat/[id]" />
-          <Stack.Screen name="group-chat/[id]" />
-          <Stack.Screen name="direct-message/[id]" />
-          <Stack.Screen name="messages" />
-          <Stack.Screen name="bookings" />
-          <Stack.Screen name="send-announcement" />
-          <Stack.Screen name="wallet" />
-          <Stack.Screen name="attendance-history/[classId]" />
-          <Stack.Screen name="group-attendance-history/[groupId]" />
+          <Stack.Screen name="profile-edit" options={slideWebTransition} />
+          <Stack.Screen name="lecturer-profile" options={slideWebTransition} />
+          <Stack.Screen name="settings" options={slideWebTransition} />
+          <Stack.Screen name="notification-settings" options={slideWebTransition} />
+          <Stack.Screen name="privacy-settings" options={{ headerShown: false, ...slideWebTransition }} />
+          <Stack.Screen name="verification-request" options={{ headerShown: false, ...slideWebTransition }} />
+          <Stack.Screen name="intakes" options={slideWebTransition} />
+          <Stack.Screen name="intake-details/[id]" options={slideWebTransition} />
+          <Stack.Screen name="intake-details/quizzes" options={slideWebTransition} />
+          <Stack.Screen name="intake-details/quiz-submissions/[id]" options={slideWebTransition} />
+          <Stack.Screen name="attendance" options={slideWebTransition} />
+          <Stack.Screen name="class-attendance" options={slideWebTransition} />
+          <Stack.Screen name="group-attendance" options={slideWebTransition} />
+          <Stack.Screen name="class-details/[id]" options={slideWebTransition} />
+          <Stack.Screen name="group-details/[id]" options={slideWebTransition} />
+          <Stack.Screen name="class-chat/[id]" options={slideWebTransition} />
+          <Stack.Screen name="group-chat/[id]" options={slideWebTransition} />
+          <Stack.Screen name="direct-message/[id]" options={slideWebTransition} />
+          <Stack.Screen name="messages" options={slideWebTransition} />
+          <Stack.Screen name="bookings" options={slideWebTransition} />
+          <Stack.Screen name="send-announcement" options={modalWebTransition} />
+          <Stack.Screen name="wallet" options={slideWebTransition} />
+          <Stack.Screen name="attendance-history/[classId]" options={slideWebTransition} />
+          <Stack.Screen name="group-attendance-history/[groupId]" options={slideWebTransition} />
         </Stack>
       </WebLayout>
       <Toast config={toastConfig} topOffset={60} />

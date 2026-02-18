@@ -36,6 +36,9 @@ interface Intake {
   is_demo?: boolean;
 }
 
+import { HoverCard } from '../src/components/HoverCard';
+import { HoverIcon } from '../src/components/HoverIcon';
+
 const IntakesScreen = () => {
   const { t, i18n } = useTranslation();
   const { isDesktop } = useResponsive();
@@ -242,27 +245,21 @@ const IntakesScreen = () => {
             {t('intakes')}
           </Text>
         </View>
-        <TouchableOpacity
+        <HoverIcon
+          name="add"
+          size={24}
+          color="#fff"
           onPress={() => setShowCreateModal(true)}
           style={{
-            width: 44,
-            height: 44,
-            borderRadius: 22,
             backgroundColor: '#3498db',
-            alignItems: 'center',
-            justifyContent: 'center',
             shadowColor: "#3498db",
-            shadowOffset: {
-              width: 0,
-              height: 4,
-            },
+            shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.3,
             shadowRadius: 4.65,
             elevation: 8,
           }}
-        >
-          <Ionicons name="add" size={24} color="#fff" />
-        </TouchableOpacity>
+          hoverBackgroundColor="#2980b9"
+        />
       </View>
 
       {/* Search Bar */}
@@ -313,17 +310,21 @@ const IntakesScreen = () => {
           alignSelf: 'center',
           width: '100%'
         }}>
-          <View style={{
-            flex: 1,
-            minWidth: 200,
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            borderRadius: 12,
-            padding: 16,
-            flexDirection: 'row',
-            alignItems: 'center',
-            borderWidth: 1,
-            borderColor: 'rgba(255, 255, 255, 0.08)',
-          }}>
+          <HoverCard
+            style={{
+              flex: 1,
+              minWidth: 200,
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: 12,
+              padding: 16,
+              flexDirection: 'row',
+              alignItems: 'center',
+              borderWidth: 1,
+              borderColor: 'rgba(255, 255, 255, 0.08)',
+            }}
+            hoverBorderColor="#3498db"
+            disabled={true} // Stats cards are not clickable, just visual hover
+          >
             <View style={{
               width: 48,
               height: 48,
@@ -343,19 +344,23 @@ const IntakesScreen = () => {
                 {t('total_intakes')}
               </Text>
             </View>
-          </View>
+          </HoverCard>
 
-          <View style={{
-            flex: 1,
-            minWidth: 200,
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            borderRadius: 12,
-            padding: 16,
-            flexDirection: 'row',
-            alignItems: 'center',
-            borderWidth: 1,
-            borderColor: 'rgba(255, 255, 255, 0.08)',
-          }}>
+          <HoverCard
+            style={{
+              flex: 1,
+              minWidth: 200,
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: 12,
+              padding: 16,
+              flexDirection: 'row',
+              alignItems: 'center',
+              borderWidth: 1,
+              borderColor: 'rgba(255, 255, 255, 0.08)',
+            }}
+            hoverBorderColor="#2ecc71"
+            disabled={true}
+          >
             <View style={{
               width: 48,
               height: 48,
@@ -375,19 +380,23 @@ const IntakesScreen = () => {
                 {t('active_intakes')}
               </Text>
             </View>
-          </View>
+          </HoverCard>
 
-          <View style={{
-            flex: 1,
-            minWidth: 200,
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            borderRadius: 12,
-            padding: 16,
-            flexDirection: 'row',
-            alignItems: 'center',
-            borderWidth: 1,
-            borderColor: 'rgba(255, 255, 255, 0.08)',
-          }}>
+          <HoverCard
+            style={{
+              flex: 1,
+              minWidth: 200,
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: 12,
+              padding: 16,
+              flexDirection: 'row',
+              alignItems: 'center',
+              borderWidth: 1,
+              borderColor: 'rgba(255, 255, 255, 0.08)',
+            }}
+            hoverBorderColor="#9b59b6"
+            disabled={true}
+          >
             <View style={{
               width: 48,
               height: 48,
@@ -407,19 +416,23 @@ const IntakesScreen = () => {
                 {t('total_students')}
               </Text>
             </View>
-          </View>
+          </HoverCard>
 
-          <View style={{
-            flex: 1,
-            minWidth: 200,
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            borderRadius: 12,
-            padding: 16,
-            flexDirection: 'row',
-            alignItems: 'center',
-            borderWidth: 1,
-            borderColor: 'rgba(255, 255, 255, 0.08)',
-          }}>
+          <HoverCard
+            style={{
+              flex: 1,
+              minWidth: 200,
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: 12,
+              padding: 16,
+              flexDirection: 'row',
+              alignItems: 'center',
+              borderWidth: 1,
+              borderColor: 'rgba(255, 255, 255, 0.08)',
+            }}
+            hoverBorderColor="#f39c12"
+            disabled={true}
+          >
             <View style={{
               width: 48,
               height: 48,
@@ -439,7 +452,7 @@ const IntakesScreen = () => {
                 {t('completed_intakes')}
               </Text>
             </View>
-          </View>
+          </HoverCard>
         </View>
       )}
 
@@ -467,7 +480,7 @@ const IntakesScreen = () => {
         }
         renderItem={({ item: intake }) => (
           <View style={{ width: isDesktop ? '33.33%' : '100%', paddingHorizontal: isDesktop ? 6 : 0, marginBottom: isDesktop ? 0 : 15 }}>
-            <TouchableOpacity
+            <HoverCard
               onPress={() => router.push(`/intake-details/${intake.id}`)}
               style={{
                 backgroundColor: '#252525',
@@ -477,6 +490,11 @@ const IntakesScreen = () => {
                 borderColor: '#333',
                 height: isDesktop ? '100%' : undefined
               }}
+              hoverBorderColor={
+                intake.status === 'active' ? '#27ae60' :
+                  intake.status === 'completed' ? '#f1c40f' :
+                    '#e74c3c'
+              }
             >
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
                 <Text style={{ color: '#fff', fontSize: 18, fontWeight: '700', flex: 1, marginRight: 10 }}>
@@ -548,7 +566,7 @@ const IntakesScreen = () => {
                   <Ionicons name={i18n.language === 'ar' ? "chevron-back" : "chevron-forward"} size={16} color="#fff" />
                 </View>
               </View>
-            </TouchableOpacity>
+            </HoverCard>
           </View>
         )}
         ListEmptyComponent={
