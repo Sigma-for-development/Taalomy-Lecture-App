@@ -17,8 +17,8 @@ import {
 } from 'react-native';
 import DatePicker from '../src/components/DatePicker';
 import { router } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { tokenStorage } from '../utils/tokenStorage';
 const AsyncStorage = tokenStorage;
 import { API_CONFIG } from '../src/config/api';
@@ -62,6 +62,7 @@ interface Intake {
 }
 
 import { HoverCard } from '../src/components/HoverCard';
+import { Skeleton } from '../src/components/Skeleton';
 
 const BookingsScreen = () => {
   const { formatPrice } = useLocalization();
@@ -361,16 +362,89 @@ const BookingsScreen = () => {
     </View>
   );
 
-  if (isLoading) {
-    return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <LinearGradient
-          colors={['#0a0a0a', '#1a1a1a', '#2d2d2d']}
-          style={styles.backgroundGradient}
-        />
-        <ActivityIndicator size="large" color="#3498db" />
+  // Skeleton Loading Component
+  const BookingsSkeleton = () => (
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+
+
+
+      {/* Header Skeleton */}
+      <View style={[styles.header, isWeb && { paddingHorizontal: 24, justifyContent: 'flex-start' }]}>
+        {!isWeb && <Skeleton width={40} height={40} borderRadius={20} style={{ marginRight: 15 }} />}
+        <Skeleton width={150} height={32} />
       </View>
-    );
+
+      <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+        {/* Desktop Stats Skeleton */}
+        {isDesktop && (
+          <View style={styles.statsContainer}>
+            {[1, 2, 3, 4].map(i => (
+              <View key={i} style={styles.statCard}>
+                <Skeleton width={48} height={48} borderRadius={24} style={{ marginRight: 12 }} />
+                <View style={{ flex: 1 }}>
+                  <Skeleton width={30} height={20} style={{ marginBottom: 4 }} />
+                  <Skeleton width={80} height={16} />
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Tabs Skeleton */}
+        <View style={[
+          styles.tabContainer,
+          { flexDirection: 'row', gap: 10, paddingVertical: 10 },
+          isDesktop && { paddingHorizontal: 24, maxWidth: 1400, alignSelf: 'center', width: '100%' }
+        ]}>
+          {[1, 2, 3, 4].map(i => (
+            <Skeleton key={i} width={100} height={40} borderRadius={20} />
+          ))}
+        </View>
+
+        {/* Booking List Skeleton */}
+        <View style={{
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          paddingTop: 10,
+          paddingHorizontal: isDesktop ? 18 : 20,
+          ...(isDesktop && { maxWidth: 1400, alignSelf: 'center', width: '100%' })
+        }}>
+          {[1, 2, 3, 4, 5, 6].map(i => (
+            <View key={i} style={{ width: isDesktop ? '33.33%' : '100%', paddingHorizontal: isDesktop ? 6 : 0, marginBottom: 12 }}>
+              <View style={[styles.bookingCard, { height: 260 }]}> {/* Fixed height approx */}
+                {/* Header: Student Info + Status */}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
+                  <View>
+                    <Skeleton width={120} height={20} style={{ marginBottom: 6 }} />
+                    <Skeleton width={150} height={14} />
+                  </View>
+                  <Skeleton width={80} height={24} borderRadius={12} />
+                </View>
+
+                {/* Details Rows */}
+                <View style={{ gap: 12 }}>
+                  <Skeleton width="60%" height={16} />
+                  <Skeleton width="80%" height={16} />
+                  <Skeleton width="50%" height={16} />
+                  <Skeleton width="40%" height={16} />
+                </View>
+
+                {/* Actions (if pending) */}
+                <View style={{ flexDirection: 'row', gap: 10, marginTop: 'auto' }}>
+                  <Skeleton width="48%" height={36} borderRadius={8} />
+                  <Skeleton width="48%" height={36} borderRadius={8} />
+                </View>
+              </View>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
+    </View>
+  );
+
+  if (isLoading) {
+    return <BookingsSkeleton />;
   }
 
   const filteredBookings = getFilteredBookings();
@@ -378,11 +452,6 @@ const BookingsScreen = () => {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
-
-      <LinearGradient
-        colors={['#0a0a0a', '#1a1a1a', '#2d2d2d']}
-        style={styles.backgroundGradient}
-      />
 
       {/* Header */}
       <View style={[styles.header, isWeb && { paddingHorizontal: 24, justifyContent: 'flex-start' }]}>
@@ -723,14 +792,7 @@ const BookingsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0a0a0a',
-  },
-  backgroundGradient: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
+    backgroundColor: '#1b1b1b',
   },
   header: {
     flexDirection: 'row',

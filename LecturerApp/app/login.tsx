@@ -280,7 +280,7 @@ const Login: React.FC = () => {
                 <View style={{ alignItems: 'flex-start', marginBottom: 50, zIndex: 1, maxWidth: 550 }}>
                   {/* Logo */}
                   <View style={{
-                    flexDirection: 'row',
+                    flexDirection: i18n.dir() === 'rtl' ? 'row-reverse' : 'row',
                     alignItems: 'center',
                     marginBottom: 5,
                     marginLeft: -40,

@@ -231,8 +231,8 @@ export const WebLayout: React.FC<WebLayoutProps> = ({ children }) => {
             {/* Sidebar */}
             <View style={[styles.sidebar, isRTL ? { borderRightWidth: 0, borderLeftWidth: 1, borderLeftColor: '#2d2d2d' } : {}]}>
                 <View style={styles.logoContainer}>
-                    <View style={styles.brandingContainer}>
-                        <View style={[styles.logoWrapper, { [isRTL ? 'marginLeft' : 'marginRight']: -12 }]}>
+                    <View style={[styles.brandingContainer, isRTL && { flexDirection: 'row-reverse' }]}>
+                        <View style={[styles.logoWrapper, { marginRight: -12 }]}>
                             <Image
                                 source={require('../../assets/taalomy-white-txt.png')}
                                 style={styles.logoImage}

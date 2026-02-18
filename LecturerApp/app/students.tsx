@@ -23,6 +23,7 @@ import { useTranslation } from 'react-i18next';
 import ProfilePicture from '../src/components/ProfilePicture';
 import { useResponsive } from '../src/hooks/useResponsive';
 import { HoverCard } from '../src/components/HoverCard';
+import { Skeleton } from '../src/components/Skeleton';
 
 interface Student {
     id: number;
@@ -83,13 +84,80 @@ const StudentsScreen = () => {
         setRefreshing(false);
     };
 
-    if (loading) {
-        return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#1a1a1a' }}>
-                <ActivityIndicator size="large" color="#3498db" />
-                <Text style={{ color: '#fff', marginTop: 16 }}>{t('loading_students')}</Text>
+    // Skeleton Loading Component
+    const StudentSkeleton = () => (
+        <View style={{ flex: 1, backgroundColor: '#1b1b1b' }}>
+            <StatusBar barStyle="light-content" />
+
+            {/* Header Skeleton */}
+            <View style={{
+                flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+                ...(isWeb ? { height: 80 } : { paddingTop: Platform.OS === 'ios' ? 60 : 40, paddingBottom: 20 }),
+                paddingHorizontal: 24, backgroundColor: '#1b1b1b', borderBottomWidth: 1, borderBottomColor: '#2c2c2c',
+            }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    {!isWeb && <Skeleton width={40} height={40} borderRadius={20} style={{ marginRight: 15 }} />}
+                    <Skeleton width={200} height={32} />
+                </View>
             </View>
-        );
+
+            <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+                {/* Search Bar Skeleton */}
+                <View style={{ paddingHorizontal: 24, paddingVertical: 16, ...(isDesktop && { maxWidth: 1400, alignSelf: 'center', width: '100%' }) }}>
+                    <Skeleton width="100%" height={48} borderRadius={12} />
+                </View>
+
+                {/* Desktop Stats Skeleton */}
+                {isDesktop && (
+                    <View style={{ flexDirection: 'row', paddingHorizontal: 24, paddingVertical: 16, gap: 12, maxWidth: 1400, alignSelf: 'center', width: '100%' }}>
+                        {[1, 2, 3, 4].map(i => (
+                            <View key={i} style={{ flex: 1, height: 80, backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: 12, padding: 16, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.08)' }}>
+                                <Skeleton width={48} height={48} borderRadius={24} style={{ marginRight: 12 }} />
+                                <View style={{ flex: 1 }}>
+                                    <Skeleton width={30} height={20} style={{ marginBottom: 4 }} />
+                                    <Skeleton width={80} height={12} />
+                                </View>
+                            </View>
+                        ))}
+                    </View>
+                )}
+
+                {/* List Header Skeleton */}
+                <View style={{ paddingHorizontal: 24, marginTop: 20, marginBottom: 16, ...(isDesktop && { maxWidth: 1400, alignSelf: 'center', width: '100%' }) }}>
+                    <Skeleton width={150} height={24} />
+                </View>
+
+                {/* Student Grid/List Skeleton */}
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: isDesktop ? 18 : 24, ...(isDesktop && { maxWidth: 1400, alignSelf: 'center', width: '100%' }) }}>
+                    {[1, 2, 3, 4, 5, 6].map(i => (
+                        <View key={i} style={{ width: isDesktop ? '33.33%' : '100%', paddingHorizontal: isDesktop ? 6 : 0, marginBottom: isDesktop ? 12 : 12 }}>
+                            <View style={{
+                                backgroundColor: 'rgba(255, 255, 255, 0.03)', borderRadius: 16, padding: 16,
+                                flexDirection: isDesktop ? 'column' : 'row', alignItems: isDesktop ? 'flex-start' : 'center',
+                                borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.08)',
+                                ...(isDesktop && { height: 200, alignItems: 'center', justifyContent: 'center' })
+                            }}>
+                                <View style={{ marginEnd: isDesktop ? 0 : 16, marginBottom: isDesktop ? 12 : 0 }}>
+                                    <Skeleton width={56} height={56} borderRadius={28} />
+                                </View>
+                                <View style={{ flex: 1, width: '100%', alignItems: isDesktop ? 'center' : 'flex-start' }}>
+                                    <Skeleton width={120} height={20} style={{ marginBottom: 6 }} />
+                                    <Skeleton width={180} height={14} style={{ marginBottom: 12 }} />
+                                    <View style={{ flexDirection: 'row', gap: 6 }}>
+                                        <Skeleton width={60} height={24} borderRadius={6} />
+                                        <Skeleton width={60} height={24} borderRadius={6} />
+                                    </View>
+                                </View>
+                            </View>
+                        </View>
+                    ))}
+                </View>
+            </ScrollView>
+        </View>
+    );
+
+    if (loading) {
+        return <StudentSkeleton />;
     }
 
     return (

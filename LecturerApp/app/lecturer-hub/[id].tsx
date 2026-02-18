@@ -175,13 +175,13 @@ export default function LecturerDetailScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0a0a0a',
+        backgroundColor: '#1b1b1b',
     },
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#0a0a0a',
+        backgroundColor: '#1b1b1b',
     },
     coverImage: {
         width: '100%',
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
     content: {
         flex: 1,
         marginTop: -40,
-        backgroundColor: '#0a0a0a',
+        backgroundColor: '#1b1b1b',
         borderTopLeftRadius: 30,
         borderTopRightRadius: 30,
         padding: 24,
@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: '#0a0a0a',
+        backgroundColor: '#1b1b1b',
         padding: 20,
         paddingBottom: 34,
         borderTopWidth: 1,

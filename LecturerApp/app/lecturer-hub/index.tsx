@@ -124,7 +124,7 @@ export default function LecturerHubScreen() {
     );
 
     return (
-        <View style={{ flex: 1, backgroundColor: '#0a0a0a' }}>
+        <View style={{ flex: 1, backgroundColor: '#1b1b1b' }}>
             {/* Header */}
             <View style={{
                 flexDirection: 'row',
@@ -135,7 +135,7 @@ export default function LecturerHubScreen() {
                     paddingBottom: 20,
                 }),
                 paddingHorizontal: isDesktop ? 24 : 20,
-                backgroundColor: '#0a0a0a',
+                backgroundColor: '#1b1b1b',
                 borderBottomWidth: 1,
                 borderBottomColor: '#2c2c2c',
             }}>
@@ -173,7 +173,7 @@ export default function LecturerHubScreen() {
                     paddingTop: 20,
                     paddingBottom: 16,
                     gap: 12,
-                    backgroundColor: '#0a0a0a',
+                    backgroundColor: '#1b1b1b',
                     ...(isDesktop && { maxWidth: 1400, alignSelf: 'center', width: '100%' })
                 }}>
                     <View style={{
@@ -306,7 +306,7 @@ export default function LecturerHubScreen() {
             <View style={{
                 paddingHorizontal: isDesktop ? 24 : 20,
                 paddingBottom: 12,
-                backgroundColor: '#0a0a0a',
+                backgroundColor: '#1b1b1b',
                 ...(isDesktop && { maxWidth: 1400, alignSelf: 'center', width: '100%' })
             }}>
                 <View style={{
