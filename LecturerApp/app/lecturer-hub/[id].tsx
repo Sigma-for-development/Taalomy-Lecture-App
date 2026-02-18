@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { lecturerAPI, chatAPI } from '../../src/utils/api';
 import { tokenStorage } from '../../utils/tokenStorage';
+import { SeoHead } from '../../src/components/SeoHead';
 
 export default function LecturerDetailScreen() {
     const { id } = useLocalSearchParams();
@@ -101,6 +102,27 @@ export default function LecturerDetailScreen() {
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
                     <Ionicons name="arrow-back" size={24} color="#fff" />
                 </TouchableOpacity>
+
+                {/* Dynamic SEO Head */}
+                <SeoHead
+                    title={`${user.first_name} ${user.last_name} - ${speciality}`}
+                    description={bio ? bio.substring(0, 160) : `Connect with ${user.first_name}, a specialist in ${speciality} at Taalomy.`}
+                    keywords={`${speciality}, ${user.first_name} ${user.last_name}, lecturer, tutor, Taalomy`}
+                    path={`/lecturer-hub/${id}`}
+                    schema={{
+                        '@context': 'https://schema.org',
+                        '@type': 'Person',
+                        'name': `${user.first_name} ${user.last_name}`,
+                        'jobTitle': speciality,
+                        'description': bio,
+                        'image': user.profile_picture_url || 'https://lecturer.taalomy.com/og.png',
+                        'url': `https://lecturer.taalomy.com/lecturer-hub/${id}`,
+                        'affiliation': {
+                            '@type': 'Organization',
+                            'name': 'Taalomy'
+                        }
+                    }}
+                />
 
                 <View style={styles.content}>
                     <View style={styles.header}>

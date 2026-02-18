@@ -2,6 +2,10 @@ User-agent: *
 Allow: /
 Disallow: /auth/reset-password
 Disallow: /auth/otp
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /wallet
+Disallow: /timetable
 Disallow: /_expo/*
 
 Sitemap: https://lecturer.taalomy.com/sitemap.xml

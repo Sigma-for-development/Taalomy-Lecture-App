@@ -7,6 +7,7 @@ type SeoHeadProps = {
   keywords?: string;
   path?: string;
   index?: boolean;
+  schema?: object;
 };
 
 const SITE_URL = 'https://lecturer.taalomy.com';
@@ -22,12 +23,13 @@ export const SeoHead: React.FC<SeoHeadProps> = ({
   keywords = DEFAULT_KEYWORDS,
   path = '/',
   index = true,
+  schema,
 }) => {
   const fullTitle = title ? `${title} | Taalomy Lecturer` : DEFAULT_TITLE;
   const url = `${SITE_URL}${path}`;
   const robots = index ? 'index,follow' : 'noindex,follow';
 
-  const schema = {
+  const defaultSchema = {
     '@context': 'https://schema.org',
     '@graph': [
       {
@@ -84,6 +86,9 @@ export const SeoHead: React.FC<SeoHeadProps> = ({
     ],
   };
 
+  // Merge or override schema if provided
+  const finalSchema = schema || defaultSchema;
+
   return (
     <Head>
       <title>{fullTitle}</title>
@@ -100,7 +105,7 @@ export const SeoHead: React.FC<SeoHeadProps> = ({
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={DEFAULT_IMAGE} />
-      <script type="application/ld+json">{JSON.stringify(schema)}</script>
+      <script type="application/ld+json">{JSON.stringify(finalSchema)}</script>
     </Head>
   );
 };
