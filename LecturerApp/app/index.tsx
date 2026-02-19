@@ -12,6 +12,7 @@ import { SeoHead } from '../src/components/SeoHead';
 import { useResponsive } from '../src/hooks/useResponsive';
 import Animated, {
   FadeInUp,
+  FadeOut,
   useSharedValue,
   useAnimatedStyle,
   withRepeat,
@@ -97,6 +98,48 @@ export default function Index() {
   const [isLoading, setIsLoading] = useState(!isWeb);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+
+  // Performance Guardian Engine
+  const [performanceMode, setPerformanceMode] = useState<'full' | 'lite'>('full');
+  const [showPerformanceToast, setShowPerformanceToast] = useState(false);
+
+  useEffect(() => {
+    if (!isWeb) return;
+
+    // Phase 1: Hardware Heuristics
+    const cores = (navigator as any).hardwareConcurrency || 4;
+    if (cores < 4) {
+      setPerformanceMode('lite');
+      return;
+    }
+
+    // Phase 2: Live FPS Sentinel (monitor first 3 seconds)
+    let frameCount = 0;
+    let startTime = performance.now();
+    let frameId: number;
+
+    const monitor = () => {
+      frameCount++;
+      const now = performance.now();
+      const elapsed = now - startTime;
+
+      if (elapsed >= 3000) {
+        const fps = (frameCount * 1000) / elapsed;
+        if (fps < 45) { // Threshold for struggling hardware
+          setPerformanceMode('lite');
+          setShowPerformanceToast(true);
+          setTimeout(() => setShowPerformanceToast(false), 5000);
+        }
+        return;
+      }
+      frameId = requestAnimationFrame(monitor);
+    };
+
+    frameId = requestAnimationFrame(monitor);
+    return () => cancelAnimationFrame(frameId);
+  }, []);
+
+  const isLite = performanceMode === 'lite' || !isDesktop;
 
   // Parallax Scroll Handler
   const scrollY = useSharedValue(0);
@@ -187,7 +230,7 @@ export default function Index() {
   }, []);
 
   const auroraStyle1 = useAnimatedStyle(() => {
-    if (!isDesktop) return {}; // Freeze on mobile
+    if (isLite) return {}; // Freeze in Lite Mode or mobile
     return {
       opacity: 0.6,
       transform: [
@@ -199,7 +242,7 @@ export default function Index() {
   });
 
   const auroraStyle2 = useAnimatedStyle(() => {
-    if (!isDesktop) return {}; // Freeze on mobile
+    if (isLite) return {}; // Freeze in Lite Mode or mobile
     return {
       opacity: 0.5,
       transform: [
@@ -210,9 +253,9 @@ export default function Index() {
     };
   });
 
-  // Parallax Animations (Disabled on mobile for thermal efficiency)
+  // Parallax Animations
   const heroParallax = useAnimatedStyle(() => {
-    if (!isDesktop) return { opacity: interpolate(scrollY.value, [0, 400], [1, 0], Extrapolate.CLAMP) };
+    if (isLite) return { opacity: interpolate(scrollY.value, [0, 400], [1, 0], Extrapolate.CLAMP) };
     return {
       transform: [{ translateY: scrollY.value * 0.5 }],
       opacity: interpolate(scrollY.value, [0, 400], [1, 0], Extrapolate.CLAMP)
@@ -220,14 +263,14 @@ export default function Index() {
   });
 
   const bentoParallax = useAnimatedStyle(() => {
-    if (!isDesktop) return {};
+    if (isLite) return {};
     return {
       transform: [{ translateY: scrollY.value * 0.1 }]
     };
   });
 
   const bigBrandWatermarkStyle = useAnimatedStyle(() => {
-    if (!isDesktop) return { transform: [{ rotate: '-10deg' }], opacity: 0.1 };
+    if (isLite) return { transform: [{ rotate: '-10deg' }], opacity: 0.1 };
     return {
       transform: [
         { translateY: scrollY.value * 0.2 },
@@ -281,7 +324,7 @@ export default function Index() {
 
       {/* --- FIXED BACKGROUND LAYER --- */}
       <View style={styles.fixedBackground}>
-        {isDesktop && <ParticleSystem />}
+        {!isLite && <ParticleSystem />}
 
         {/* Huge Brand Watermark */}
         <Animated.View style={[{
@@ -300,37 +343,41 @@ export default function Index() {
           />
         </Animated.View>
 
-        {/* Aurora Blobs - Simplified for Mobile */}
+        {/* Aurora Blobs - Refined for "Lite Mode" and Mobile with Soft-Glow Gradients */}
         <Animated.View style={[styles.auroraBlob, {
-          backgroundColor: '#1e3a8a', // Blue 900
-          top: isDesktop ? -300 : -150,
-          left: isDesktop ? '10%' : '-10%',
-          width: isDesktop ? 1200 : 600,
-          height: isDesktop ? 1200 : 600,
-          opacity: isDesktop ? 0.2 : 0.3,
-          ...(isWeb && isDesktop ? { filter: 'blur(70px)' } : {}) as any
+          backgroundColor: isLite ? 'transparent' : '#1e3a8a',
+          top: isDesktop ? -300 : -200,
+          left: isDesktop ? '10%' : '-20%',
+          width: isDesktop ? 1200 : 800,
+          height: isDesktop ? 1200 : 800,
+          opacity: isDesktop ? 0.2 : 0.4,
+          ...(isWeb && !isLite ? { filter: 'blur(70px)' } : {}) as any
         }, auroraStyle1]}>
-          {!isDesktop && (
+          {isLite && (
             <LinearGradient
-              colors={['#1e3a8a', 'transparent']}
+              colors={['rgba(30, 58, 138, 0.4)', 'rgba(30, 58, 138, 0.1)', 'transparent']}
               style={StyleSheet.absoluteFill}
+              start={{ x: 0.5, y: 0.5 }}
+              end={{ x: 1, y: 1 }}
             />
           )}
         </Animated.View>
 
         <Animated.View style={[styles.auroraBlob, {
-          backgroundColor: '#0369a1', // Sky 700
-          top: isDesktop ? 100 : 200,
-          right: isDesktop ? '-20%' : '-20%',
-          width: isDesktop ? 1000 : 500,
-          height: isDesktop ? 1000 : 500,
-          opacity: isDesktop ? 0.15 : 0.2,
-          ...(isWeb && isDesktop ? { filter: 'blur(90px)' } : {}) as any
+          backgroundColor: isLite ? 'transparent' : '#0369a1',
+          top: isDesktop ? 100 : 300,
+          right: isDesktop ? '-20%' : '-30%',
+          width: isDesktop ? 1000 : 700,
+          height: isDesktop ? 1000 : 700,
+          opacity: isDesktop ? 0.15 : 0.3,
+          ...(isWeb && !isLite ? { filter: 'blur(90px)' } : {}) as any
         }, auroraStyle2]}>
-          {!isDesktop && (
+          {isLite && (
             <LinearGradient
-              colors={['#0369a1', 'transparent']}
+              colors={['rgba(3, 105, 161, 0.3)', 'rgba(3, 105, 161, 0.1)', 'transparent']}
               style={StyleSheet.absoluteFill}
+              start={{ x: 0.5, y: 0.5 }}
+              end={{ x: 0, y: 0 }}
             />
           )}
         </Animated.View>
@@ -344,14 +391,39 @@ export default function Index() {
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
+        {/* Performance Observer Toast */}
+        {showPerformanceToast && (
+          <Animated.View
+            entering={FadeInUp.springify()}
+            exiting={FadeOut.duration(500)}
+            style={{
+              position: 'absolute',
+              top: 100,
+              alignSelf: 'center',
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              paddingHorizontal: 20,
+              paddingVertical: 10,
+              borderRadius: 100,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 10,
+              borderWidth: 1,
+              borderColor: 'rgba(59, 130, 246, 0.3)',
+              zIndex: 1000,
+            }}
+          >
+            <Ionicons name="speedometer-outline" size={20} color="#3b82f6" />
+            <Text style={{ color: '#fff', fontSize: 13, fontWeight: '600' }}>Performance Mode Optimized</Text>
+          </Animated.View>
+        )}
 
         {/* Navbar */}
         <Animated.View entering={FadeInUp.duration(800)} style={[styles.navHeader, { paddingHorizontal: isDesktop ? 60 : 20, paddingTop: isDesktop ? 48 : 28 }]}>
           <Image
             source={require('../assets/taalomy-white-txt.png')}
             style={{
-              width: isDesktop ? 340 : 44, // Square-ish look on mobile
-              height: isDesktop ? 85 : 44,
+              width: isDesktop ? 340 : 40,
+              height: isDesktop ? 85 : 40,
               marginLeft: isDesktop ? -10 : 0
             }}
             resizeMode="contain"
@@ -362,7 +434,7 @@ export default function Index() {
         </Animated.View>
 
         {/* --- HERO SECTION --- */}
-        <View style={[styles.section, { minHeight: screenHeight * 0.9, alignItems: 'center', justifyContent: 'flex-start', paddingTop: isDesktop ? 160 : 100 }]}>
+        <View style={[styles.section, { minHeight: screenHeight * 0.9, alignItems: 'center', justifyContent: 'flex-start', paddingTop: isDesktop ? 160 : 80 }]}>
           <Animated.View style={[{ alignItems: 'center', maxWidth: 1200 }, heroParallax]}>
 
             <Animated.View entering={FadeInUp.delay(200).springify()} style={styles.pillContainer}>
