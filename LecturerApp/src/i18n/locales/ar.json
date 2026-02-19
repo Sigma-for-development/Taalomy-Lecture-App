@@ -1572,5 +1572,6 @@
     "theme_dark": "داكن",
     "theme_light": "فاتح",
     "theme_system": "النظام",
+    "intake_created_successfully": "تم إنشاء الدفعة بنجاح",
     "message_error": "فشل في إرسال الرسالة"
 }

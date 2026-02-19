@@ -1538,5 +1538,6 @@
     "upcoming_sessions": "Upcoming Sessions",
     "completed_sessions": "Completed Sessions",
     "total_participants": "Total Participants",
+    "intake_created_successfully": "Intake created successfully",
     "message_error": "Failed to send message"
 }
