@@ -315,10 +315,10 @@ export default function Index() {
       >
 
         {/* Navbar */}
-        <Animated.View entering={FadeInUp.duration(800)} style={[styles.navHeader, { paddingHorizontal: isDesktop ? 60 : 24 }]}>
+        <Animated.View entering={FadeInUp.duration(800)} style={[styles.navHeader, { paddingHorizontal: isDesktop ? 60 : 20, paddingTop: isDesktop ? 48 : 24 }]}>
           <Image
             source={require('../assets/taalomy-white-txt.png')}
-            style={{ width: 240, height: 60 }} // Larger logo
+            style={{ width: isDesktop ? 340 : 180, height: isDesktop ? 85 : 45 }} // Responsive logo
             resizeMode="contain"
           />
           <TouchableOpacity onPress={() => router.push('/login')} style={styles.navButton}>
@@ -342,23 +342,21 @@ export default function Index() {
 
             <Animated.Text
               entering={FadeInUp.delay(400).duration(1000)}
-              style={[styles.heroTitle, { fontSize: heroTitleSize, lineHeight: heroTitleSize * 1.05 }]}
+              style={[styles.heroTitle, { fontSize: isDesktop ? heroTitleSize : 48, lineHeight: isDesktop ? heroTitleSize * 1.05 : 54 }]}
             >
               Teaching,
             </Animated.Text>
             <Animated.Text
               entering={FadeInUp.delay(600).duration(1000)}
-              style={[styles.heroTitleGradient, { fontSize: heroTitleSize, lineHeight: heroTitleSize * 1.05 }]}
+              style={[styles.heroTitleGradient, { fontSize: isDesktop ? heroTitleSize : 58, lineHeight: isDesktop ? heroTitleSize * 1.05 : 64 }]}
             >
               Elevated.
             </Animated.Text>
-
             <Animated.Text
               entering={FadeInUp.delay(800).duration(1000)}
-              style={[styles.heroSubtitle, { fontSize: heroSubTitleSize, maxWidth: 660 }]}
+              style={[styles.heroSubtitle, { fontSize: isDesktop ? heroSubTitleSize : 16, maxWidth: isDesktop ? 660 : '100%', paddingHorizontal: isDesktop ? 0 : 20 }]}
             >
-              Experience the dashboard designed for the world&apos;s most demanding educators.
-              Manage effortlessly. Teach passionately.
+              The elite AI-driven platform for modern lecturers.{'\n'}Command your classroom, automate your grading,{'\n'}and orchestrate student success.
             </Animated.Text>
 
             <Animated.View entering={FadeInUp.delay(1000).springify()} style={{ marginTop: 56 }}>
@@ -434,7 +432,7 @@ export default function Index() {
 
 
         {/* --- BENTO GRID WITH PARALLAX --- */}
-        <Animated.View style={[styles.section, { paddingVertical: 100 }, bentoParallax]}>
+        <Animated.View style={[styles.section, { paddingVertical: isDesktop ? 100 : 60 }, bentoParallax]}>
           <View style={[styles.bentoGrid, { flexDirection: isDesktop ? 'row' : 'column' }]}>
             {/* Col 1 */}
             <View style={{ flex: isDesktop ? 6 : 1, gap: 24 }}>
@@ -446,16 +444,17 @@ export default function Index() {
                 height={420}
                 delay={400}
                 isLarge
+                isDesktop={isDesktop}
               />
               <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 24 }}>
-                <BentoCard icon="stats-chart" title="Analytics" subtitle="Deep data." color="#0ea5e9" height={280} delay={500} flex={1} />
-                <BentoCard icon="cloud-done" title="Sync" subtitle="Auto-save." color="#10b981" height={280} delay={600} flex={1} />
+                <BentoCard icon="stats-chart" title="Analytics" subtitle="Deep data." color="#0ea5e9" height={280} delay={500} flex={1} isDesktop={isDesktop} />
+                <BentoCard icon="cloud-done" title="Sync" subtitle="Auto-save." color="#10b981" height={280} delay={600} flex={1} isDesktop={isDesktop} />
               </View>
             </View>
             {/* Col 2 */}
             <View style={{ flex: isDesktop ? 4 : 1, gap: 24 }}>
-              <BentoCard title="Chat" subtitle="Private channels." icon="chatbox-ellipses" color="#f59e0b" height={320} delay={700} />
-              <BentoCard title="Hub" subtitle="Command center." icon="layers" color="#ef4444" height={380} delay={800} />
+              <BentoCard title="Chat" subtitle="Private channels." icon="chatbox-ellipses" color="#f59e0b" height={320} delay={700} isDesktop={isDesktop} />
+              <BentoCard title="Hub" subtitle="Command center." icon="layers" color="#ef4444" height={380} delay={800} isDesktop={isDesktop} />
             </View>
           </View>
         </Animated.View>
@@ -466,10 +465,10 @@ export default function Index() {
             {/* AI Text Content */}
             <View style={{ flex: 1, alignItems: isDesktop ? 'flex-start' : 'center' }}>
               <Text style={styles.featureLabel}>AI COPILOT</Text>
-              <Text style={[styles.featureTitle, { textAlign: isDesktop ? 'left' : 'center', fontSize: isDesktop ? 72 : 48, lineHeight: isDesktop ? 72 : 54 }]}>
+              <Text style={[styles.featureTitle, { textAlign: isDesktop ? 'left' : 'center', fontSize: isDesktop ? 72 : 42, lineHeight: isDesktop ? 72 : 48 }]}>
                 Chat to{'\n'}Automate.
               </Text>
-              <Text style={[styles.heroSubtitle, { textAlign: isDesktop ? 'left' : 'center', marginTop: 24, fontSize: 18 }]}>
+              <Text style={[styles.heroSubtitle, { textAlign: isDesktop ? 'left' : 'center', marginTop: 24, fontSize: isDesktop ? 18 : 15, paddingHorizontal: isDesktop ? 0 : 20 }]}>
                 Your AI Copilot doesn't just talk. It acts.{'\n'}Manage your entire academic workflow through{'\n'}natural conversation.
               </Text>
 
@@ -502,6 +501,7 @@ export default function Index() {
                 style={[
                   styles.aiAssetContainer,
                   {
+                    height: isDesktop ? 750 : 400,
                     maxWidth: isDesktop ? 800 : '100%',
                     transform: isDesktop ? [
                       { perspective: 2000 },
@@ -522,10 +522,10 @@ export default function Index() {
         </Animated.View>
 
         {/* --- INFRASTRUCTURE SECTION --- */}
-        <Animated.View style={[styles.section, { paddingVertical: 160, paddingTop: 240, alignItems: 'center' }, bentoParallax]}>
+        <Animated.View style={[styles.section, { paddingVertical: isDesktop ? 160 : 80, paddingTop: isDesktop ? 240 : 120, alignItems: 'center' }, bentoParallax]}>
           <View style={{ maxWidth: 1000, width: '100%', alignItems: 'center' }}>
             <Text style={styles.featureLabel}>THE INFRASTRUCTURE</Text>
-            <Text style={styles.featureTitle}>Modernized for{'\n'}Lecturer Success.</Text>
+            <Text style={[styles.featureTitle, { fontSize: isDesktop ? 80 : 42, lineHeight: isDesktop ? 80 : 48 }]}>Modernized for{'\n'}Lecturer Success.</Text>
 
             <View style={{
               marginTop: 80,
@@ -535,27 +535,65 @@ export default function Index() {
             }} />
 
             <View style={{ flexDirection: isDesktop ? 'row' : 'column', justifyContent: 'space-between', width: '100%', marginTop: 80, gap: 40 }}>
-              <FeatureStat value="5x" label="Faster Academic Grading" delay={0} icon="school-outline" />
-              <FeatureStat value="Live" label="Real-time Student Insights" delay={100} icon="stats-chart-outline" />
-              <FeatureStat value="24/7" label="AI Teaching Support" delay={200} icon="chatbubbles-outline" />
+              <FeatureStat value="5x" label="Faster Academic Grading" delay={0} icon="school-outline" isDesktop={isDesktop} />
+              <FeatureStat value="Live" label="Real-time Student Insights" delay={100} icon="stats-chart-outline" isDesktop={isDesktop} />
+              <FeatureStat value="24/7" label="AI Teaching Support" delay={200} icon="chatbubbles-outline" isDesktop={isDesktop} />
             </View>
           </View>
         </Animated.View>
 
         {/* --- FOOTER --- */}
         <Animated.View style={[styles.footer, bentoParallax]}>
-          <View style={{ flexDirection: 'row', gap: 32, marginBottom: 32 }}>
-            <TouchableOpacity onPress={() => router.push('/privacy-policy')}>
-              <Text style={styles.footerLink}>Privacy</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => router.push('/terms-of-service')}>
-              <Text style={styles.footerLink}>Terms</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => router.push('/contact')}>
-              <Text style={styles.footerLink}>Support</Text>
-            </TouchableOpacity>
+          <View style={styles.footerInner}>
+            {/* Column 1: Brand */}
+            <View style={[styles.footerColumn, { alignItems: isDesktop ? 'flex-start' : 'center' }]}>
+              <Image
+                source={require('../assets/taalomy-white-txt.png')}
+                style={[styles.footerLogo, { width: isDesktop ? 200 : 160, height: isDesktop ? 50 : 40, marginLeft: isDesktop ? -10 : 0 }]}
+                resizeMode="contain"
+              />
+              <Text style={[styles.footerTagline, { textAlign: isDesktop ? 'left' : 'center' }]}>
+                The ultimate orchestration tool for{'\n'}modern educators and lecturers.
+              </Text>
+              <View style={styles.socialRow}>
+                <Ionicons name="logo-twitter" size={20} color="#71717a" />
+                <Ionicons name="logo-linkedin" size={20} color="#71717a" />
+                <Ionicons name="logo-github" size={20} color="#71717a" />
+              </View>
+            </View>
+
+            {/* Column 2: Platform */}
+            <View style={[styles.footerColumn, { alignItems: isDesktop ? 'flex-start' : 'center' }]}>
+              <Text style={styles.footerLabel}>Platform</Text>
+              <TouchableOpacity onPress={() => router.push('/dashboard')}><Text style={styles.footerLink}>Dashboard</Text></TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push('/lecturer-hub/all')}><Text style={styles.footerLink}>Intakes</Text></TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push('/timetable')}><Text style={styles.footerLink}>Timetable</Text></TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push('/wallet')}><Text style={styles.footerLink}>Wallet</Text></TouchableOpacity>
+            </View>
+
+            {/* Column 3: Legal */}
+            <View style={[styles.footerColumn, { alignItems: isDesktop ? 'flex-start' : 'center' }]}>
+              <Text style={styles.footerLabel}>Legal</Text>
+              <TouchableOpacity onPress={() => router.push('/privacy-policy')}><Text style={styles.footerLink}>Privacy</Text></TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push('/terms-of-service')}><Text style={styles.footerLink}>Terms</Text></TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push('/privacy-policy')}><Text style={styles.footerLink}>Cookies</Text></TouchableOpacity>
+            </View>
+
+            {/* Column 4: Support */}
+            <View style={[styles.footerColumn, { alignItems: isDesktop ? 'flex-start' : 'center' }]}>
+              <Text style={styles.footerLabel}>Support</Text>
+              <TouchableOpacity onPress={() => router.push('/contact')}><Text style={styles.footerLink}>Contact</Text></TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push('/contact')}><Text style={styles.footerLink}>Help Center</Text></TouchableOpacity>
+            </View>
           </View>
-          <Text style={{ color: '#52525b', fontSize: 13, fontWeight: '500' }}>© 2026 Taalomy Inc.</Text>
+
+          <View style={styles.footerBottom}>
+            <Text style={styles.footerCopy}>© 2026 Taalomy Inc. All rights reserved.</Text>
+            <View style={styles.statusPill}>
+              <View style={styles.statusDot} />
+              <Text style={styles.statusText}>All Systems Operational</Text>
+            </View>
+          </View>
         </Animated.View>
 
       </Animated.ScrollView>
@@ -565,7 +603,7 @@ export default function Index() {
 
 // --- Components ---
 
-const FeatureStat = ({ value, label, delay, icon }: any) => (
+const FeatureStat = ({ value, label, delay, icon, isDesktop }: any) => (
   <Animated.View
     entering={FadeInUp.delay(delay + 200).springify()}
     style={{ alignItems: 'center', marginVertical: 20, flex: 1 }}
@@ -573,12 +611,12 @@ const FeatureStat = ({ value, label, delay, icon }: any) => (
     <View style={styles.statIconBox}>
       <Ionicons name={icon} size={28} color="#3b82f6" />
     </View>
-    <Text style={{ color: '#fff', fontSize: 52, fontWeight: '800', letterSpacing: -2 }}>{value}</Text>
+    <Text style={{ color: '#fff', fontSize: isDesktop ? 52 : 36, fontWeight: '800', letterSpacing: -2 }}>{value}</Text>
     <Text style={{ color: '#71717a', fontSize: 13, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, marginTop: 12, textAlign: 'center', lineHeight: 20 }}>{label}</Text>
   </Animated.View>
 );
 
-const BentoCard = ({ title, subtitle, icon, color, height, flex, delay, isLarge }: any) => {
+const BentoCard = ({ title, subtitle, icon, color, height, flex, delay, isLarge, isDesktop }: any) => {
   const scale = useSharedValue(1);
   const glow = useSharedValue(0);
 
@@ -621,13 +659,13 @@ const BentoCard = ({ title, subtitle, icon, color, height, flex, delay, isLarge 
             style={{ position: 'absolute', right: -40, bottom: -40, opacity: 0.05, transform: [{ rotate: '-15deg' }] }}
           />
 
-          <View style={[styles.iconBox, { backgroundColor: `${color}20` }]}>
-            <Ionicons name={icon} size={isLarge ? 36 : 28} color={color} />
+          <View style={[styles.iconBox, { backgroundColor: `${color}20`, width: isDesktop ? 72 : 56, height: isDesktop ? 72 : 56 }]}>
+            <Ionicons name={icon} size={isDesktop ? (isLarge ? 36 : 28) : 24} color={color} />
           </View>
 
           <View style={{ flex: 1 }} />
-          <Text style={[styles.cardTitle, isLarge && { fontSize: 36 }]}>{title}</Text>
-          <Text style={styles.cardSubtitle}>{subtitle}</Text>
+          <Text style={[styles.cardTitle, { fontSize: isDesktop ? (isLarge ? 36 : 26) : 22 }]}>{title}</Text>
+          <Text style={[styles.cardSubtitle, { fontSize: isDesktop ? 17 : 14 }]}>{subtitle}</Text>
         </Animated.View>
       </Pressable>
     </Animated.View>
@@ -794,12 +832,91 @@ const styles = StyleSheet.create({
     lineHeight: 80,
   },
   footer: {
-    paddingBottom: 80,
+    paddingTop: 120,
+    paddingBottom: 60,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.05)',
+    width: '100%',
     alignItems: 'center',
+  },
+  footerInner: {
+    maxWidth: 1200,
+    width: '100%',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: 24,
+    gap: 60,
+  },
+  footerColumn: {
+    flex: 1,
+    minWidth: 200,
+    gap: 16,
+  },
+  footerLogo: {
+    width: 200,
+    height: 50,
+    marginLeft: -10,
+    marginBottom: 8,
+  },
+  footerTagline: {
+    color: '#71717a',
+    fontSize: 14,
+    lineHeight: 22,
+    fontWeight: '500',
+  },
+  footerLabel: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 8,
   },
   footerLink: {
     color: '#71717a',
     fontSize: 14,
+    fontWeight: '500',
+  },
+  socialRow: {
+    flexDirection: 'row',
+    gap: 20,
+    marginTop: 8,
+  },
+  footerBottom: {
+    maxWidth: 1200,
+    width: '100%',
+    marginTop: 80,
+    paddingTop: 32,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.05)',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  footerCopy: {
+    color: '#3f3f46',
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  statusPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(16, 185, 129, 0.05)',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.1)',
+  },
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#10b981',
+  },
+  statusText: {
+    color: '#10b981',
+    fontSize: 12,
     fontWeight: '600',
   },
   sectionHeader: {
