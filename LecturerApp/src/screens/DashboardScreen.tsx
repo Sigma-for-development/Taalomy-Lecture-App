@@ -7,17 +7,14 @@ import LecturerHeader from '../components/LecturerHeader';
 const DashboardScreen: React.FC = () => {
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={['#0a0a0a', '#1a1a1a', '#2d2d2d']}
-        style={styles.backgroundGradient}
-      />
-      
+      <View style={styles.backgroundContainer} />
+
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <LecturerHeader 
-          title="Lecturer Dashboard" 
+        <LecturerHeader
+          title="Lecturer Dashboard"
           subtitle="Manage your courses and students"
         />
-        
+
         {/* Quick Stats */}
         <View style={styles.statsContainer}>
           <View style={styles.statCard}>
@@ -27,7 +24,7 @@ const DashboardScreen: React.FC = () => {
             <Text style={styles.statNumber}>4</Text>
             <Text style={styles.statLabel}>Active Courses</Text>
           </View>
-          
+
           <View style={styles.statCard}>
             <View style={styles.statIconContainer}>
               <Ionicons name="people-outline" size={24} color="#3498db" />
@@ -35,7 +32,7 @@ const DashboardScreen: React.FC = () => {
             <Text style={styles.statNumber}>127</Text>
             <Text style={styles.statLabel}>Total Students</Text>
           </View>
-          
+
           <View style={styles.statCard}>
             <View style={styles.statIconContainer}>
               <Ionicons name="document-text-outline" size={24} color="#3498db" />
@@ -43,16 +40,16 @@ const DashboardScreen: React.FC = () => {
             <Text style={styles.statNumber}>23</Text>
             <Text style={styles.statLabel}>Pending Grades</Text>
           </View>
-          
+
           <View style={styles.statCard}>
             <View style={styles.statIconContainer}>
               <Ionicons name="calendar-outline" size={24} color="#3498db" />
             </View>
             <Text style={styles.statNumber}>8</Text>
-            <Text style={styles.statLabel}>Today's Classes</Text>
+            <Text style={styles.statLabel}>Today&apos;s Classes</Text>
           </View>
         </View>
-        
+
         {/* Quick Actions */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Quick Actions</Text>
@@ -63,21 +60,21 @@ const DashboardScreen: React.FC = () => {
               </View>
               <Text style={styles.actionText}>Create Assignment</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity style={styles.actionCard}>
               <View style={styles.actionIconContainer}>
                 <Ionicons name="checkmark-circle-outline" size={28} color="#3498db" />
               </View>
               <Text style={styles.actionText}>Mark Attendance</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity style={styles.actionCard}>
               <View style={styles.actionIconContainer}>
                 <Ionicons name="analytics-outline" size={28} color="#3498db" />
               </View>
               <Text style={styles.actionText}>View Reports</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity style={styles.actionCard}>
               <View style={styles.actionIconContainer}>
                 <Ionicons name="mail-outline" size={28} color="#3498db" />
@@ -86,7 +83,7 @@ const DashboardScreen: React.FC = () => {
             </TouchableOpacity>
           </View>
         </View>
-        
+
         {/* Recent Activity */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Recent Activity</Text>
@@ -100,7 +97,7 @@ const DashboardScreen: React.FC = () => {
                 <Text style={styles.activityTime}>2 hours ago</Text>
               </View>
             </View>
-            
+
             <View style={styles.activityItem}>
               <View style={styles.activityIconContainer}>
                 <Ionicons name="checkmark-circle-outline" size={20} color="#3498db" />
@@ -110,7 +107,7 @@ const DashboardScreen: React.FC = () => {
                 <Text style={styles.activityTime}>1 day ago</Text>
               </View>
             </View>
-            
+
             <View style={styles.activityItem}>
               <View style={styles.activityIconContainer}>
                 <Ionicons name="add-circle-outline" size={20} color="#3498db" />
@@ -130,14 +127,15 @@ const DashboardScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0a0a0a',
+    backgroundColor: '#1b1b1b',
   },
-  backgroundGradient: {
+  backgroundContainer: {
     position: 'absolute',
     left: 0,
     right: 0,
     top: 0,
     bottom: 0,
+    backgroundColor: '#1b1b1b',
   },
   scrollView: {
     flex: 1,

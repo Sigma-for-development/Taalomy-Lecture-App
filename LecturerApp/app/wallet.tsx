@@ -15,7 +15,6 @@ import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { tokenStorage } from '../utils/tokenStorage';
-const AsyncStorage = tokenStorage;
 import { API_CONFIG } from '../src/config/api';
 import axios from 'axios';
 import Toast from 'react-native-toast-message';
@@ -26,6 +25,7 @@ import { useTranslation } from 'react-i18next';
 import { aiContextCache } from '../src/utils/aiContextCache';
 import { useResponsive } from '../src/hooks/useResponsive';
 import { HoverCard } from '../src/components/HoverCard';
+const AsyncStorage = tokenStorage;
 
 interface Wallet {
   id: number;

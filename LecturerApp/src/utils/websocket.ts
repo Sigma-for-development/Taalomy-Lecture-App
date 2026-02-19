@@ -1,6 +1,6 @@
 import { tokenStorage } from '../../utils/tokenStorage';
-const AsyncStorage = tokenStorage;
 import { API_CONFIG } from '../config/api';
+const AsyncStorage = tokenStorage;
 
 export interface ChatMessage {
   id: string;

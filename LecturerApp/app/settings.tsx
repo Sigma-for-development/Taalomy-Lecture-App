@@ -9,21 +9,23 @@ import {
     StatusBar,
     Platform,
     Modal
+    , I18nManager
 } from 'react-native';
 import { Stack, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { changeLanguage as i18nChangeLanguage } from '../src/i18n';
-import { I18nManager } from 'react-native';
 import { tokenStorage } from '../utils/tokenStorage';
 import { BlurView } from 'expo-blur';
 import { HoverCard } from '../src/components/HoverCard';
 import { useResponsive } from '../src/hooks/useResponsive';
+import { useZoom, ZoomLevel } from '../src/context/ZoomContext';
 
 export default function SettingsScreen() {
     const { t, i18n } = useTranslation();
     const { isDesktop } = useResponsive();
+    const { zoomLevel, setZoomLevel } = useZoom();
     const isWeb = Platform.OS === 'web';
     const [isLanguageModalVisible, setIsLanguageModalVisible] = React.useState(false);
 
@@ -174,6 +176,40 @@ export default function SettingsScreen() {
                         t('privacy_settings'),
                         () => router.push('/privacy-settings')
                     )}
+                </View>
+
+                {/* System Zoom Section */}
+                <View style={styles.section}>
+                    <Text style={[styles.sectionTitle, { textAlign: i18n.dir() === 'rtl' ? 'right' : 'left' }]}>
+                        {t('appearance_settings') || 'Appearance'}
+                    </Text>
+                    <View style={styles.zoomContainer}>
+                        <Text style={styles.zoomLabel}>{t('system_zoom') || 'System Zoom'}</Text>
+                        <View style={styles.zoomOptionsGrid}>
+                            {(['compact', 'default', 'zoomed', 'extra'] as ZoomLevel[]).map((level) => (
+                                <TouchableOpacity
+                                    key={level}
+                                    style={[
+                                        styles.zoomOption,
+                                        zoomLevel === level && styles.zoomOptionActive
+                                    ]}
+                                    onPress={() => setZoomLevel(level)}
+                                >
+                                    <Ionicons
+                                        name={level === 'compact' ? 'contract' : level === 'default' ? 'expand' : level === 'zoomed' ? 'add-circle' : 'sparkles'}
+                                        size={20}
+                                        color={zoomLevel === level ? '#fff' : '#95a5a6'}
+                                    />
+                                    <Text style={[
+                                        styles.zoomOptionText,
+                                        zoomLevel === level && styles.zoomOptionTextActive
+                                    ]}>
+                                        {t(`zoom_${level}`) || level.charAt(0).toUpperCase() + level.slice(1)}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    </View>
                 </View>
 
                 <View style={styles.section}>
@@ -414,5 +450,50 @@ const styles = StyleSheet.create({
     modalCancelText: {
         fontSize: 16,
         color: '#95a5a6',
+    },
+    zoomContainer: {
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        borderRadius: 16,
+        padding: 20,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.05)',
+    },
+    zoomLabel: {
+        fontSize: 16,
+        color: '#ecf0f1',
+        marginBottom: 15,
+        fontWeight: '600',
+    },
+    zoomOptionsGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 10,
+    },
+    zoomOption: {
+        flex: 1,
+        minWidth: '45%',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 12,
+        borderRadius: 10,
+        backgroundColor: 'rgba(255, 255, 255, 0.03)',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.05)',
+    },
+    zoomOptionActive: {
+        backgroundColor: '#3498db',
+        borderColor: '#3498db',
+    },
+    zoomOptionText: {
+        fontSize: 14,
+        color: '#95a5a6',
+        marginStart: 8,
+        fontWeight: '500',
+        textTransform: 'capitalize',
+    },
+    zoomOptionTextActive: {
+        color: '#fff',
+        fontWeight: 'bold',
     },
 });

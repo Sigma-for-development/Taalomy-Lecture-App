@@ -14,14 +14,14 @@ import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { tokenStorage } from '../utils/tokenStorage';
-const AsyncStorage = tokenStorage;
 import ProfilePicture from '../src/components/ProfilePicture';
 import CountryPickerModal, { COUNTRIES } from '../src/components/CountryPickerModal';
 import { pickImage, takePhoto, uploadProfilePicture, refreshUserData } from '../src/utils/profilePicture';
 import { API_CONFIG } from '../src/config/api';
 import axios from 'axios';
 import Toast from 'react-native-toast-message';
-import { useTranslation } from 'react-i18next'; // Added import
+import { useTranslation } from 'react-i18next';
+const AsyncStorage = tokenStorage; // Added import
 
 interface UserData {
   id: number;

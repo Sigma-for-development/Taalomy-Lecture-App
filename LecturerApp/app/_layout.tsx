@@ -10,6 +10,7 @@ import initI18n from '../src/i18n';
 import * as SplashScreen from 'expo-splash-screen';
 import { WebLayout } from '../src/components/WebLayout';
 import { standardWebTransition, slideWebTransition, modalWebTransition } from '../src/utils/webTransitions';
+import { ZoomProvider } from '../src/context/ZoomContext';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -135,51 +136,53 @@ export default function Layout() {
   }
 
   return (
-    <LocalizationProvider>
-      <StatusBar style="light" />
-      <WebLayout>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: '#0a0a0a' },
-            ...standardWebTransition, // Apply default web transition
-          }}
-        >
-          <Stack.Screen name="index" />
-          <Stack.Screen name="login" />
-          <Stack.Screen name="register" />
-          <Stack.Screen name="auth/forgot-password" />
-          <Stack.Screen name="auth/reset-password" />
-          <Stack.Screen name="auth/otp" />
-          <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-          <Stack.Screen name="dashboard" />
-          <Stack.Screen name="profile-edit" options={slideWebTransition} />
-          <Stack.Screen name="lecturer-profile" options={slideWebTransition} />
-          <Stack.Screen name="settings" options={slideWebTransition} />
-          <Stack.Screen name="notification-settings" options={slideWebTransition} />
-          <Stack.Screen name="privacy-settings" options={{ headerShown: false, ...slideWebTransition }} />
-          <Stack.Screen name="verification-request" options={{ headerShown: false, ...slideWebTransition }} />
-          <Stack.Screen name="intakes" options={slideWebTransition} />
-          <Stack.Screen name="intake-details/[id]" options={slideWebTransition} />
-          <Stack.Screen name="intake-details/quizzes" options={slideWebTransition} />
-          <Stack.Screen name="intake-details/quiz-submissions/[id]" options={slideWebTransition} />
-          <Stack.Screen name="attendance" options={slideWebTransition} />
-          <Stack.Screen name="class-attendance" options={slideWebTransition} />
-          <Stack.Screen name="group-attendance" options={slideWebTransition} />
-          <Stack.Screen name="class-details/[id]" options={slideWebTransition} />
-          <Stack.Screen name="group-details/[id]" options={slideWebTransition} />
-          <Stack.Screen name="class-chat/[id]" options={slideWebTransition} />
-          <Stack.Screen name="group-chat/[id]" options={slideWebTransition} />
-          <Stack.Screen name="direct-message/[id]" options={slideWebTransition} />
-          <Stack.Screen name="messages" options={slideWebTransition} />
-          <Stack.Screen name="bookings" options={slideWebTransition} />
-          <Stack.Screen name="send-announcement" options={modalWebTransition} />
-          <Stack.Screen name="wallet" options={slideWebTransition} />
-          <Stack.Screen name="attendance-history/[classId]" options={slideWebTransition} />
-          <Stack.Screen name="group-attendance-history/[groupId]" options={slideWebTransition} />
-        </Stack>
-      </WebLayout>
-      <Toast config={toastConfig} topOffset={60} />
-    </LocalizationProvider>
+    <ZoomProvider>
+      <LocalizationProvider>
+        <StatusBar style="light" />
+        <WebLayout>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: '#0a0a0a' },
+              ...standardWebTransition, // Apply default web transition
+            }}
+          >
+            <Stack.Screen name="index" />
+            <Stack.Screen name="login" />
+            <Stack.Screen name="register" />
+            <Stack.Screen name="auth/forgot-password" />
+            <Stack.Screen name="auth/reset-password" />
+            <Stack.Screen name="auth/otp" />
+            <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+            <Stack.Screen name="dashboard" />
+            <Stack.Screen name="profile-edit" options={slideWebTransition} />
+            <Stack.Screen name="lecturer-profile" options={slideWebTransition} />
+            <Stack.Screen name="settings" options={slideWebTransition} />
+            <Stack.Screen name="notification-settings" options={slideWebTransition} />
+            <Stack.Screen name="privacy-settings" options={{ headerShown: false, ...slideWebTransition }} />
+            <Stack.Screen name="verification-request" options={{ headerShown: false, ...slideWebTransition }} />
+            <Stack.Screen name="intakes" options={slideWebTransition} />
+            <Stack.Screen name="intake-details/[id]" options={slideWebTransition} />
+            <Stack.Screen name="intake-details/quizzes" options={slideWebTransition} />
+            <Stack.Screen name="intake-details/quiz-submissions/[id]" options={slideWebTransition} />
+            <Stack.Screen name="attendance" options={slideWebTransition} />
+            <Stack.Screen name="class-attendance" options={slideWebTransition} />
+            <Stack.Screen name="group-attendance" options={slideWebTransition} />
+            <Stack.Screen name="class-details/[id]" options={slideWebTransition} />
+            <Stack.Screen name="group-details/[id]" options={slideWebTransition} />
+            <Stack.Screen name="class-chat/[id]" options={slideWebTransition} />
+            <Stack.Screen name="group-chat/[id]" options={slideWebTransition} />
+            <Stack.Screen name="direct-message/[id]" options={slideWebTransition} />
+            <Stack.Screen name="messages" options={slideWebTransition} />
+            <Stack.Screen name="bookings" options={slideWebTransition} />
+            <Stack.Screen name="send-announcement" options={modalWebTransition} />
+            <Stack.Screen name="wallet" options={slideWebTransition} />
+            <Stack.Screen name="attendance-history/[classId]" options={slideWebTransition} />
+            <Stack.Screen name="group-attendance-history/[groupId]" options={slideWebTransition} />
+          </Stack>
+        </WebLayout>
+        <Toast config={toastConfig} topOffset={60} />
+      </LocalizationProvider>
+    </ZoomProvider>
   );
 }

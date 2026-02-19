@@ -20,13 +20,16 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { tokenStorage } from '../utils/tokenStorage';
-const AsyncStorage = tokenStorage;
 import { API_CONFIG } from '../src/config/api';
 import axios from 'axios';
 import Toast from 'react-native-toast-message';
 import { useLocalization } from '../src/context/LocalizationContext';
 import { useTranslation } from 'react-i18next';
 import { useResponsive } from '../src/hooks/useResponsive';
+
+import { HoverCard } from '../src/components/HoverCard';
+import { Skeleton } from '../src/components/Skeleton';
+const AsyncStorage = tokenStorage;
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -60,9 +63,6 @@ interface Intake {
   max_students: number;
   current_students: number;
 }
-
-import { HoverCard } from '../src/components/HoverCard';
-import { Skeleton } from '../src/components/Skeleton';
 
 const BookingsScreen = () => {
   const { formatPrice } = useLocalization();

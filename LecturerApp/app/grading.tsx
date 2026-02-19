@@ -13,12 +13,12 @@ import {
 } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { tokenStorage } from '../utils/tokenStorage';
-const AsyncStorage = tokenStorage;
 import { Ionicons } from '@expo/vector-icons';
 import { lecturerAPI } from '../src/utils/api';
 import { useTranslation } from 'react-i18next';
 import { API_CONFIG } from '../src/config/api';
 import { useResponsive } from '../src/hooks/useResponsive';
+const AsyncStorage = tokenStorage;
 
 interface PendingSubmission {
     id: number;

@@ -19,7 +19,7 @@ export default function OTPVerificationScreen() {
     const [canResend, setCanResend] = useState(autoSend === 'true');
 
     // Refs for text inputs to handle auto-focus
-    const inputRefs = useRef<Array<TextInput | null>>([]);
+    const inputRefs = useRef<(TextInput | null)[]>([]);
 
     useEffect(() => {
         if (autoSend === 'true' && canResend) {

@@ -21,7 +21,6 @@ import { Picker } from '@react-native-picker/picker';
 import Toast from 'react-native-toast-message';
 import { router, useLocalSearchParams } from 'expo-router';
 import { tokenStorage } from '../../utils/tokenStorage';
-const AsyncStorage = tokenStorage;
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
@@ -31,6 +30,7 @@ import { useTranslation } from 'react-i18next';
 import { checkForConflicts, ScheduleItem } from '../../src/utils/scheduler';
 import { lecturerAPI } from '../../src/utils/api';
 import DatePicker from '../../src/components/DatePicker';
+const AsyncStorage = tokenStorage;
 
 const VENUES = [
   'Lecture Hall A',

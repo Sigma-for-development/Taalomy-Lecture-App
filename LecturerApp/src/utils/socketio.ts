@@ -1,7 +1,7 @@
 import { tokenStorage } from '../../utils/tokenStorage';
-const AsyncStorage = tokenStorage;
 import { API_CONFIG } from '../config/api';
 import { io, Socket } from 'socket.io-client';
+const AsyncStorage = tokenStorage;
 
 export interface ChatMessage {
   message_id: number;

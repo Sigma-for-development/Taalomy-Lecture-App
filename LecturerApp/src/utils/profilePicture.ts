@@ -1,8 +1,8 @@
 import * as ImagePicker from 'expo-image-picker';
 import { tokenStorage } from '../../utils/tokenStorage';
-const AsyncStorage = tokenStorage;
 import { API_CONFIG } from '../config/api';
 import { appEventEmitter } from './eventEmitter';
+const AsyncStorage = tokenStorage;
 
 export const pickImage = async (): Promise<string | null> => {
   try {

@@ -17,9 +17,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import axios from 'axios';
 import { tokenStorage } from '../utils/tokenStorage';
-const AsyncStorage = tokenStorage;
 import { API_CONFIG } from '../src/config/api';
 import { useTranslation } from 'react-i18next';
+const AsyncStorage = tokenStorage;
 
 interface PrivacySettingsData {
     id?: number;

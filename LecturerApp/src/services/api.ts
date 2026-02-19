@@ -1,9 +1,9 @@
 import axios from 'axios';
 import { tokenStorage } from '../../utils/tokenStorage';
-const AsyncStorage = tokenStorage;
 import { API_CONFIG } from '../config/api';
 import { router } from 'expo-router';
 import Toast from 'react-native-toast-message';
+const AsyncStorage = tokenStorage;
 
 const api = axios.create({
     baseURL: API_CONFIG.ACCOUNTS_BASE_URL,

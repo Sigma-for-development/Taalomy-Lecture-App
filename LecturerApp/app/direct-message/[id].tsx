@@ -6,12 +6,11 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { API_CONFIG } from '../../src/config/api';
+import api, { API_CONFIG } from '../../src/config/api';
 import { socketIOManager, ChatMessage, TypingEvent, UserEvent } from '../../src/utils/socketio';
 import { tokenStorage } from '../../utils/tokenStorage';
-const AsyncStorage = tokenStorage;
-import api from '../../src/config/api';
 import { useTranslation } from 'react-i18next';
+const AsyncStorage = tokenStorage;
 
 const baseurl = API_CONFIG.CHAT_BASE_URL;
 

@@ -17,12 +17,12 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { tokenStorage } from '../../utils/tokenStorage';
-const AsyncStorage = tokenStorage;
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
 import { API_CONFIG } from '../../src/config/api';
 import { socketIOManager, ChatMessage, TypingEvent, UserEvent } from '../../src/utils/socketio';
 import { useTranslation } from 'react-i18next';
+const AsyncStorage = tokenStorage;
 
 const baseurl = API_CONFIG.CHAT_BASE_URL;
 const { width } = Dimensions.get('window');

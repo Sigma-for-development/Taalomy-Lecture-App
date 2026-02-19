@@ -15,12 +15,12 @@ import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { tokenStorage } from '../utils/tokenStorage';
-const AsyncStorage = tokenStorage;
 import { API_CONFIG } from '../src/config/api';
 import axios from 'axios';
 import Toast from 'react-native-toast-message';
 import { useTranslation } from 'react-i18next';
 import ProfilePicture from '../src/components/ProfilePicture';
+const AsyncStorage = tokenStorage;
 
 interface Group {
     id: number;
@@ -461,10 +461,7 @@ const GroupAttendanceScreen = () => {
     return (
         <View style={styles.container}>
             <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
-            <LinearGradient
-                colors={['#0a0a0a', '#1a1a1a', '#2d2d2d']}
-                style={styles.backgroundGradient}
-            />
+            <View style={styles.backgroundContainer} />
 
             {/* Header */}
             <View style={styles.header}>
@@ -549,12 +546,13 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#0a0a0a',
     },
-    backgroundGradient: {
+    backgroundContainer: {
         position: 'absolute',
         left: 0,
         right: 0,
         top: 0,
         bottom: 0,
+        backgroundColor: '#1b1b1b',
     },
     loadingContainer: {
         flex: 1,

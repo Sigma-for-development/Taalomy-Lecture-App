@@ -16,12 +16,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import { tokenStorage } from '../utils/tokenStorage';
-const AsyncStorage = tokenStorage;
 import api from '../src/config/api';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { useResponsive } from '../src/hooks/useResponsive';
+const AsyncStorage = tokenStorage;
 
 interface ChatRoom {
   id: number;
@@ -35,14 +35,14 @@ interface ChatRoom {
     id: number;
     name: string;
   };
-  participants?: Array<{
+  participants?: {
     id: number;
     first_name: string;
     last_name: string;
     user_type: string;
     profile_picture_url?: string;
     username?: string;
-  }>;
+  }[];
   last_message: {
     id: number;
     content: string;

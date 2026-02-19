@@ -12,12 +12,12 @@ import {
     StyleSheet
 } from 'react-native';
 import { tokenStorage } from '../../utils/tokenStorage';
-const AsyncStorage = tokenStorage;
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { API_CONFIG } from '../../src/config/api';
 import { useTranslation } from 'react-i18next';
 import ProfilePicture from '../../src/components/ProfilePicture';
+const AsyncStorage = tokenStorage;
 
 interface QuizGrade {
     id: number;

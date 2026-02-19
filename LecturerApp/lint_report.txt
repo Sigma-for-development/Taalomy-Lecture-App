@@ -1,0 +1,411 @@
+
+> taalomy-lecturer@1.0.0 lint
+> expo lint --fix
+
+env: load .env
+env: export EXPO_PUBLIC_API_BASE_URL EXPO_PUBLIC_ACCOUNTS_BASE_URL EXPO_PUBLIC_CHAT_BASE_URL EXPO_PUBLIC_GROQ_LECTURER_PERSONAL_API EXPO_PUBLIC_TIMEOUT EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/_layout.tsx
+  114:6  warning  React Hook useEffect has a missing dependency: 'router'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  131:6  warning  React Hook useEffect has a missing dependency: 'router'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/ai-assistant.tsx
+    2:38  warning  'KeyboardAvoidingView' is defined but never used                                                                               @typescript-eslint/no-unused-vars
+    4:30  warning  'Send' is defined but never used                                                                                               @typescript-eslint/no-unused-vars
+    4:50  warning  'Composer' is defined but never used                                                                                           @typescript-eslint/no-unused-vars
+    4:60  warning  'Avatar' is defined but never used                                                                                             @typescript-eslint/no-unused-vars
+   17:7   warning  'AnimatedMessage' is assigned a value but never used                                                                           @typescript-eslint/no-unused-vars
+   36:8   warning  React Hook useEffect has missing dependencies: 'fadeAnim' and 'slideAnim'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+   76:8   warning  React Hook useEffect has missing dependencies: 'dot1', 'dot2', and 'dot3'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  427:8   warning  React Hook useEffect has a missing dependency: 'updateUsage'. Either include it or remove the dependency array                 react-hooks/exhaustive-deps
+  588:34  warning  'err' is defined but never used                                                                                                @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/attendance-history/[classId].tsx
+  66:6  warning  React Hook useEffect has a missing dependency: 'loadAttendanceHistory'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/attendance-history/student-details.tsx
+  43:6  warning  React Hook useEffect has a missing dependency: 'loadStudentDetails'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/attendance.tsx
+  1:17  warning  'useState' is defined but never used   @typescript-eslint/no-unused-vars
+  1:27  warning  'useEffect' is defined but never used  @typescript-eslint/no-unused-vars
+  7:3   warning  'Alert' is defined but never used      @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/auth/forgot-password.tsx
+  2:107  warning  'Alert' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/auth/otp.tsx
+   8:8  warning  'Toast' is defined but never used                                                                                                  @typescript-eslint/no-unused-vars
+  28:8  warning  React Hook useEffect has missing dependencies: 'canResend' and 'handleResend'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/bookings.tsx
+  10:3   warning  'ActivityIndicator' is defined but never used                                                                    @typescript-eslint/no-unused-vars
+  34:17  warning  'SCREEN_HEIGHT' is assigned a value but never used                                                               @typescript-eslint/no-unused-vars
+  92:6   warning  React Hook useEffect has a missing dependency: 'loadBookings'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/class-attendance.tsx
+    1:38  warning  'useRef' is defined but never used                                                                                             @typescript-eslint/no-unused-vars
+    7:3   warning  'ScrollView' is defined but never used                                                                                         @typescript-eslint/no-unused-vars
+   77:6   warning  React Hook useEffect has a missing dependency: 'loadClasses'. Either include it or remove the dependency array                 react-hooks/exhaustive-deps
+  138:6   warning  React Hook useEffect has missing dependencies: 'colorAnim' and 'fadeAnim'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/class-chat/[classId]/index.tsx
+   4:10  warning  'SafeAreaView' is defined but never used                                                                         @typescript-eslint/no-unused-vars
+  20:12  warning  'error' is assigned a value but never used                                                                       @typescript-eslint/no-unused-vars
+  29:8   warning  React Hook useEffect has a missing dependency: 'loadChannels'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  69:18  warning  'err' is defined but never used                                                                                  @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/class-chat/channel/[roomId].tsx
+    4:144  warning  'TouchableWithoutFeedback' is defined but never used                                                                                                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+    4:170  warning  'Keyboard' is defined but never used                                                                                                                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+    6:10   warning  'SafeAreaView' is defined but never used                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+   70:8    warning  React Hook useEffect has missing dependencies: 'loadChatRoom' and 't'. Either include them or remove the dependency array                                                                                                                                                                                                      react-hooks/exhaustive-deps
+  102:80   warning  Expected '===' and instead saw '=='                                                                                                                                                                                                                                                                                            eqeqeq
+  161:8    warning  React Hook useEffect has missing dependencies: 'chatRoom.current_user', 'chatRoom?.current_user_id', and 'chatRoom.participants'. Either include them or remove the dependency array. You can also replace multiple useState variables with useReducer if 'setMessages' needs the current value of 'chatRoom.current_user_id'  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/class-chat/socketio-[id].tsx
+  19:10  warning  'tokenStorage' is defined but never used                                                                                   @typescript-eslint/no-unused-vars
+  58:6   warning  React Hook useEffect has missing dependencies: 'loadChatRoom' and 't'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/class-details/[id].tsx
+    24:10  warning  'LinearGradient' is defined but never used                                                                                                 @typescript-eslint/no-unused-vars
+    87:14  warning  'i18n' is assigned a value but never used                                                                                                  @typescript-eslint/no-unused-vars
+    93:22  warning  'setRefreshing' is assigned a value but never used                                                                                         @typescript-eslint/no-unused-vars
+   163:7   warning  Unreachable code                                                                                                                           no-unreachable
+   200:6   warning  React Hook useEffect has missing dependencies: 'classId', 'loadClassDetails', and 't'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+   305:6   warning  React Hook useCallback has a missing dependency: 'loadClassDetails'. Either include it or remove the dependency array                      react-hooks/exhaustive-deps
+   527:13  warning  'response' is assigned a value but never used                                                                                              @typescript-eslint/no-unused-vars
+   599:9   warning  'handleRemoveStudentFromGroup' is assigned a value but never used                                                                          @typescript-eslint/no-unused-vars
+   650:13  warning  'response' is assigned a value but never used                                                                                              @typescript-eslint/no-unused-vars
+   775:13  warning  'response' is assigned a value but never used                                                                                              @typescript-eslint/no-unused-vars
+  2498:7   warning  'styles' is assigned a value but never used                                                                                                @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/class-videos/[classId].tsx
+   1:27  warning  'useEffect' is defined but never used                                                                          @typescript-eslint/no-unused-vars
+  32:8   warning  React Hook useCallback has a missing dependency: 'loadData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/contact.tsx
+  3:84  warning  'Platform' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/dashboard.tsx
+   23:8   warning  'ProfilePicture' is defined but never used                                                                             @typescript-eslint/no-unused-vars
+   59:11  warning  'ClassAttendance' is defined but never used                                                                            @typescript-eslint/no-unused-vars
+   80:11  warning  'Review' is defined but never used                                                                                     @typescript-eslint/no-unused-vars
+   88:11  warning  'Intake' is defined but never used                                                                                     @typescript-eslint/no-unused-vars
+   99:11  warning  'Class' is defined but never used                                                                                      @typescript-eslint/no-unused-vars
+  200:10  warning  'loadingUnreadMessages' is assigned a value but never used                                                             @typescript-eslint/no-unused-vars
+  213:6   warning  React Hook useEffect has a missing dependency: 'loadDashboardStats'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  317:9   warning  'formatTimeAgo' is assigned a value but never used                                                                     @typescript-eslint/no-unused-vars
+  455:14  warning  'e' is defined but never used                                                                                          @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/demo-sessions.tsx
+   5:5   warning  'ScrollView' is defined but never used                                                                          @typescript-eslint/no-unused-vars
+  18:10  warning  'LinearGradient' is defined but never used                                                                      @typescript-eslint/no-unused-vars
+  58:8   warning  React Hook useEffect has a missing dependency: 'loadIntakes'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/direct-message/[id].tsx
+   6:10  warning  'SafeAreaView' is defined but never used                                                                                   @typescript-eslint/no-unused-vars
+  10:40  warning  'TypingEvent' is defined but never used                                                                                    @typescript-eslint/no-unused-vars
+  52:6   warning  React Hook useEffect has missing dependencies: 'loadChatRoom' and 't'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  85:15  warning  'isOwnMessage' is assigned a value but never used                                                                          @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/grading.tsx
+   5:5   warning  'ScrollView' is defined but never used                                                                                  @typescript-eslint/no-unused-vars
+  21:7   warning  'AsyncStorage' is assigned a value but never used                                                                       @typescript-eslint/no-unused-vars
+  34:16  warning  'i18n' is assigned a value but never used                                                                               @typescript-eslint/no-unused-vars
+  41:11  warning  'baseurl' is assigned a value but never used                                                                            @typescript-eslint/no-unused-vars
+  46:12  warning  React Hook useCallback has a missing dependency: 'loadPendingGrades'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/group-attendance-history/[groupId].tsx
+   7:3  warning  'Alert' is defined but never used                                                                                         @typescript-eslint/no-unused-vars
+  67:6  warning  React Hook useEffect has a missing dependency: 'loadAttendanceHistory'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/group-attendance.tsx
+    1:38  warning  'useRef' is defined but never used                                                                                             @typescript-eslint/no-unused-vars
+   66:12  warning  'students' is assigned a value but never used                                                                                  @typescript-eslint/no-unused-vars
+   67:12  warning  'isLoadingStudents' is assigned a value but never used                                                                         @typescript-eslint/no-unused-vars
+   96:8   warning  React Hook useEffect has a missing dependency: 'loadGroups'. Either include it or remove the dependency array                  react-hooks/exhaustive-deps
+  105:8   warning  React Hook useEffect has a missing dependency: 'loadSessionStudents'. Either include it or remove the dependency array         react-hooks/exhaustive-deps
+  158:8   warning  React Hook useEffect has missing dependencies: 'colorAnim' and 'fadeAnim'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  418:11  warning  'renderStudentItem' is assigned a value but never used                                                                         @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/group-chat/[id].tsx
+  28:9  warning  'width' is assigned a value but never used                                                                                 @typescript-eslint/no-unused-vars
+  60:6  warning  React Hook useEffect has missing dependencies: 'loadChatRoom' and 't'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/group-chat/socketio-[id].tsx
+  19:10  warning  'tokenStorage' is defined but never used                                                                                   @typescript-eslint/no-unused-vars
+  58:6   warning  React Hook useEffect has missing dependencies: 'loadChatRoom' and 't'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/group-details/[id].tsx
+   15:3   warning  'StyleSheet' is defined but never used                                                                                                     @typescript-eslint/no-unused-vars
+   24:10  warning  'LinearGradient' is defined but never used                                                                                                 @typescript-eslint/no-unused-vars
+   75:14  warning  'i18n' is assigned a value but never used                                                                                                  @typescript-eslint/no-unused-vars
+   80:22  warning  'setRefreshing' is assigned a value but never used                                                                                         @typescript-eslint/no-unused-vars
+  100:10  warning  'addingStudent' is assigned a value but never used                                                                                         @typescript-eslint/no-unused-vars
+  160:6   warning  React Hook useEffect has missing dependencies: 'groupId', 'loadGroupDetails', and 't'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  239:6   warning  React Hook useCallback has a missing dependency: 'loadGroupDetails'. Either include it or remove the dependency array                      react-hooks/exhaustive-deps
+  408:13  warning  'response' is assigned a value but never used                                                                                              @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/index.tsx
+    4:58  warning  'ScrollView' is defined but never used                                                                                                                    @typescript-eslint/no-unused-vars
+   26:3   warning  'cancelAnimation' is defined but never used                                                                                                               @typescript-eslint/no-unused-vars
+   69:6   warning  React Hook useEffect has missing dependencies: 'delay', 'duration', 'opacity', and 'translateY'. Either include them or remove the dependency array       react-hooks/exhaustive-deps
+   93:11  warning  't' is assigned a value but never used                                                                                                                    @typescript-eslint/no-unused-vars
+   93:14  warning  'i18n' is assigned a value but never used                                                                                                                 @typescript-eslint/no-unused-vars
+   95:22  warning  'isTablet' is assigned a value but never used                                                                                                             @typescript-eslint/no-unused-vars
+   99:18  warning  'screenWidth' is assigned a value but never used                                                                                                          @typescript-eslint/no-unused-vars
+  110:6   warning  React Hook useEffect has a missing dependency: 'checkLoginStatus'. Either include it or remove the dependency array                                       react-hooks/exhaustive-deps
+  188:6   warning  React Hook useEffect has missing dependencies: 'aurora1', 'aurora2', 'ctaPulse', and 'marqueeOffset'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/intake-details/[id].tsx
+   21:10  warning  'LinearGradient' is defined but never used                                                                                                   @typescript-eslint/no-unused-vars
+   24:10  warning  'API_CONFIG' is defined but never used                                                                                                       @typescript-eslint/no-unused-vars
+   29:7   warning  'AsyncStorage' is assigned a value but never used                                                                                            @typescript-eslint/no-unused-vars
+  154:6   warning  React Hook useEffect has missing dependencies: 'intakeId', 'loadIntakeDetails', and 't'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/intake-details/quiz-submissions/[id].tsx
+  73:6  warning  React Hook useEffect has a missing dependency: 'loadSubmissions'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/intake-details/quizzes.tsx
+    7:3  warning  'Alert' is defined but never used                                                                                 @typescript-eslint/no-unused-vars
+  108:6  warning  React Hook useEffect has a missing dependency: 'loadQuizzes'. Either include it or remove the dependency array    react-hooks/exhaustive-deps
+  314:6  warning  React Hook useEffect has a missing dependency: 'loadQuestions'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/intake-videos/[intakeId].tsx
+  32:8  warning  React Hook useEffect has a missing dependency: 'loadData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/intake-videos/placeholder.tsx
+   5:5   warning  'ScrollView' is defined but never used                                                                       @typescript-eslint/no-unused-vars
+   6:5   warning  'TouchableOpacity' is defined but never used                                                                 @typescript-eslint/no-unused-vars
+   7:5   warning  'ActivityIndicator' is defined but never used                                                                @typescript-eslint/no-unused-vars
+   8:5   warning  'RefreshControl' is defined but never used                                                                   @typescript-eslint/no-unused-vars
+   9:5   warning  'Image' is defined but never used                                                                            @typescript-eslint/no-unused-vars
+  11:5   warning  'StatusBar' is defined but never used                                                                        @typescript-eslint/no-unused-vars
+  14:10  warning  'Ionicons' is defined but never used                                                                         @typescript-eslint/no-unused-vars
+  16:10  warning  'LinearGradient' is defined but never used                                                                   @typescript-eslint/no-unused-vars
+  19:11  warning  'router' is assigned a value but never used                                                                  @typescript-eslint/no-unused-vars
+  21:12  warning  'loading' is assigned a value but never used                                                                 @typescript-eslint/no-unused-vars
+  22:12  warning  'refreshing' is assigned a value but never used                                                              @typescript-eslint/no-unused-vars
+  22:24  warning  'setRefreshing' is assigned a value but never used                                                           @typescript-eslint/no-unused-vars
+  23:12  warning  'categories' is assigned a value but never used                                                              @typescript-eslint/no-unused-vars
+  23:24  warning  'setCategories' is assigned a value but never used                                                           @typescript-eslint/no-unused-vars
+  24:12  warning  'videos' is assigned a value but never used                                                                  @typescript-eslint/no-unused-vars
+  24:20  warning  'setVideos' is assigned a value but never used                                                               @typescript-eslint/no-unused-vars
+  25:12  warning  'selectedCategory' is assigned a value but never used                                                        @typescript-eslint/no-unused-vars
+  25:30  warning  'setSelectedCategory' is assigned a value but never used                                                     @typescript-eslint/no-unused-vars
+  31:8   warning  React Hook useEffect has a missing dependency: 'loadData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  38:20  warning  'cats' is assigned a value but never used                                                                    @typescript-eslint/no-unused-vars
+  38:26  warning  'vids' is assigned a value but never used                                                                    @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/intake-videos/video/[id].tsx
+    9:5   warning  'Image' is defined but never used                                                                            @typescript-eslint/no-unused-vars
+   26:11  warning  'router' is assigned a value but never used                                                                  @typescript-eslint/no-unused-vars
+   28:12  warning  'loading' is assigned a value but never used                                                                 @typescript-eslint/no-unused-vars
+   29:12  warning  'video' is assigned a value but never used                                                                   @typescript-eslint/no-unused-vars
+   29:19  warning  'setVideo' is assigned a value but never used                                                                @typescript-eslint/no-unused-vars
+   30:12  warning  'insights' is assigned a value but never used                                                                @typescript-eslint/no-unused-vars
+   30:22  warning  'setInsights' is assigned a value but never used                                                             @typescript-eslint/no-unused-vars
+   31:12  warning  'saving' is assigned a value but never used                                                                  @typescript-eslint/no-unused-vars
+   31:20  warning  'setSaving' is assigned a value but never used                                                               @typescript-eslint/no-unused-vars
+   32:12  warning  'originalInsights' is assigned a value but never used                                                        @typescript-eslint/no-unused-vars
+   32:30  warning  'setOriginalInsights' is assigned a value but never used                                                     @typescript-eslint/no-unused-vars
+   38:8   warning  React Hook useEffect has a missing dependency: 'loadData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+   57:19  warning  'vidId' is assigned a value but never used                                                                   @typescript-eslint/no-unused-vars
+  120:8   warning  React Hook useEffect has a missing dependency: 'router'. Either include it or remove the dependency array    react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/intakes.tsx
+    5:3  warning  'ScrollView' is defined but never used                                                                          @typescript-eslint/no-unused-vars
+   29:7  warning  'AsyncStorage' is assigned a value but never used                                                               @typescript-eslint/no-unused-vars
+   85:6  warning  React Hook useEffect has a missing dependency: 'loadIntakes'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  184:9  warning  'getStatusColor' is assigned a value but never used                                                             @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/invitations.tsx
+  20:8  warning  'ProfilePicture' is defined but never used                                                                          @typescript-eslint/no-unused-vars
+  53:8  warning  React Hook useEffect has a missing dependency: 'loadInvitations'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/lecturer-hub/[id].tsx
+  37:8  warning  React Hook useEffect has a missing dependency: 'fetchLecturerDetails'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/lecturer-hub/index.tsx
+  65:8  warning  React Hook useEffect has a missing dependency: 'fetchLecturers'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  73:8  warning  React Hook useEffect has a missing dependency: 'fetchLecturers'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/lecturer-profile.tsx
+    7:3   warning  'Alert' is defined but never used                                                                               @typescript-eslint/no-unused-vars
+   80:9   warning  'isWeb' is assigned a value but never used                                                                      @typescript-eslint/no-unused-vars
+  117:6   warning  React Hook useEffect has a missing dependency: 'loadProfile'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  244:9   warning  'renderField' is assigned a value but never used                                                                @typescript-eslint/no-unused-vars
+  731:22  error    Component definition is missing display name                                                                    react/display-name
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/login.tsx
+   7:3   warning  'Alert' is defined but never used                                                                                               @typescript-eslint/no-unused-vars
+   8:3   warning  'Dimensions' is defined but never used                                                                                          @typescript-eslint/no-unused-vars
+  28:20  warning  'FadeIn' is defined but never used                                                                                              @typescript-eslint/no-unused-vars
+  34:29  warning  'screenWidth' is assigned a value but never used                                                                                @typescript-eslint/no-unused-vars
+  70:6   warning  React Hook useEffect has missing dependencies: 'handleGoogleLogin' and 't'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/messages.tsx
+   16:10  warning  'SafeAreaView' is defined but never used                                                                            @typescript-eslint/no-unused-vars
+   21:10  warning  'LinearGradient' is defined but never used                                                                          @typescript-eslint/no-unused-vars
+   77:14  warning  'i18n' is assigned a value but never used                                                                           @typescript-eslint/no-unused-vars
+  131:6   warning  React Hook useCallback has a missing dependency: 'loadChatRooms'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  135:6   warning  React Hook useEffect has a missing dependency: 'loadChatRooms'. Either include it or remove the dependency array    react-hooks/exhaustive-deps
+  146:8   warning  React Hook useCallback has a missing dependency: 'loadChatRooms'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/notification-settings.tsx
+  10:5   warning  'Alert' is defined but never used                                                                                @typescript-eslint/no-unused-vars
+  14:17  warning  'router' is defined but never used                                                                               @typescript-eslint/no-unused-vars
+  15:10  warning  'Ionicons' is defined but never used                                                                             @typescript-eslint/no-unused-vars
+  36:12  warning  'updating' is assigned a value but never used                                                                    @typescript-eslint/no-unused-vars
+  48:8   warning  React Hook useEffect has a missing dependency: 'loadSettings'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/onboarding.tsx
+  10:5   warning  'Animated' is defined but never used         @typescript-eslint/no-unused-vars
+  20:16  warning  'height' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/privacy-policy.tsx
+  3:75  warning  'I18nManager' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/privacy-settings.tsx
+  10:5   warning  'Alert' is defined but never used                                                                                @typescript-eslint/no-unused-vars
+  15:17  warning  'router' is defined but never used                                                                               @typescript-eslint/no-unused-vars
+  35:12  warning  'updating' is assigned a value but never used                                                                    @typescript-eslint/no-unused-vars
+  49:8   warning  React Hook useEffect has a missing dependency: 'loadSettings'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/profile-edit.tsx
+  72:6  warning  React Hook useEffect has a missing dependency: 'loadUserData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/register.tsx
+    2:82  warning  'Dimensions' is defined but never used                                                                                           @typescript-eslint/no-unused-vars
+    5:17  warning  'AxiosError' is defined but never used                                                                                           @typescript-eslint/no-unused-vars
+   18:20  warning  'FadeIn' is defined but never used                                                                                               @typescript-eslint/no-unused-vars
+   45:11  warning  'ApiResponse' is defined but never used                                                                                          @typescript-eslint/no-unused-vars
+   69:10  warning  'isGoogleUser' is assigned a value but never used                                                                                @typescript-eslint/no-unused-vars
+  104:6   warning  React Hook useEffect has missing dependencies: 'handleGoogleSignUp' and 't'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/send-announcement.tsx
+  17:10  warning  'LinearGradient' is defined but never used                                                                       @typescript-eslint/no-unused-vars
+  22:10  warning  'socketIOManager' is defined but never used                                                                      @typescript-eslint/no-unused-vars
+  84:6   warning  React Hook useEffect has a missing dependency: 'loadEntities'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/send-invitation.tsx
+  47:12  warning  'students' is assigned a value but never used                                                                            @typescript-eslint/no-unused-vars
+  62:8   warning  React Hook useEffect has a missing dependency: 'loadData'. Either include it or remove the dependency array              react-hooks/exhaustive-deps
+  75:8   warning  React Hook useEffect has a missing dependency: 'searchStudentByEmail'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/settings.tsx
+  15:10  warning  'LinearGradient' is defined but never used      @typescript-eslint/no-unused-vars
+  25:13  warning  'isDesktop' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/student-details/[id].tsx
+  11:5   warning  'Image' is defined but never used                                                                                        @typescript-eslint/no-unused-vars
+  81:12  warning  React Hook useCallback has a missing dependency: 'loadStudentDetails'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/students.tsx
+  12:5  warning  'Image' is defined but never used                                                                                @typescript-eslint/no-unused-vars
+  50:8  warning  React Hook useEffect has a missing dependency: 'loadStudents'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/submission-grading/[id].tsx
+  60:8  warning  React Hook useEffect has a missing dependency: 'loadSubmissionDetails'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/support/index.tsx
+   67:8   warning  React Hook useEffect has a missing dependency: 'loadTickets'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  133:19  warning  'response' is assigned a value but never used                                                                   @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/terms-of-service.tsx
+  3:75  warning  'I18nManager' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/timetable.tsx
+   11:5   warning  'ActivityIndicator' is defined but never used      @typescript-eslint/no-unused-vars
+   20:7   warning  'AsyncStorage' is assigned a value but never used  @typescript-eslint/no-unused-vars
+   68:11  warning  'isRTL' is assigned a value but never used         @typescript-eslint/no-unused-vars
+  127:18  warning  'e' is defined but never used                      @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/upload-video/[classId].tsx
+  45:6  warning  React Hook useEffect has a missing dependency: 'loadCategories'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/upload-video/new.tsx
+   26:10  warning  'BlurView' is defined but never used                                                                                 @typescript-eslint/no-unused-vars
+   48:12  warning  'loadingCategories' is assigned a value but never used                                                               @typescript-eslint/no-unused-vars
+   68:8   warning  React Hook useEffect has a missing dependency: 'loadContextItems'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+   77:8   warning  React Hook useEffect has a missing dependency: 'loadCategories'. Either include it or remove the dependency array    react-hooks/exhaustive-deps
+  137:18  warning  'error' is defined but never used                                                                                    @typescript-eslint/no-unused-vars
+  159:18  warning  'error' is defined but never used                                                                                    @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/verification-request.tsx
+  38:12  warning  'isLoading' is assigned a value but never used                                                                    @typescript-eslint/no-unused-vars
+  43:8   warning  React Hook useEffect has a missing dependency: 'fetchRequests'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/app/wallet.tsx
+  57:24  warning  'currencySymbol' is assigned a value but never used                                                                @typescript-eslint/no-unused-vars
+  79:6   warning  React Hook useEffect has a missing dependency: 'loadWalletData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  99:14  warning  'error' is defined but never used                                                                                  @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/src/components/DatePicker.tsx
+  103:8  warning  React Hook useEffect has a missing dependency: 'tempDate'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/src/components/HoverCard.tsx
+  1:17  warning  'useRef' is defined but never used            @typescript-eslint/no-unused-vars
+  2:10  warning  'View' is defined but never used              @typescript-eslint/no-unused-vars
+  2:28  warning  'TouchableOpacity' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/src/components/HoverIcon.tsx
+  56:15  warning  'iconColor' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/src/components/IntakeSelectionModal.tsx
+  11:5  warning  'Dimensions' is defined but never used                                                                          @typescript-eslint/no-unused-vars
+  44:8  warning  React Hook useEffect has a missing dependency: 'loadIntakes'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/src/components/LoginSuccessAnimation.tsx
+   2:34  warning  'Dimensions' is defined but never used                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+   8:5   warning  'withSequence' is defined but never used                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+  11:5   warning  'interpolate' is defined but never used                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+  12:5   warning  'Extrapolation' is defined but never used                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
+  62:8   warning  React Hook useEffect has missing dependencies: 'contentOpacity', 'iconScale', 'onComplete', 'ripple1Opacity', 'ripple1Scale', 'ripple2Opacity', 'ripple2Scale', and 'textTranslateY'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/src/components/MiniAIChat.tsx
+  56:8   warning  React Hook useEffect has a missing dependency: 'slideAnim'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  72:18  warning  'error' is defined but never used                                                                             @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/src/components/Skeleton.tsx
+  2:10  warning  'View' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/src/components/VideoPlayer.tsx
+   19:16  warning  'screenWidth' is assigned a value but never used                                                                                                             @typescript-eslint/no-unused-vars
+   72:6   warning  React Hook useEffect has a missing dependency: 'initializeVideoProtection'. Either include it or remove the dependency array                                 react-hooks/exhaustive-deps
+  132:6   warning  React Hook useEffect has missing dependencies: 'player.currentTime' and 'player.duration'. Either include them or remove the dependency array                react-hooks/exhaustive-deps
+  144:6   warning  React Hook useEffect has missing dependencies: 'showControlsWithAnimation' and 'startHideControlsTimer'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  166:6   warning  React Hook useEffect has missing dependencies: 'player.currentTime' and 'player.duration'. Either include them or remove the dependency array                react-hooks/exhaustive-deps
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/src/components/WalletInfoSlides.tsx
+  14:16  warning  'WINDOW_WIDTH' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/src/components/WebLayout.tsx
+    2:108  warning  'I18nManager' is defined but never used                                                                            @typescript-eslint/no-unused-vars
+    6:10   warning  'LinearGradient' is defined but never used                                                                         @typescript-eslint/no-unused-vars
+   74:8    warning  React Hook React.useEffect has a missing dependency: 'glowAnim'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  172:11   warning  'handleLogout' is assigned a value but never used                                                                  @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/src/config/api.ts
+  127:16  warning  'refreshError' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/src/i18n/index.ts
+  24:15  warning  Caution: `i18n` also has a named export `use`. Check if you meant to write `import {use} from 'i18next'` instead                        import/no-named-as-default-member
+  65:11  warning  Caution: `i18n` also has a named export `changeLanguage`. Check if you meant to write `import {changeLanguage} from 'i18next'` instead  import/no-named-as-default-member
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/src/utils/aiService.ts
+  357:21  warning  'lastError' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/src/utils/notifications.ts
+  49:26  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/src/utils/socketio.ts
+  463:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/ahmad-m4/Documents/lec-app-trial/Taalomy-lec-web/Taalomy-Lecture-App/LecturerApp/src/utils/videoSecurity.ts
+    3:13  warning  'Device' is defined but never used  @typescript-eslint/no-unused-vars
+  182:14  warning  'error' is defined but never used   @typescript-eslint/no-unused-vars
+
+✖ 256 problems (1 error, 255 warnings)
+

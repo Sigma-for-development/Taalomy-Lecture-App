@@ -24,10 +24,7 @@ const AttendanceScreen = () => {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
-      <LinearGradient
-        colors={['#0a0a0a', '#1a1a1a', '#2d2d2d']}
-        style={styles.backgroundGradient}
-      />
+      <View style={styles.backgroundContainer} />
 
       {/* Header */}
       <View style={[
@@ -159,12 +156,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0a0a0a',
   },
-  backgroundGradient: {
+  backgroundContainer: {
     position: 'absolute',
     left: 0,
     right: 0,
     top: 0,
     bottom: 0,
+    backgroundColor: '#1b1b1b',
   },
   header: {
     flexDirection: 'row',

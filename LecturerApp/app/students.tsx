@@ -15,7 +15,6 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { tokenStorage } from '../utils/tokenStorage';
-const AsyncStorage = tokenStorage;
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { API_CONFIG } from '../src/config/api';
@@ -24,6 +23,7 @@ import ProfilePicture from '../src/components/ProfilePicture';
 import { useResponsive } from '../src/hooks/useResponsive';
 import { HoverCard } from '../src/components/HoverCard';
 import { Skeleton } from '../src/components/Skeleton';
+const AsyncStorage = tokenStorage;
 
 interface Student {
     id: number;

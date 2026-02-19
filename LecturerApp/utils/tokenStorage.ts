@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 
-type StorageKey = 'access_token' | 'refresh_token' | 'user_data' | 'user_settings' | 'user_region' | 'user-language' | 'welcome_dismissed' | 'has_seen_onboarding';
+type StorageKey = 'access_token' | 'refresh_token' | 'user_data' | 'user_settings' | 'user_region' | 'user-language' | 'welcome_dismissed' | 'has_seen_onboarding' | 'system_zoom_level';
 
 /**
  * Robust token storage that handles platform differences (Web vs Native)

@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { router } from 'expo-router';
 import { tokenStorage } from '../../utils/tokenStorage';
-const AsyncStorage = tokenStorage;
 import { API_CONFIG } from '../config/api';
+const AsyncStorage = tokenStorage;
 
 // Create axios instance with base configuration for accounts
 const api = axios.create({

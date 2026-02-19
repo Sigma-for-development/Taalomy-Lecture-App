@@ -13,10 +13,10 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { tokenStorage } from '../../utils/tokenStorage';
-const AsyncStorage = tokenStorage;
 import { API_CONFIG } from '../../src/config/api';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
+const AsyncStorage = tokenStorage;
 
 interface StudentDetail {
   id: number;
@@ -156,10 +156,7 @@ const StudentDetailsScreen = () => {
   if (isLoading) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <LinearGradient
-          colors={['#0a0a0a', '#1a1a1a', '#2d2d2d']}
-          style={styles.backgroundGradient}
-        />
+        <View style={styles.backgroundContainer} />
         <ActivityIndicator size="large" color="#3498db" />
       </View>
     );
@@ -169,10 +166,7 @@ const StudentDetailsScreen = () => {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
-      <LinearGradient
-        colors={['#0a0a0a', '#1a1a1a', '#2d2d2d']}
-        style={styles.backgroundGradient}
-      />
+      <View style={styles.backgroundContainer} />
 
       {/* Header */}
       <View style={styles.header}>
@@ -242,12 +236,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0a0a0a',
   },
-  backgroundGradient: {
+  backgroundContainer: {
     position: 'absolute',
     left: 0,
     right: 0,
     top: 0,
     bottom: 0,
+    backgroundColor: '#1b1b1b',
   },
   header: {
     flexDirection: 'row',

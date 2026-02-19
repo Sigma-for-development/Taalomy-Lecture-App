@@ -16,7 +16,6 @@ import {
 import Toast from 'react-native-toast-message';
 import { router, useFocusEffect } from 'expo-router';
 import { tokenStorage } from '../utils/tokenStorage';
-const AsyncStorage = tokenStorage;
 import { useResponsive } from '../src/hooks/useResponsive';
 import { useTranslation } from 'react-i18next'; // Added import
 import { LinearGradient } from 'expo-linear-gradient';
@@ -29,6 +28,7 @@ import { aiContextCache } from '../src/utils/aiContextCache';
 import MiniAIChat from '../src/components/MiniAIChat';
 import { HoverCard } from '../src/components/HoverCard';
 import { HoverIcon } from '../src/components/HoverIcon';
+const AsyncStorage = tokenStorage;
 
 // Width will be handled by the hook inside the component
 
@@ -529,25 +529,25 @@ const Dashboard = () => {
 
   if (!userData) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#0a0a0a', justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ flex: 1, backgroundColor: '#1b1b1b', justifyContent: 'center', alignItems: 'center' }}>
         <Text style={{ color: '#ecf0f1' }}>{t('loading')}</Text>
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#0a0a0a' }}>
+    <View style={{ flex: 1, backgroundColor: '#1b1b1b' }}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
       {/* Professional Dark Background */}
-      <LinearGradient
-        colors={['#0a0a0a', '#1a1a1a', '#2d2d2d']}
+      <View
         style={{
           position: 'absolute',
           left: 0,
           right: 0,
           top: 0,
           bottom: 0,
+          backgroundColor: '#1b1b1b',
         }}
       />
 

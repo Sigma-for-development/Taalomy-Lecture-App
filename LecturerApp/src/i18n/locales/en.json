@@ -1527,5 +1527,13 @@
     "classes_count_plural": "{{count}} classes",
     "confirm_intake_setup": "Confirm Intake Setup",
     "confirm_intake_setup_desc": "Are you sure you want to setup this intake?",
+    "theme_settings": "Theme Settings",
+    "theme_dark": "Dark",
+    "theme_light": "Light",
+    "theme_system": "System",
+    "total_demo_sessions": "Total Demo Sessions",
+    "upcoming_sessions": "Upcoming Sessions",
+    "completed_sessions": "Completed Sessions",
+    "total_participants": "Total Participants",
     "message_error": "Failed to send message"
 }

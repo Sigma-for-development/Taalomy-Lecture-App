@@ -17,12 +17,16 @@ import Toast from 'react-native-toast-message';
 import { useTranslation } from 'react-i18next'; // Added import
 import { router } from 'expo-router';
 import { tokenStorage } from '../utils/tokenStorage';
-const AsyncStorage = tokenStorage;
 import { Ionicons } from '@expo/vector-icons';
 import { lecturerAPI } from '../src/utils/api';
 import { socketIOManager } from '../src/utils/socketio';
 import DatePicker from '../src/components/DatePicker';
 import { useResponsive } from '../src/hooks/useResponsive';
+
+import { HoverCard } from '../src/components/HoverCard';
+import { HoverIcon } from '../src/components/HoverIcon';
+import { Skeleton } from '../src/components/Skeleton';
+const AsyncStorage = tokenStorage;
 
 interface Intake {
   id: number;
@@ -35,10 +39,6 @@ interface Intake {
   status: 'active' | 'inactive' | 'completed';
   is_demo?: boolean;
 }
-
-import { HoverCard } from '../src/components/HoverCard';
-import { HoverIcon } from '../src/components/HoverIcon';
-import { Skeleton } from '../src/components/Skeleton';
 
 const IntakesScreen = () => {
   const { t, i18n } = useTranslation();

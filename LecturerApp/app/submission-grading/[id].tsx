@@ -14,12 +14,12 @@ import {
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { tokenStorage } from '../../utils/tokenStorage';
-const AsyncStorage = tokenStorage;
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { API_CONFIG } from '../../src/config/api';
 import { useTranslation } from 'react-i18next';
+const AsyncStorage = tokenStorage;
 
 interface StudentAnswer {
     id: number;

@@ -12,9 +12,9 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { tokenStorage } from '../../utils/tokenStorage';
-const AsyncStorage = tokenStorage;
 import axios from 'axios';
 import { API_CONFIG } from '../config/api';
+const AsyncStorage = tokenStorage;
 
 interface Intake {
     id: number;

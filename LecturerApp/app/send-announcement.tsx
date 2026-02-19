@@ -14,7 +14,6 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { tokenStorage } from '../utils/tokenStorage';
-const AsyncStorage = tokenStorage;
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
@@ -23,6 +22,7 @@ import { lecturerAPI } from '../src/utils/api';
 import { socketIOManager } from '../src/utils/socketio';
 import { useTranslation } from 'react-i18next';
 import { useResponsive } from '../src/hooks/useResponsive';
+const AsyncStorage = tokenStorage;
 
 interface Intake {
   id: number;

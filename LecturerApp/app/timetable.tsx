@@ -13,11 +13,11 @@ import {
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { tokenStorage } from '../utils/tokenStorage';
-const AsyncStorage = tokenStorage;
 import { lecturerAPI } from '../src/utils/api';
 import { useTranslation } from 'react-i18next';
 import { useResponsive } from '../src/hooks/useResponsive';
 import { Skeleton } from '../src/components/Skeleton';
+const AsyncStorage = tokenStorage;
 
 // Unified interface for display
 interface ScheduleItem {

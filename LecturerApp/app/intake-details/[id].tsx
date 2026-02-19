@@ -18,7 +18,6 @@ import {
 import Toast from 'react-native-toast-message';
 import { router, useLocalSearchParams } from 'expo-router';
 import { tokenStorage } from '../../utils/tokenStorage';
-const AsyncStorage = tokenStorage;
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import api from '../../src/services/api';
@@ -27,6 +26,7 @@ import { socketIOManager } from '../../src/utils/socketio';
 import DatePicker from '../../src/components/DatePicker';
 import { useLocalization } from '../../src/context/LocalizationContext';
 import { useTranslation } from 'react-i18next';
+const AsyncStorage = tokenStorage;
 
 interface Intake {
   id: number;

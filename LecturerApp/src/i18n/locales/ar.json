@@ -1565,5 +1565,9 @@
     "classes_count_plural": "{{count}} فصول",
     "confirm_intake_setup": "تأكيد إعداد الدفعة",
     "confirm_intake_setup_desc": "هل أنت متأكد من إعداد هذه الدفعة؟",
+    "theme_settings": "إعدادات المظهر",
+    "theme_dark": "داكن",
+    "theme_light": "فاتح",
+    "theme_system": "النظام",
     "message_error": "فشل في إرسال الرسالة"
 }

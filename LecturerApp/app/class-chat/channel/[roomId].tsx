@@ -9,12 +9,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { API_CONFIG } from '../../../src/config/api';
 import { socketIOManager, ChatMessage, TypingEvent, UserEvent } from '../../../src/utils/socketio';
 import { tokenStorage } from '../../../utils/tokenStorage';
-const AsyncStorage = tokenStorage;
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { useTranslation } from 'react-i18next';
+const AsyncStorage = tokenStorage;
 
 // NOTE: ReviewModal removed as Lecturers don't review classes
 

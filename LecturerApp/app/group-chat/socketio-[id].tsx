@@ -17,9 +17,8 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { tokenStorage } from '../../utils/tokenStorage';
-import api from '../../src/config/api';
+import api, { API_CONFIG } from '../../src/config/api';
 import { Ionicons } from '@expo/vector-icons';
-import { API_CONFIG } from '../../src/config/api';
 import { socketIOManager, ChatMessage, TypingEvent, UserEvent } from '../../src/utils/socketio';
 import { useTranslation } from 'react-i18next';
 
