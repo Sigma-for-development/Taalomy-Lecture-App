@@ -23,6 +23,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { API_CONFIG } from '../src/config/api';
 import Toast from 'react-native-toast-message';
 import { useResponsive } from '../src/hooks/useResponsive';
+import { refreshUserData } from '../src/utils/profilePicture';
 
 import { SeoHead } from '../src/components/SeoHead';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
@@ -129,10 +130,12 @@ const Login: React.FC = () => {
           }
 
           await tokenStorage.setItem('user_data', JSON.stringify(updatedUser));
+          await refreshUserData(updatedUser);
         } catch (fetchError) {
           console.error('Error fetching latest user data:', fetchError);
           const fallbackUser = { ...user };
           await tokenStorage.setItem('user_data', JSON.stringify(fallbackUser));
+          await refreshUserData(fallbackUser);
         }
       }
 
@@ -197,6 +200,7 @@ const Login: React.FC = () => {
 
       if (user) {
         await tokenStorage.setItem('user_data', JSON.stringify(user));
+        await refreshUserData(user);
       }
 
       Toast.show({

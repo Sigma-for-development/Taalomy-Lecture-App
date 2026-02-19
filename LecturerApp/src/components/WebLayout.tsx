@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Platform, StyleSheet, Image, Animated, Easing , Alert , I18nManager } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Platform, StyleSheet, Image, Animated, Easing, Alert, I18nManager } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useResponsive } from '../hooks/useResponsive';
@@ -153,6 +153,13 @@ export const WebLayout: React.FC<WebLayoutProps> = ({ children }) => {
             appEventEmitter.off('userProfileUpdated', handleProfileUpdate);
         };
     }, []);
+
+    // Sync user data on navigation changes as a fallback
+    React.useEffect(() => {
+        if (!userData && !isPublicRoute) {
+            loadUserData();
+        }
+    }, [pathname]);
 
     const loadUserData = async () => {
         try {
