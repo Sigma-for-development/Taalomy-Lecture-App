@@ -525,29 +525,41 @@ export default function Index() {
 
         {/* --- BENTO GRID WITH PARALLAX --- */}
         <Animated.View style={[styles.section, { paddingVertical: isDesktop ? 100 : 60, alignItems: 'center' }, bentoParallax]}>
-          <View style={[styles.bentoGrid, { flexDirection: isDesktop ? 'row' : 'column', gap: isDesktop ? 24 : 32 }]}>
-            {/* Col 1 */}
-            <View style={{ flex: isDesktop ? 6 : 0, width: '100%', gap: isDesktop ? 24 : 32 }}>
-              <BentoCard
-                title="Smart Attendance"
-                subtitle="Instant check-ins."
-                icon="qr-code"
-                color="#3b82f6"
-                height={isDesktop ? 420 : 300}
-                delay={400}
-                isLarge
-                isDesktop={isDesktop}
-              />
-              <View style={{ flexDirection: isDesktop ? 'row' : 'column', width: '100%', gap: isDesktop ? 24 : 32 }}>
-                <BentoCard icon="stats-chart" title="Analytics" subtitle="Deep data." color="#0ea5e9" height={isDesktop ? 280 : 220} delay={500} flex={isDesktop ? 1 : 0} isDesktop={isDesktop} />
-                <BentoCard icon="cloud-done" title="Sync" subtitle="Auto-save." color="#10b981" height={isDesktop ? 280 : 220} delay={600} flex={isDesktop ? 1 : 0} isDesktop={isDesktop} />
+          <View style={[styles.bentoGrid, { flexDirection: isDesktop ? 'row' : 'column', gap: isDesktop ? 24 : 0 }]}>
+            {isDesktop ? (
+              <>
+                {/* Desktop Grid Layout */}
+                <View style={{ flex: 6, gap: 24 }}>
+                  <BentoCard
+                    title="Smart Attendance"
+                    subtitle="Instant check-ins."
+                    icon="qr-code"
+                    color="#3b82f6"
+                    height={420}
+                    delay={400}
+                    isLarge
+                    isDesktop={true}
+                  />
+                  <View style={{ flexDirection: 'row', gap: 24 }}>
+                    <BentoCard icon="stats-chart" title="Analytics" subtitle="Deep data." color="#0ea5e9" height={280} delay={500} flex={1} isDesktop={true} />
+                    <BentoCard icon="cloud-done" title="Sync" subtitle="Auto-save." color="#10b981" height={280} delay={600} flex={1} isDesktop={true} />
+                  </View>
+                </View>
+                <View style={{ flex: 4, gap: 24 }}>
+                  <BentoCard title="Chat" subtitle="Private channels." icon="chatbox-ellipses" color="#f59e0b" height={320} delay={700} isDesktop={true} />
+                  <BentoCard title="Hub" subtitle="Command center." icon="layers" color="#ef4444" height={380} delay={800} isDesktop={true} />
+                </View>
+              </>
+            ) : (
+              /* High-Efficiency Mobile Stack - ZERO OVERLAP */
+              <View style={{ width: '100%', gap: 32 }}>
+                <BentoCard title="Smart Attendance" subtitle="Instant check-ins." icon="qr-code" color="#3b82f6" height={320} delay={400} isDesktop={false} />
+                <BentoCard title="Chat" subtitle="Private channels." icon="chatbox-ellipses" color="#f59e0b" height={240} delay={500} isDesktop={false} />
+                <BentoCard title="Analytics" subtitle="Deep data." icon="stats-chart" color="#0ea5e9" height={240} delay={600} isDesktop={false} />
+                <BentoCard title="Hub" subtitle="Command center." icon="layers" color="#ef4444" height={280} delay={700} isDesktop={false} />
+                <BentoCard title="Sync" subtitle="Auto-save." icon="cloud-done" color="#10b981" height={240} delay={800} isDesktop={false} />
               </View>
-            </View>
-            {/* Col 2 */}
-            <View style={{ flex: isDesktop ? 4 : 0, width: '100%', gap: isDesktop ? 24 : 32 }}>
-              <BentoCard title="Chat" subtitle="Private channels." icon="chatbox-ellipses" color="#f59e0b" height={isDesktop ? 320 : 260} delay={700} isDesktop={isDesktop} />
-              <BentoCard title="Hub" subtitle="Command center." icon="layers" color="#ef4444" height={isDesktop ? 380 : 300} delay={800} isDesktop={isDesktop} />
-            </View>
+            )}
           </View>
         </Animated.View>
 
