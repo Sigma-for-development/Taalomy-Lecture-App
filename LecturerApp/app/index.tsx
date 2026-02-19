@@ -315,14 +315,14 @@ export default function Index() {
       >
 
         {/* Navbar */}
-        <Animated.View entering={FadeInUp.duration(800)} style={[styles.navHeader, { paddingHorizontal: isDesktop ? 60 : 20, paddingTop: isDesktop ? 48 : 24 }]}>
+        <Animated.View entering={FadeInUp.duration(800)} style={[styles.navHeader, { paddingHorizontal: isDesktop ? 60 : 24, paddingTop: isDesktop ? 48 : 40 }]}>
           <Image
             source={require('../assets/taalomy-white-txt.png')}
-            style={{ width: isDesktop ? 340 : 180, height: isDesktop ? 85 : 45 }} // Responsive logo
+            style={{ width: isDesktop ? 340 : 160, height: isDesktop ? 85 : 40 }} // Fixed mobile logo scaling
             resizeMode="contain"
           />
-          <TouchableOpacity onPress={() => router.push('/login')} style={styles.navButton}>
-            <Text style={styles.navButtonText}>Sign In</Text>
+          <TouchableOpacity onPress={() => router.push('/login')} style={[styles.navButton, { paddingHorizontal: 16, paddingVertical: 8 }]}>
+            <Text style={[styles.navButtonText, { fontSize: 13 }]}>Sign In</Text>
           </TouchableOpacity>
         </Animated.View>
 
@@ -354,24 +354,33 @@ export default function Index() {
             </Animated.Text>
             <Animated.Text
               entering={FadeInUp.delay(800).duration(1000)}
-              style={[styles.heroSubtitle, { fontSize: isDesktop ? heroSubTitleSize : 16, maxWidth: isDesktop ? 660 : '100%', paddingHorizontal: isDesktop ? 0 : 20 }]}
+              style={[styles.heroSubtitle, {
+                fontSize: isDesktop ? heroSubTitleSize : 15,
+                maxWidth: isDesktop ? 660 : '90%',
+                paddingHorizontal: isDesktop ? 0 : 10,
+                lineHeight: isDesktop ? 32 : 24
+              }]}
             >
               The elite AI-driven platform for modern lecturers.{'\n'}Command your classroom, automate your grading,{'\n'}and orchestrate student success.
             </Animated.Text>
 
-            <Animated.View entering={FadeInUp.delay(1000).springify()} style={{ marginTop: 56 }}>
+            <Animated.View entering={FadeInUp.delay(1000).springify()} style={{ marginTop: isDesktop ? 56 : 40 }}>
               <Pressable
                 onPress={() => router.push('/login')}
                 style={({ pressed }) => [
                   styles.primaryButton,
-                  { transform: [{ scale: pressed ? 0.96 : 1 }] }
+                  {
+                    paddingVertical: isDesktop ? 20 : 16,
+                    paddingHorizontal: isDesktop ? 56 : 32,
+                    transform: [{ scale: pressed ? 0.96 : 1 }]
+                  }
                 ]}
               >
                 <LinearGradient
                   colors={['#fff', '#f0f0f0']}
                   style={StyleSheet.absoluteFill}
                 />
-                <Text style={styles.primaryButtonText}>Get Started</Text>
+                <Text style={[styles.primaryButtonText, { fontSize: isDesktop ? 18 : 16 }]}>Get Started</Text>
               </Pressable>
             </Animated.View>
           </Animated.View>
@@ -396,12 +405,16 @@ export default function Index() {
             <Text style={{ color: '#71717a', fontSize: 16, marginTop: 8, fontWeight: '500' }}>A professional glimpse into your next workspace.</Text>
           </View>
 
-          <View style={{ height: 580, width: '100%', maxWidth: '100%', overflow: 'hidden' }}>
+          <View style={{ height: isDesktop ? 580 : 320, width: '100%', maxWidth: '100%', overflow: 'hidden' }}>
             <Animated.View style={[{ flexDirection: 'row', gap: 40, paddingTop: 40 }, marqueeStyle]}>
               {seamlessScreenshots.map((shot, index) => (
                 <View
                   key={`${shot.id}-${index}`}
-                  style={[styles.screenshotCard, { transform: [{ perspective: 1000 }, { rotateY: '-5deg' }, { skewY: '2deg' }] }]}
+                  style={[styles.screenshotCard, {
+                    width: isDesktop ? 640 : 280,
+                    height: isDesktop ? 440 : 200,
+                    transform: [{ perspective: 1000 }, { rotateY: '-5deg' }, { skewY: '2deg' }]
+                  }]}
                 >
                   {/* Monitor Frame Cap/Header */}
                   <View style={styles.monitorHeader}>
@@ -937,8 +950,6 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(59, 130, 246, 0.2)',
   },
   screenshotCard: {
-    width: 640,
-    height: 440,
     borderRadius: 16,
     overflow: 'hidden',
     borderWidth: 1,

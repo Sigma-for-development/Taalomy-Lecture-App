@@ -9,10 +9,16 @@ export default function RootHtml({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
         {/* Global Metadata */}
-        <meta name="theme-color" content="#0a0a0a" />
+        <meta name="theme-color" content="#000000" />
         <link rel="icon" href="/og.png" type="image/png" />
         <link rel="apple-touch-icon" href="/og.png" />
         <link rel="manifest" href="/site.webmanifest" />
+        <style dangerouslySetInnerHTML={{
+          __html: `
+          html, body {
+            background-color: #000000 !important;
+          }
+        ` }} />
 
         {/* Search Engine Verification Placeholders */}
         {/* <meta name="google-site-verification" content="YOUR_GOOGLE_VERIFICATION_CODE" /> */}

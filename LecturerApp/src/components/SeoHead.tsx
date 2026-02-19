@@ -105,6 +105,20 @@ export const SeoHead: React.FC<SeoHeadProps> = ({
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={DEFAULT_IMAGE} />
+
+      {/* Safari & Browser Theme Handling */}
+      <meta name="theme-color" content="#000000" />
+      <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+      {/* Global CSS Reset for true black background across all browsers */}
+      <style>{`
+        html, body {
+          background-color: #000000 !important;
+          margin: 0;
+          padding: 0;
+        }
+      `}</style>
+
       <script type="application/ld+json">{JSON.stringify(finalSchema)}</script>
     </Head>
   );
