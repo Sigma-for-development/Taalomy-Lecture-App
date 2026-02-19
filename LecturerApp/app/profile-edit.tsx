@@ -9,6 +9,7 @@ import {
   StatusBar,
   ActivityIndicator,
   TextInput,
+  Platform,
 } from 'react-native';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -21,6 +22,9 @@ import { API_CONFIG } from '../src/config/api';
 import axios from 'axios';
 import Toast from 'react-native-toast-message';
 import { useTranslation } from 'react-i18next';
+import { useResponsive } from '../src/hooks/useResponsive';
+import { HoverCard } from '../src/components/HoverCard';
+import { HoverIcon } from '../src/components/HoverIcon';
 const AsyncStorage = tokenStorage; // Added import
 
 interface UserData {
@@ -45,6 +49,8 @@ interface PasswordChangeData {
 
 const ProfileEditScreen = () => {
   const { t } = useTranslation();
+  const { isDesktop } = useResponsive();
+  const isWeb = Platform.OS === 'web';
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
@@ -136,6 +142,15 @@ const ProfileEditScreen = () => {
   };
 
   const handleImagePicker = async () => {
+    if (isWeb) {
+      // On web, direct pick is better
+      const imageUri = await pickImage();
+      if (imageUri) {
+        await uploadImage(imageUri);
+      }
+      return;
+    }
+
     Alert.alert(
       t('choose_photo'),
       t('choose_photo_msg'),
@@ -436,140 +451,197 @@ const ProfileEditScreen = () => {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
-      <LinearGradient
-        colors={['#0a0a0a', '#1a1a1a', '#2d2d2d']}
-        style={styles.backgroundGradient}
-      />
+      {isWeb ? (
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: '#1a1a1a' }]} />
+      ) : (
+        <LinearGradient
+          colors={['#0a0a0a', '#1a1a1a', '#2d2d2d']}
+          style={styles.backgroundGradient}
+        />
+      )}
 
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={24} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('edit_profile_title')}</Text>
-        <View style={styles.placeholder} />
+      <View style={[
+        styles.header,
+        isWeb && {
+          height: 80,
+          paddingTop: 0,
+          backgroundColor: '#1a1a1a',
+          borderBottomWidth: 1,
+          borderBottomColor: '#2c2c2c',
+          paddingHorizontal: isDesktop ? 24 : 20,
+        }
+      ]}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, justifyContent: 'space-between' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            {!isWeb && (
+              <TouchableOpacity
+                style={styles.backButton}
+                onPress={() => router.back()}
+              >
+                <Ionicons name="arrow-back" size={24} color="#fff" />
+              </TouchableOpacity>
+            )}
+            <Text style={[
+              styles.headerTitle,
+              isWeb && { fontSize: 24, fontWeight: '700' }
+            ]}>{t('edit_profile_title')}</Text>
+          </View>
+          {isWeb && <View style={styles.placeholder} />}
+        </View>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Profile Picture Section */}
-        <View style={styles.profileSection}>
-          <Text style={styles.sectionTitle}>{t('profile_picture_title')}</Text>
-          <View style={styles.profilePictureContainer}>
-            <ProfilePicture
-              imageUrl={userData?.profile_picture_url || undefined}
-              firstName={userData?.first_name || ''}
-              lastName={userData?.last_name || ''}
-              size={100}
-              onPress={handleImagePicker}
-              showEditIcon={true}
-            />
-            {isUploading && (
-              <View style={styles.uploadingOverlay}>
-                <ActivityIndicator size="large" color="#fff" />
-                <Text style={styles.uploadingText}>{t('uploading')}</Text>
+      <ScrollView
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: 40,
+          paddingTop: isDesktop ? 30 : 20,
+          paddingHorizontal: isDesktop ? 24 : 0,
+        }}
+      >
+        <View style={{
+          flexDirection: isDesktop ? 'row' : 'column',
+          alignItems: 'flex-start',
+          gap: 24,
+        }}>
+          {/* Left Column: Profile Picture (Desktop) */}
+          <View style={{ flex: isDesktop ? 1 : undefined, width: '100%' }}>
+            {/* Profile Picture Section */}
+            <View style={[styles.profileSection, isDesktop && { marginBottom: 24, backgroundColor: 'rgba(255, 255, 255, 0.03)', padding: 24, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.05)' }]}>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.sectionTitle, { marginBottom: 4 }]}>{t('profile_picture_title')}</Text>
+                <Text style={{ color: '#7f8c8d', fontSize: 13, marginBottom: 16 }}>{t('profile_pic_hint', 'Update your avatar to personalize your profile.')}</Text>
               </View>
-            )}
-          </View>
-          <TouchableOpacity
-            style={styles.uploadButton}
-            onPress={handleImagePicker}
-            disabled={isUploading}
-          >
-            <Ionicons name="camera" size={20} color="#fff" />
-            <Text style={styles.uploadButtonText}>
-              {isUploading ? t('uploading') : t('change_photo')}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Personal Information Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('personal_info')}</Text>
-
-          {renderEditableField('first_name', t('first_name'), userData?.first_name || '')}
-          {renderEditableField('last_name', t('last_name'), userData?.last_name || '')}
-          {renderEditableField('phone_number', t('phone_number'), userData?.phone_number || '')}
-          {renderEditableField('address', t('address'), userData?.address || '')}
-        </View>
-
-        {/* Account Information Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('account_info')}</Text>
-
-          <View style={styles.fieldContainer}>
-            <Text style={styles.fieldLabel}>{t('email_address')}</Text>
-            <Text style={styles.fieldValue}>{userData?.email}</Text>
-          </View>
-
-          <View style={styles.fieldContainer}>
-            <Text style={styles.fieldLabel}>{t('username')}</Text>
-            <Text style={styles.fieldValue}>{userData?.username}</Text>
-          </View>
-
-          <View style={styles.fieldContainer}>
-            <Text style={styles.fieldLabel}>{t('user_type')}</Text>
-            <Text style={styles.fieldValue}>{userData?.user_type}</Text>
-          </View>
-
-          {/* Password Change Section */}
-          <View style={styles.fieldContainer}>
-            <TouchableOpacity
-              style={styles.passwordChangeButton}
-              onPress={() => setShowPasswordChange(!showPasswordChange)}
-            >
-              <Text style={styles.passwordChangeButtonText}>{t('change_password')}</Text>
-              <Ionicons
-                name={showPasswordChange ? "chevron-up" : "chevron-down"}
-                size={20}
-                color="#3498db"
-              />
-            </TouchableOpacity>
-
-            {showPasswordChange && (
-              <View style={styles.passwordChangeForm}>
-                <TextInput
-                  style={styles.passwordInput}
-                  placeholder={t('current_password')}
-                  placeholderTextColor="#95a5a6"
-                  secureTextEntry={true}
-                  value={passwordChange.currentPassword}
-                  onChangeText={(text) => setPasswordChange(prev => ({ ...prev, currentPassword: text }))}
-                />
-
-                <TextInput
-                  style={styles.passwordInput}
-                  placeholder={t('new_password')}
-                  placeholderTextColor="#95a5a6"
-                  secureTextEntry={true}
-                  value={passwordChange.newPassword}
-                  onChangeText={(text) => setPasswordChange(prev => ({ ...prev, newPassword: text }))}
-                />
-
-                <TextInput
-                  style={styles.passwordInput}
-                  placeholder={t('confirm_new_password')}
-                  placeholderTextColor="#95a5a6"
-                  secureTextEntry={true}
-                  value={passwordChange.confirmPassword}
-                  onChangeText={(text) => setPasswordChange(prev => ({ ...prev, confirmPassword: text }))}
-                />
-
-                <TouchableOpacity
-                  style={styles.changePasswordButton}
-                  onPress={handleChangePassword}
-                  disabled={isChangingPassword}
-                >
-                  {isChangingPassword ? (
-                    <ActivityIndicator size="small" color="#fff" />
-                  ) : (
-                    <Text style={styles.changePasswordButtonText}>{t('update_password')}</Text>
+              <View style={{ alignItems: 'center' }}>
+                <View style={styles.profilePictureContainer}>
+                  <ProfilePicture
+                    imageUrl={userData?.profile_picture_url || undefined}
+                    firstName={userData?.first_name || ''}
+                    lastName={userData?.last_name || ''}
+                    size={isDesktop ? 120 : 120}
+                    onPress={handleImagePicker}
+                    showEditIcon={true}
+                  />
+                  {isUploading && (
+                    <View style={[styles.uploadingOverlay, { borderRadius: 60 }]}>
+                      <ActivityIndicator size="large" color="#fff" />
+                      <Text style={styles.uploadingText}>{t('uploading')}</Text>
+                    </View>
                   )}
+                </View>
+                <TouchableOpacity
+                  style={styles.uploadButton}
+                  onPress={handleImagePicker}
+                  disabled={isUploading}
+                >
+                  <Ionicons name="camera" size={20} color="#fff" />
+                  <Text style={styles.uploadButtonText}>
+                    {isUploading ? t('uploading') : t('change_photo')}
+                  </Text>
                 </TouchableOpacity>
               </View>
-            )}
+            </View>
+          </View>
+
+          {/* Right Column: Information (Desktop) */}
+          <View style={{ flex: isDesktop ? 2 : undefined, width: '100%' }}>
+            {/* Personal Information Section */}
+            <View style={[styles.section, isDesktop && { backgroundColor: 'rgba(255, 255, 255, 0.03)', padding: 24, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.05)', marginBottom: 24 }]}>
+              <Text style={[styles.sectionTitle, { marginBottom: 16 }]}>{t('personal_info')}</Text>
+
+              {renderEditableField('first_name', t('first_name'), userData?.first_name || '')}
+              {renderEditableField('last_name', t('last_name'), userData?.last_name || '')}
+              {renderEditableField('phone_number', t('phone_number'), userData?.phone_number || '')}
+              {renderEditableField('address', t('address'), userData?.address || '')}
+            </View>
+
+            {/* Account Information Section */}
+            <View style={[styles.section, isDesktop && { backgroundColor: 'rgba(255, 255, 255, 0.03)', padding: 24, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.05)' }]}>
+              <Text style={[styles.sectionTitle, { marginBottom: 16 }]}>{t('account_info')}</Text>
+
+              <View style={[styles.fieldContainer, { marginBottom: 12 }]}>
+                <Text style={styles.fieldLabel}>{t('email_address')}</Text>
+                <View style={[styles.fieldValueContainer, { backgroundColor: 'rgba(255, 255, 255, 0.01)', opacity: 0.8, paddingVertical: 10 }]}>
+                  <Text style={styles.fieldValue}>{userData?.email}</Text>
+                  <Ionicons name="lock-closed-outline" size={16} color="#7f8c8d" />
+                </View>
+              </View>
+
+              <View style={[styles.fieldContainer, { marginBottom: 12 }]}>
+                <Text style={styles.fieldLabel}>{t('username')}</Text>
+                <View style={[styles.fieldValueContainer, { backgroundColor: 'rgba(255, 255, 255, 0.01)', opacity: 0.8, paddingVertical: 10 }]}>
+                  <Text style={styles.fieldValue}>{userData?.username}</Text>
+                  <Ionicons name="lock-closed-outline" size={16} color="#7f8c8d" />
+                </View>
+              </View>
+
+              <View style={[styles.fieldContainer, { marginBottom: 12 }]}>
+                <Text style={styles.fieldLabel}>{t('user_type')}</Text>
+                <View style={[styles.fieldValueContainer, { backgroundColor: 'rgba(255, 255, 255, 0.01)', opacity: 0.8, paddingVertical: 10 }]}>
+                  <Text style={styles.fieldValue}>{userData?.user_type}</Text>
+                  <Ionicons name="lock-closed-outline" size={16} color="#7f8c8d" />
+                </View>
+              </View>
+
+              {/* Password Change Section */}
+              <View style={styles.fieldContainer}>
+                <TouchableOpacity
+                  style={[styles.passwordChangeButton, { paddingVertical: 10 }]}
+                  onPress={() => setShowPasswordChange(!showPasswordChange)}
+                >
+                  <Text style={styles.passwordChangeButtonText}>{t('change_password')}</Text>
+                  <Ionicons
+                    name={showPasswordChange ? "chevron-up" : "chevron-down"}
+                    size={20}
+                    color="#3498db"
+                  />
+                </TouchableOpacity>
+
+                {showPasswordChange && (
+                  <View style={styles.passwordChangeForm}>
+                    <TextInput
+                      style={styles.passwordInput}
+                      placeholder={t('current_password')}
+                      placeholderTextColor="#95a5a6"
+                      secureTextEntry={true}
+                      value={passwordChange.currentPassword}
+                      onChangeText={(text) => setPasswordChange(prev => ({ ...prev, currentPassword: text }))}
+                    />
+
+                    <TextInput
+                      style={styles.passwordInput}
+                      placeholder={t('new_password')}
+                      placeholderTextColor="#95a5a6"
+                      secureTextEntry={true}
+                      value={passwordChange.newPassword}
+                      onChangeText={(text) => setPasswordChange(prev => ({ ...prev, newPassword: text }))}
+                    />
+
+                    <TextInput
+                      style={styles.passwordInput}
+                      placeholder={t('confirm_new_password')}
+                      placeholderTextColor="#95a5a6"
+                      secureTextEntry={true}
+                      value={passwordChange.confirmPassword}
+                      onChangeText={(text) => setPasswordChange(prev => ({ ...prev, confirmPassword: text }))}
+                    />
+
+                    <TouchableOpacity
+                      style={styles.changePasswordButton}
+                      onPress={handleChangePassword}
+                      disabled={isChangingPassword}
+                    >
+                      {isChangingPassword ? (
+                        <ActivityIndicator size="small" color="#fff" />
+                      ) : (
+                        <Text style={styles.changePasswordButtonText}>{t('update_password')}</Text>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+            </View>
           </View>
         </View>
       </ScrollView>
@@ -598,10 +670,10 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 60,
+    justifyContent: 'center',
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
     paddingBottom: 20,
+    paddingHorizontal: 20,
   },
   backButton: {
     padding: 8,
@@ -616,7 +688,6 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
   },
   profileSection: {
     alignItems: 'center',
@@ -677,14 +748,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
     paddingHorizontal: 15,
-    paddingVertical: 12,
-    borderRadius: 10,
+    paddingVertical: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
   },
   fieldValue: {
     fontSize: 16,
-    color: '#fff',
+    color: '#ecf0f1',
     flex: 1,
   },
   editIcon: {
@@ -725,10 +798,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(52, 152, 219, 0.1)',
     paddingHorizontal: 15,
-    paddingVertical: 12,
-    borderRadius: 10,
+    paddingVertical: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(52, 152, 219, 0.2)',
   },
   passwordChangeButtonText: {
     fontSize: 16,

@@ -124,7 +124,13 @@ const ProfilePicture: React.FC<ProfilePictureProps> = ({
 
           <Image
             key={key}
-            source={{ uri: currentImageUrl.startsWith('http') ? currentImageUrl : `${API_CONFIG.ROOT_URL}${currentImageUrl}` }}
+            source={{
+              uri: hasValidImageUrl
+                ? (currentImageUrl!.startsWith('http')
+                  ? currentImageUrl!
+                  : `${API_CONFIG.ROOT_URL}${currentImageUrl!.startsWith('/') ? '' : '/'}${currentImageUrl}`)
+                : undefined
+            }}
             style={styles.image}
             resizeMode="cover"
             onError={(e) => {

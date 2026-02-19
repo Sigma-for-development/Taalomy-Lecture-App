@@ -1,4 +1,5 @@
 import * as ImagePicker from 'expo-image-picker';
+import { Platform } from 'react-native';
 import { tokenStorage } from '../../utils/tokenStorage';
 import { API_CONFIG } from '../config/api';
 import { appEventEmitter } from './eventEmitter';
@@ -68,18 +69,25 @@ export const uploadProfilePicture = async (imageUri: string, onProgress?: (progr
 
     // Create form data
     const formData = new FormData();
-    formData.append('profile_picture', {
-      uri: imageUri,
-      type: 'image/jpeg',
-      name: 'profile_picture.jpg',
-    } as any);
+
+    if (Platform.OS === 'web') {
+      // On web, we need to fetch the blob from the URI
+      const response = await fetch(imageUri);
+      const blob = await response.blob();
+      formData.append('profile_picture', blob, 'profile_picture.jpg');
+    } else {
+      formData.append('profile_picture', {
+        uri: imageUri,
+        type: 'image/jpeg',
+        name: 'profile_picture.jpg',
+      } as any);
+    }
 
     // Upload to server
     const response = await fetch(`${API_CONFIG.ACCOUNTS_BASE_URL}${API_CONFIG.ENDPOINTS.PROFILE_PICTURE}`, {
       method: 'PATCH',
       headers: {
         'Authorization': `Bearer ${token}`,
-        // Note: Don't set Content-Type for FormData, let browser set it with boundary
       },
       body: formData,
     });
@@ -87,21 +95,18 @@ export const uploadProfilePicture = async (imageUri: string, onProgress?: (progr
     if (response.ok) {
       const data = await response.json();
       console.log('Upload response:', data);
+
       // Handle both profile_picture_url and profile_picture fields
       let profilePictureUrl = data.profile_picture_url || data.profile_picture;
 
-      // If the URL is relative, make it absolute
-      if (profilePictureUrl && !profilePictureUrl.startsWith('http')) {
-        // Handle both absolute paths and relative paths
-        if (profilePictureUrl.startsWith('/')) {
-          profilePictureUrl = `${API_CONFIG.BASE_URL}${profilePictureUrl}`;
-        } else {
-          const fullUrl = `${API_CONFIG.BASE_URL}/${profilePictureUrl}`;
-          console.log('Constructed full URL:', fullUrl);
-          return fullUrl;
-        }
+      // Ensure we store it consistently. If it's a relative path, keep it relative for storage
+      // but the component will resolve it using ROOT_URL.
+      if (profilePictureUrl && profilePictureUrl.startsWith('http')) {
+        // If it's absolute but from our own server, we might want to store it relative 
+        // to avoid issues if the ROOT_URL changes, but let's stick to what the server returns.
+        return profilePictureUrl;
       }
-      console.log('Using provided URL:', profilePictureUrl);
+
       return profilePictureUrl;
     } else {
       const errorData = await response.json();
