@@ -640,9 +640,15 @@ export default function Index() {
           © 2026 Taalomy Lecturer. All rights reserved.
         </Text>
         <View style={{ flexDirection: 'row', gap: 24, marginTop: 16 }}>
-          <Text style={{ color: '#9ca3af', fontSize: 14 }}>Privacy</Text>
-          <Text style={{ color: '#9ca3af', fontSize: 14 }}>Terms</Text>
-          <Text style={{ color: '#9ca3af', fontSize: 14 }}>Support</Text>
+          <TouchableOpacity onPress={() => router.push('/privacy-policy')}>
+            <Text style={{ color: '#9ca3af', fontSize: 14 }}>Privacy</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push('/terms-of-service')}>
+            <Text style={{ color: '#9ca3af', fontSize: 14 }}>Terms</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push('/contact')}>
+            <Text style={{ color: '#9ca3af', fontSize: 14 }}>Support</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </ScrollView>

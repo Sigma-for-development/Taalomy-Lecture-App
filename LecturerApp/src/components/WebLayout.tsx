@@ -168,7 +168,7 @@ export const WebLayout: React.FC<WebLayoutProps> = ({ children }) => {
     };
 
     // Public/auth routes that should NOT have the sidebar
-    const publicRoutes = ['/', '/login', '/register', '/auth/forgot-password', '/auth/reset-password', '/auth/otp', '/onboarding', '/terms-of-service'];
+    const publicRoutes = ['/', '/login', '/register', '/auth/forgot-password', '/auth/reset-password', '/auth/otp', '/onboarding', '/terms-of-service', '/privacy-policy', '/contact'];
     const isPublicRoute = publicRoutes.includes(pathname) || pathname.startsWith('/auth/');
 
     const handleLogout = async () => {
