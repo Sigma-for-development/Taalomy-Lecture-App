@@ -8,6 +8,7 @@ import { tokenStorage } from '../../utils/tokenStorage';
 import ProfilePicture from './ProfilePicture';
 import { appEventEmitter } from '../utils/eventEmitter';
 import { useTranslation } from 'react-i18next';
+import { useZoom } from '../context/ZoomContext';
 
 interface WebLayoutProps {
     children: React.ReactNode;
@@ -138,6 +139,14 @@ export const WebLayout: React.FC<WebLayoutProps> = ({ children }) => {
     const pathname = usePathname();
     const [userData, setUserData] = React.useState<any>(null);
     const isRTL = i18n.dir() === 'rtl';
+    const { scale } = useZoom();
+
+    React.useEffect(() => {
+        if (Platform.OS === 'web') {
+            // @ts-ignore
+            document.body.style.zoom = scale;
+        }
+    }, [scale]);
 
     React.useEffect(() => {
         loadUserData();
@@ -232,7 +241,13 @@ export const WebLayout: React.FC<WebLayoutProps> = ({ children }) => {
     };
 
     return (
-        <View key={i18n.language} style={styles.container}>
+        <View
+            key={`${i18n.language}`}
+            style={[
+                styles.container,
+                // Removed visual transform in favor of native browser zoom
+            ]}
+        >
             {/* Sidebar */}
             <View style={[styles.sidebar, isRTL ? { borderRightWidth: 0, borderLeftWidth: 1, borderLeftColor: '#2d2d2d' } : {}]}>
                 <View style={styles.logoContainer}>

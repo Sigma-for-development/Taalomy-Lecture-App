@@ -17,7 +17,6 @@ import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { tokenStorage } from '../utils/tokenStorage';
-const AsyncStorage = tokenStorage;
 import { API_CONFIG } from '../src/config/api';
 import Toast from 'react-native-toast-message';
 import axios from 'axios';
@@ -27,6 +26,7 @@ import { SeoHead } from '../src/components/SeoHead';
 import { useResponsive } from '../src/hooks/useResponsive';
 import { HoverCard } from '../src/components/HoverCard';
 import { Skeleton } from '../src/components/Skeleton';
+const AsyncStorage = tokenStorage;
 
 interface LecturerProfile {
   id?: number;
@@ -728,7 +728,7 @@ const LecturerProfileScreen = () => {
 };
 
 // Extracted components to prevent re-renders on every keystroke (Fixes Focus Loss)
-const ProfileField = React.memo(({
+const ProfileField = React.memo(function ProfileField({
   label,
   value,
   onChangeText,
@@ -748,32 +748,34 @@ const ProfileField = React.memo(({
   toggleKey?: string;
   isToggled?: boolean;
   onToggle?: (val: boolean) => void;
-}) => (
-  <View style={styles.fieldContainer}>
-    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-      <Text style={{ fontSize: 13, color: '#bdc3c7', fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 }}>{label}</Text>
-      {toggleKey && onToggle && (
-        <Switch
-          value={!!isToggled}
-          onValueChange={onToggle}
-          trackColor={{ false: '#767577', true: '#3498db' }}
-          thumbColor={isToggled ? '#fff' : '#f4f3f4'}
-          style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }}
-        />
-      )}
+}) {
+  return (
+    <View style={styles.fieldContainer}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <Text style={{ fontSize: 13, color: '#bdc3c7', fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 }}>{label}</Text>
+        {toggleKey && onToggle && (
+          <Switch
+            value={!!isToggled}
+            onValueChange={onToggle}
+            trackColor={{ false: '#767577', true: '#3498db' }}
+            thumbColor={isToggled ? '#fff' : '#f4f3f4'}
+            style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }}
+          />
+        )}
+      </View>
+      <TextInput
+        style={[styles.textInput, multiline && styles.multilineInput]}
+        value={String(value || '')}
+        onChangeText={(text) => onChangeText(numeric ? (text === '' ? '0' : text) : text)} // Pass raw text for now, convert in parent if needed
+        placeholder={placeholder}
+        placeholderTextColor="#555"
+        multiline={multiline}
+        numberOfLines={multiline ? 4 : 1}
+        keyboardType={numeric ? 'numeric' : 'default'}
+      />
     </View>
-    <TextInput
-      style={[styles.textInput, multiline && styles.multilineInput]}
-      value={String(value || '')}
-      onChangeText={(text) => onChangeText(numeric ? (text === '' ? '0' : text) : text)} // Pass raw text for now, convert in parent if needed
-      placeholder={placeholder}
-      placeholderTextColor="#555"
-      multiline={multiline}
-      numberOfLines={multiline ? 4 : 1}
-      keyboardType={numeric ? 'numeric' : 'default'}
-    />
-  </View>
-));
+  );
+});
 
 const Wrapper = ({ children, title, isDesktop }: { children: React.ReactNode, title: string, isDesktop: boolean }) => (
   <View style={[styles.section, isDesktop && styles.card]}>
