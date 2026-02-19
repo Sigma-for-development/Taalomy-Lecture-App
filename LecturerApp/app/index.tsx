@@ -356,8 +356,8 @@ export default function Index() {
             }}
             resizeMode="contain"
           />
-          <TouchableOpacity onPress={() => router.push('/login')} style={[styles.navButton, { paddingHorizontal: 16, paddingVertical: 8 }]}>
-            <Text style={[styles.navButtonText, { fontSize: 13 }]}>Sign In</Text>
+          <TouchableOpacity onPress={() => router.push('/login')} style={[styles.navButton, { paddingHorizontal: 20, paddingVertical: 10 }]}>
+            <Text style={[styles.navButtonText, { fontSize: 14 }]}>Sign In</Text>
           </TouchableOpacity>
         </Animated.View>
 
@@ -481,28 +481,28 @@ export default function Index() {
 
         {/* --- BENTO GRID WITH PARALLAX --- */}
         <Animated.View style={[styles.section, { paddingVertical: isDesktop ? 100 : 60 }, bentoParallax]}>
-          <View style={[styles.bentoGrid, { flexDirection: isDesktop ? 'row' : 'column' }]}>
+          <View style={[styles.bentoGrid, { flexDirection: isDesktop ? 'row' : 'column', gap: isDesktop ? 24 : 16 }]}>
             {/* Col 1 */}
-            <View style={{ flex: isDesktop ? 6 : 1, gap: 24 }}>
+            <View style={{ flex: isDesktop ? 6 : 1, gap: isDesktop ? 24 : 16 }}>
               <BentoCard
                 title="Smart Attendance"
                 subtitle="Instant check-ins."
                 icon="qr-code"
                 color="#3b82f6"
-                height={isDesktop ? 420 : 220} // Dynamic height
+                height={isDesktop ? 420 : 300} // Increased mobile height
                 delay={400}
                 isLarge
                 isDesktop={isDesktop}
               />
-              <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 24 }}>
-                <BentoCard icon="stats-chart" title="Analytics" subtitle="Deep data." color="#0ea5e9" height={isDesktop ? 280 : 180} delay={500} flex={1} isDesktop={isDesktop} />
-                <BentoCard icon="cloud-done" title="Sync" subtitle="Auto-save." color="#10b981" height={isDesktop ? 280 : 180} delay={600} flex={1} isDesktop={isDesktop} />
+              <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: isDesktop ? 24 : 16 }}>
+                <BentoCard icon="stats-chart" title="Analytics" subtitle="Deep data." color="#0ea5e9" height={isDesktop ? 280 : 220} delay={500} flex={isDesktop ? 1 : 0} isDesktop={isDesktop} />
+                <BentoCard icon="cloud-done" title="Sync" subtitle="Auto-save." color="#10b981" height={isDesktop ? 280 : 220} delay={600} flex={isDesktop ? 1 : 0} isDesktop={isDesktop} />
               </View>
             </View>
             {/* Col 2 */}
-            <View style={{ flex: isDesktop ? 4 : 1, gap: 24 }}>
-              <BentoCard title="Chat" subtitle="Private channels." icon="chatbox-ellipses" color="#f59e0b" height={isDesktop ? 320 : 200} delay={700} isDesktop={isDesktop} />
-              <BentoCard title="Hub" subtitle="Command center." icon="layers" color="#ef4444" height={isDesktop ? 380 : 220} delay={800} isDesktop={isDesktop} />
+            <View style={{ flex: isDesktop ? 4 : 1, gap: isDesktop ? 24 : 16 }}>
+              <BentoCard title="Chat" subtitle="Private channels." icon="chatbox-ellipses" color="#f59e0b" height={isDesktop ? 320 : 260} delay={700} isDesktop={isDesktop} />
+              <BentoCard title="Hub" subtitle="Command center." icon="layers" color="#ef4444" height={isDesktop ? 380 : 300} delay={800} isDesktop={isDesktop} />
             </View>
           </View>
         </Animated.View>
@@ -671,7 +671,7 @@ const BentoCard = ({ title, subtitle, icon, color, height, flex, delay, isLarge,
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
       { scale: withTiming(scale.value, { duration: 400, easing: Easing.out(Easing.ease) }) },
-      { translateY: withTiming(scale.value === 1 ? 0 : -5, { duration: 400 }) } // Lift effect
+      { translateY: withTiming(scale.value === 1 ? 0 : -5, { duration: 400 }) }
     ],
     borderColor: `rgba(255, 255, 255, ${withTiming(glow.value, { duration: 300 })})`,
     backgroundColor: interpolateColor(
@@ -684,14 +684,14 @@ const BentoCard = ({ title, subtitle, icon, color, height, flex, delay, isLarge,
   return (
     <Animated.View
       entering={FadeInUp.delay(delay).springify()}
-      style={[{ height, flex, borderRadius: 32 }, styles.shadow]}
+      style={[{ height, flex: isDesktop ? flex : undefined, borderRadius: 32 }, styles.shadow]}
     >
       <Pressable
-        onHoverIn={() => { scale.value = 1.03; glow.value = 0.3; }}
-        onHoverOut={() => { scale.value = 1; glow.value = 0.1; }}
+        onHoverIn={() => { if (isDesktop) { scale.value = 1.03; glow.value = 0.3; } }}
+        onHoverOut={() => { if (isDesktop) { scale.value = 1; glow.value = 0.1; } }}
         style={{ flex: 1 }}
       >
-        <Animated.View style={[styles.card, animatedStyle, { padding: isDesktop ? 36 : 20 }]}>
+        <Animated.View style={[styles.card, animatedStyle, { padding: isDesktop ? 36 : 24 }]}>
           <LinearGradient
             colors={['rgba(255,255,255,0.08)', 'transparent']}
             style={StyleSheet.absoluteFill}
@@ -699,21 +699,28 @@ const BentoCard = ({ title, subtitle, icon, color, height, flex, delay, isLarge,
             end={{ x: 0, y: 0.6 }}
           />
 
-          {/* Brand Watermark in Card */}
+          {/* Brand Watermark - Recalibrated for Mobile */}
           <Ionicons
             name={icon}
-            size={isDesktop ? 180 : 100} // Responsive watermark
+            size={isDesktop ? 180 : 120}
             color={color}
-            style={{ position: 'absolute', right: isDesktop ? -40 : -20, bottom: isDesktop ? -40 : -20, opacity: 0.05, transform: [{ rotate: '-15deg' }] }}
+            style={{
+              position: 'absolute',
+              right: isDesktop ? -40 : -30,
+              bottom: isDesktop ? -40 : -30,
+              opacity: isDesktop ? 0.05 : 0.03,
+              transform: [{ rotate: '-15deg' }]
+            }}
           />
 
-          <View style={[styles.iconBox, { backgroundColor: `${color}20`, width: isDesktop ? 72 : 56, height: isDesktop ? 72 : 56 }]}>
-            <Ionicons name={icon} size={isDesktop ? (isLarge ? 36 : 28) : 24} color={color} />
+          <View style={[styles.iconBox, { backgroundColor: `${color}20`, width: isDesktop ? 72 : 60, height: isDesktop ? 72 : 60, borderRadius: isDesktop ? 24 : 18 }]}>
+            <Ionicons name={icon} size={isDesktop ? (isLarge ? 36 : 28) : 26} color={color} />
           </View>
 
-          <View style={{ flex: 1 }} />
-          <Text style={[styles.cardTitle, { fontSize: isDesktop ? (isLarge ? 36 : 26) : 22 }]}>{title}</Text>
-          <Text style={[styles.cardSubtitle, { fontSize: isDesktop ? 17 : 14 }]}>{subtitle}</Text>
+          <View style={{ flex: 1, justifyContent: 'flex-end' }}>
+            <Text style={[styles.cardTitle, { fontSize: isDesktop ? (isLarge ? 36 : 26) : 24, marginBottom: 4 }]}>{title}</Text>
+            <Text style={[styles.cardSubtitle, { fontSize: isDesktop ? 17 : 15, opacity: 0.6 }]}>{subtitle}</Text>
+          </View>
         </Animated.View>
       </Pressable>
     </Animated.View>
