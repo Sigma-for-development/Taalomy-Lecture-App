@@ -9,14 +9,16 @@ import ProfilePicture from './ProfilePicture';
 import { appEventEmitter } from '../utils/eventEmitter';
 import { useTranslation } from 'react-i18next';
 import { useZoom } from '../context/ZoomContext';
+import axios from 'axios';
+import { API_CONFIG } from '../config/api';
 
 interface WebLayoutProps {
     children: React.ReactNode;
 }
 
-const SidebarItem = ({ icon, label, route, isActive, onPress }: any) => {
+const SidebarItem = ({ icon, label, route, isActive, onPress, isLocked }: any) => {
     const [isHovered, setIsHovered] = React.useState(false);
-    const { i18n } = useTranslation();
+    const { i18n, t } = useTranslation();
     const isRTL = i18n.dir() === 'rtl';
 
     return (
@@ -29,27 +31,50 @@ const SidebarItem = ({ icon, label, route, isActive, onPress }: any) => {
             style={[
                 styles.sidebarItem,
                 isActive && styles.sidebarItemActive,
-                !isActive && isHovered && styles.sidebarItemHover
+                !isActive && isHovered && styles.sidebarItemHover,
+                isLocked && { opacity: 0.7 }
             ]}
         >
-            <Ionicons
-                name={icon}
-                size={22}
-                color={isActive || isHovered ? '#FFFFFF' : '#BDC3C7'}
-                style={{ [isRTL ? 'marginLeft' : 'marginRight']: 18 }}
-            />
+            <View style={{ position: 'relative' }}>
+                <Ionicons
+                    name={icon}
+                    size={22}
+                    color={isActive || isHovered ? '#FFFFFF' : '#BDC3C7'}
+                    style={{ [isRTL ? 'marginLeft' : 'marginRight']: 18 }}
+                />
+                {isLocked && (
+                    <View style={{
+                        position: 'absolute',
+                        top: -4,
+                        right: isRTL ? undefined : -4,
+                        left: isRTL ? -4 : undefined,
+                        backgroundColor: '#e74c3c',
+                        borderRadius: 8,
+                        width: 14,
+                        height: 14,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderWidth: 1.5,
+                        borderColor: '#1b1b1b'
+                    }}>
+                        <Ionicons name="lock-closed" size={8} color="#fff" />
+                    </View>
+                )}
+            </View>
             <Text style={[
                 styles.sidebarText,
                 (isActive || isHovered) && styles.sidebarTextActive,
-                { textAlign: isRTL ? 'right' : 'left', flex: 1 }
+                { textAlign: isRTL ? 'right' : 'left', flex: 1 },
+                isLocked && { color: '#7f8c8d' }
             ]}>
                 {label}
             </Text>
+            {isLocked && <Ionicons name="lock-closed-outline" size={14} color="#555" style={{ marginLeft: 8 }} />}
         </TouchableOpacity >
     );
 };
 
-const AISidebarItem = ({ label, route, isActive, onPress }: any) => {
+const AISidebarItem = ({ label, route, isActive, onPress, isLocked }: any) => {
     const [isHovered, setIsHovered] = React.useState(false);
     const glowAnim = React.useRef(new Animated.Value(0)).current;
     const { i18n } = useTranslation();
@@ -128,6 +153,7 @@ const AISidebarItem = ({ label, route, isActive, onPress }: any) => {
                 borderRadius: 4,
                 backgroundColor: isActive ? '#FFFFFF' : glowColor,
             }} />
+            {isLocked && <Ionicons name="lock-closed-outline" size={14} color="#555" style={{ position: 'absolute', [isRTL ? 'left' : 'right']: 24 }} />}
         </TouchableOpacity>
     );
 };
@@ -173,8 +199,34 @@ export const WebLayout: React.FC<WebLayoutProps> = ({ children }) => {
     const loadUserData = async () => {
         try {
             const userDataString = await tokenStorage.getItem('user_data');
-            if (userDataString) {
-                setUserData(JSON.parse(userDataString));
+            let userData = userDataString ? JSON.parse(userDataString) : null;
+
+            // If we have user data but verification status is missing, try to fetch profile
+            // This handles cases where login didn't include the full profile data
+            if (userData && (userData.is_verified === undefined || userData.is_verified === null)) {
+                try {
+                    const token = await tokenStorage.getItem('access_token');
+                    if (token) {
+                        // Use the accounts base URL from config
+                        const response = await axios.get(`${API_CONFIG.ACCOUNTS_BASE_URL}lecturer/profile/`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+
+                        if (response.data && response.data.length > 0) {
+                            const profileData = response.data[0];
+                            // Merge verification status into user data
+                            userData = { ...userData, is_verified: profileData.is_verified };
+                            // Update storage with complete data
+                            await tokenStorage.setItem('user_data', JSON.stringify(userData));
+                        }
+                    }
+                } catch (profileError) {
+                    console.error('Error fetching profile in WebLayout:', profileError);
+                }
+            }
+
+            if (userData) {
+                setUserData(userData);
             }
         } catch (error) {
             console.error('Error loading user data in WebLayout:', error);
@@ -223,6 +275,35 @@ export const WebLayout: React.FC<WebLayoutProps> = ({ children }) => {
         }
     };
 
+    const isVerified = userData?.is_verified === true;
+
+    // List of routes that require verification
+    const protectedRoutes = [
+        '/intakes',
+        '/students',
+        '/attendance',
+        '/grading',
+        '/demo-sessions',
+        '/ai-assistant',
+        '/messages',
+        '/send-announcement',
+        '/invitations',
+        '/lecturer-hub',
+        '/wallet',
+        '/bookings',
+        '/timetable'
+    ];
+
+    // Global URL Guard
+    React.useEffect(() => {
+        if (userData && !isVerified) {
+            const isProtected = protectedRoutes.some(route => pathname.startsWith(route));
+            if (isProtected) {
+                router.replace('/lecturer-profile');
+            }
+        }
+    }, [pathname, userData, isVerified]);
+
     // If not web or not desktop, render children normally (mobile layout)
     // Also skip sidebar for public/auth routes
     if (!isWeb || !isDesktop || isPublicRoute) {
@@ -238,6 +319,36 @@ export const WebLayout: React.FC<WebLayoutProps> = ({ children }) => {
         if (path === '/dashboard' && pathname === '/dashboard') return true;
         if (path !== '/dashboard' && pathname.startsWith(path)) return true;
         return false;
+    };
+
+
+
+    // List of routes that require verification
+
+    // Global URL Guard
+
+    const handleProtectedNavigation = (path: string) => {
+        // Check if the route is protected and user is not verified
+        if (protectedRoutes.some(route => path.startsWith(route)) && !isVerified) {
+            if (Platform.OS === 'web') {
+                const confirm = window.confirm(`${t('verification_required_title')}\n\n${t('verification_required_msg')}`);
+                if (confirm) {
+                    navigate('/lecturer-profile');
+                }
+            } else {
+                Alert.alert(
+                    t('verification_required_title'),
+                    t('verification_required_msg'),
+                    [
+                        { text: t('cancel'), style: 'cancel' },
+                        { text: t('go_to_profile'), onPress: () => navigate('/lecturer-profile') }
+                    ]
+                );
+            }
+            return;
+        }
+
+        navigate(path);
     };
 
     return (
@@ -271,63 +382,71 @@ export const WebLayout: React.FC<WebLayoutProps> = ({ children }) => {
                         label={t('dashboard')}
                         route="/dashboard"
                         isActive={isActive('/dashboard')}
-                        onPress={() => navigate('/dashboard')}
+                        onPress={() => handleProtectedNavigation('/dashboard')}
                     />
                     <SidebarItem
                         icon="calendar-outline"
                         label={t('timetable')}
                         route="/timetable"
                         isActive={isActive('/timetable')}
-                        onPress={() => navigate('/timetable')}
+                        onPress={() => handleProtectedNavigation('/timetable')}
+                        isLocked={!isVerified}
                     />
                     <SidebarItem
                         icon="calendar-number-outline"
                         label={t('pending_bookings')}
                         route="/bookings"
                         isActive={isActive('/bookings')}
-                        onPress={() => navigate('/bookings')}
+                        onPress={() => handleProtectedNavigation('/bookings')}
+                        isLocked={!isVerified}
                     />
                     <SidebarItem
                         icon="school-outline"
                         label={t('intakes')}
                         route="/intakes"
                         isActive={isActive('/intakes')}
-                        onPress={() => navigate('/intakes')}
+                        onPress={() => handleProtectedNavigation('/intakes')}
+                        isLocked={!isVerified}
                     />
                     <SidebarItem
                         icon="people-outline"
                         label={t('students')}
                         route="/students"
                         isActive={isActive('/students')}
-                        onPress={() => navigate('/students')}
+                        onPress={() => handleProtectedNavigation('/students')}
+                        isLocked={!isVerified}
                     />
                     <SidebarItem
                         icon="checkmark-circle-outline"
                         label={t('attendance')}
                         route="/attendance"
                         isActive={isActive('/attendance')}
-                        onPress={() => navigate('/attendance')}
+                        onPress={() => handleProtectedNavigation('/attendance')}
+                        isLocked={!isVerified}
                     />
                     <SidebarItem
                         icon="document-text-outline"
                         label={t('grading')}
                         route="/grading"
                         isActive={isActive('/grading')}
-                        onPress={() => navigate('/grading')}
+                        onPress={() => handleProtectedNavigation('/grading')}
+                        isLocked={!isVerified}
                     />
                     <SidebarItem
                         icon="flask-outline"
                         label={t('demos')}
                         route="/demo-sessions"
                         isActive={isActive('/demo-sessions')}
-                        onPress={() => navigate('/demo-sessions')}
+                        onPress={() => handleProtectedNavigation('/demo-sessions')}
+                        isLocked={!isVerified}
                     />
 
                     <AISidebarItem
                         label={t('ai_assistant')}
                         route="/ai-assistant"
                         isActive={isActive('/ai-assistant')}
-                        onPress={() => navigate('/ai-assistant')}
+                        onPress={() => handleProtectedNavigation('/ai-assistant')}
+                        isLocked={!isVerified}
                     />
 
                     <Text style={[styles.sectionTitle, { marginTop: 24, textAlign: isRTL ? 'right' : 'left' }]}>
@@ -339,28 +458,32 @@ export const WebLayout: React.FC<WebLayoutProps> = ({ children }) => {
                         label={t('messages')}
                         route="/messages"
                         isActive={isActive('/messages')}
-                        onPress={() => navigate('/messages')}
+                        onPress={() => handleProtectedNavigation('/messages')}
+                        isLocked={!isVerified}
                     />
                     <SidebarItem
                         icon="megaphone-outline"
                         label={t('announcements_header')}
                         route="/send-announcement"
                         isActive={isActive('/send-announcement')}
-                        onPress={() => navigate('/send-announcement')}
+                        onPress={() => handleProtectedNavigation('/send-announcement')}
+                        isLocked={!isVerified}
                     />
                     <SidebarItem
                         icon="mail-open-outline"
                         label={t('invitations')}
                         route="/invitations"
                         isActive={isActive('/invitations')}
-                        onPress={() => navigate('/invitations')}
+                        onPress={() => handleProtectedNavigation('/invitations')}
+                        isLocked={!isVerified}
                     />
                     <SidebarItem
                         icon="planet-outline"
                         label={t('lecturer_hub.title')}
                         route="/lecturer-hub"
                         isActive={isActive('/lecturer-hub')}
-                        onPress={() => navigate('/lecturer-hub')}
+                        onPress={() => handleProtectedNavigation('/lecturer-hub')}
+                        isLocked={!isVerified}
                     />
 
                     <Text style={[styles.sectionTitle, { marginTop: 24, textAlign: isRTL ? 'right' : 'left' }]}>
@@ -372,21 +495,22 @@ export const WebLayout: React.FC<WebLayoutProps> = ({ children }) => {
                         label={t('professional_profile')}
                         route="/lecturer-profile"
                         isActive={isActive('/lecturer-profile')}
-                        onPress={() => navigate('/lecturer-profile')}
+                        onPress={() => handleProtectedNavigation('/lecturer-profile')}
                     />
                     <SidebarItem
                         icon="wallet-outline"
                         label={t('wallet')}
                         route="/wallet"
                         isActive={isActive('/wallet')}
-                        onPress={() => navigate('/wallet')}
+                        onPress={() => handleProtectedNavigation('/wallet')}
+                        isLocked={!isVerified}
                     />
                     <SidebarItem
                         icon="settings-outline"
                         label={t('settings')}
                         route="/settings"
                         isActive={isActive('/settings')}
-                        onPress={() => navigate('/settings')}
+                        onPress={() => handleProtectedNavigation('/settings')}
                     />
 
                 </ScrollView>

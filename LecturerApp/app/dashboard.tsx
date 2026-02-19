@@ -28,6 +28,8 @@ import { aiContextCache } from '../src/utils/aiContextCache';
 import MiniAIChat from '../src/components/MiniAIChat';
 import { HoverCard } from '../src/components/HoverCard';
 import { HoverIcon } from '../src/components/HoverIcon';
+import { API_CONFIG } from '../src/config/api';
+import axios from 'axios';
 const AsyncStorage = tokenStorage;
 
 // Width will be handled by the hook inside the component
@@ -43,6 +45,7 @@ interface UserData {
   address: string;
   user_type: string;
   profile_picture_url?: string;
+  is_verified?: boolean; // Added field
 }
 
 // Add these new interfaces for recent activity data
@@ -244,7 +247,32 @@ const Dashboard = () => {
     try {
       const userDataString = await AsyncStorage.getItem('user_data');
       if (userDataString) {
-        const user = JSON.parse(userDataString);
+        let user = JSON.parse(userDataString);
+
+        // Robust check: if verification status is missing, try to fetch it
+        if (user && user.is_verified === undefined) {
+          try {
+            const token = await AsyncStorage.getItem('access_token');
+            if (token) {
+              const response = await axios.get(`${API_CONFIG.ACCOUNTS_BASE_URL}lecturer/profile/`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+              });
+
+              if (response.data && response.data.length > 0) {
+                const profileData = response.data[0];
+                user = { ...user, is_verified: profileData.is_verified };
+                // We also need to update profile_picture_url if it's there
+                if (profileData.profile_picture && !profileData.profile_picture_url) {
+                  user.profile_picture_url = profileData.profile_picture;
+                }
+                await AsyncStorage.setItem('user_data', JSON.stringify(user));
+                appEventEmitter.emit('userProfileUpdated', user); // Notify WebLayout
+              }
+            }
+          } catch (profileError) {
+            console.error('Error fetching profile in Dashboard:', profileError);
+          }
+        }
 
         // Ensure profile_picture_url is properly set
         if (user.profile_picture && !user.profile_picture_url) {
@@ -260,6 +288,13 @@ const Dashboard = () => {
           const response = await lecturerAPI.getUserProfile();
           const updatedUser = response.data;
 
+          // Preserve is_verified from local if missing in update, or re-fetch?
+          // The issue is getUserProfile (users/me) might NOT return is_verified.
+          // So we should merge it carefully.
+          if (updatedUser.is_verified === undefined && user.is_verified !== undefined) {
+            updatedUser.is_verified = user.is_verified;
+          }
+
           // Ensure profile_picture_url is properly set
           if (updatedUser.profile_picture && !updatedUser.profile_picture_url) {
             updatedUser.profile_picture_url = updatedUser.profile_picture;
@@ -267,8 +302,10 @@ const Dashboard = () => {
             updatedUser.profile_picture_url = null;
           }
 
+
           setUserData(updatedUser as UserData);
           await AsyncStorage.setItem('user_data', JSON.stringify(updatedUser));
+          appEventEmitter.emit('userProfileUpdated', updatedUser); // Notify WebLayout
           aiContextCache.updateContext({ profile: updatedUser });
         } catch (fetchError) {
           console.error('Error fetching latest user data:', fetchError);
@@ -277,6 +314,19 @@ const Dashboard = () => {
     } catch (error) {
       console.error('Error loading user data:', error);
     }
+  };
+
+  const isVerified = userData?.is_verified === true;
+
+  const handleRestrictedAction = () => {
+    Alert.alert(
+      t('verification_required_title'),
+      t('verification_required_msg'),
+      [
+        { text: t('cancel'), style: 'cancel' },
+        { text: t('go_to_profile'), onPress: () => router.push('/lecturer-profile') }
+      ]
+    );
   };
 
   const loadDashboardStats = async () => {
@@ -746,31 +796,32 @@ const Dashboard = () => {
                 justifyContent: isDesktop ? 'flex-start' : 'space-between',
               }}>
                 <HoverCard
-                  onPress={() => router.push('/intakes')}
+                  onPress={() => isVerified ? router.push('/intakes') : handleRestrictedAction()}
                   style={{
                     flex: isDesktop ? 1 : 0,
                     minWidth: isDesktop ? 280 : (width - 60) / 2,
                     padding: 24,
                     marginBottom: 16,
-                    height: 'auto'
+                    height: 'auto',
+                    opacity: isVerified ? 1 : 0.7,
                   }}
-                  hoverBorderColor="#3498db"
+                  hoverBorderColor={isVerified ? "#3498db" : "transparent"}
                 >
                   <View style={{
                     width: 40,
                     height: 40,
                     borderRadius: 20,
-                    backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                    backgroundColor: isVerified ? 'rgba(52, 152, 219, 0.2)' : 'rgba(255, 255, 255, 0.05)',
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginBottom: 12,
                   }}>
-                    <Ionicons name="library-outline" size={20} color="#3498db" />
+                    <Ionicons name="library-outline" size={20} color={isVerified ? "#3498db" : "#7f8c8d"} />
                   </View>
                   <Text style={{
                     fontSize: 24,
                     fontWeight: 'bold',
-                    color: '#3498db',
+                    color: isVerified ? '#3498db' : '#7f8c8d',
                     marginBottom: 4,
                   }}>
                     {loadingStats ? '...' : stats.intakes}
@@ -781,35 +832,41 @@ const Dashboard = () => {
                   }}>
                     {t('active_intakes')}
                   </Text>
+                  {!isVerified && (
+                    <View style={{ position: 'absolute', top: 10, right: 10 }}>
+                      <Ionicons name="lock-closed" size={14} color="#7f8c8d" />
+                    </View>
+                  )}
                 </HoverCard>
 
                 <HoverCard
-                  onPress={() => router.push('/demo-sessions')}
+                  onPress={() => isVerified ? router.push('/demo-sessions') : handleRestrictedAction()}
                   style={{
                     flex: isDesktop ? 1 : 0,
                     minWidth: isDesktop ? 280 : (width - 60) / 2,
                     padding: 24,
                     marginBottom: 16,
-                    height: 'auto'
+                    height: 'auto',
+                    opacity: isVerified ? 1 : 0.7,
                   }}
-                  baseBorderColor="#2ecc71"
-                  hoverBorderColor="#2ecc71"
+                  baseBorderColor={isVerified ? "#2ecc71" : "transparent"}
+                  hoverBorderColor={isVerified ? "#2ecc71" : "transparent"}
                 >
                   <View style={{
                     width: 40,
                     height: 40,
                     borderRadius: 20,
-                    backgroundColor: 'rgba(46, 204, 113, 0.2)',
+                    backgroundColor: isVerified ? 'rgba(46, 204, 113, 0.2)' : 'rgba(255, 255, 255, 0.05)',
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginBottom: 12,
                   }}>
-                    <Ionicons name="flask-outline" size={20} color="#2ecc71" />
+                    <Ionicons name="flask-outline" size={20} color={isVerified ? "#2ecc71" : "#7f8c8d"} />
                   </View>
                   <Text style={{
                     fontSize: 24,
                     fontWeight: 'bold',
-                    color: '#2ecc71',
+                    color: isVerified ? '#2ecc71' : '#7f8c8d',
                     marginBottom: 4,
                   }}>
                     {t('demos')}
@@ -820,34 +877,40 @@ const Dashboard = () => {
                   }}>
                     {t('trial_sessions')}
                   </Text>
+                  {!isVerified && (
+                    <View style={{ position: 'absolute', top: 10, right: 10 }}>
+                      <Ionicons name="lock-closed" size={14} color="#7f8c8d" />
+                    </View>
+                  )}
                 </HoverCard>
 
                 <HoverCard
-                  onPress={() => router.push('/students')}
+                  onPress={() => isVerified ? router.push('/students') : handleRestrictedAction()}
                   style={{
                     flex: isDesktop ? 1 : 0,
                     minWidth: isDesktop ? 280 : (width - 60) / 2,
                     padding: 24,
                     marginBottom: 16,
-                    height: 'auto'
+                    height: 'auto',
+                    opacity: isVerified ? 1 : 0.7,
                   }}
-                  hoverBorderColor="#2ecc71"
+                  hoverBorderColor={isVerified ? "#2ecc71" : "transparent"}
                 >
                   <View style={{
                     width: 40,
                     height: 40,
                     borderRadius: 20,
-                    backgroundColor: 'rgba(46, 204, 113, 0.2)',
+                    backgroundColor: isVerified ? 'rgba(46, 204, 113, 0.2)' : 'rgba(255, 255, 255, 0.05)',
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginBottom: 12,
                   }}>
-                    <Ionicons name="people-outline" size={20} color="#2ecc71" />
+                    <Ionicons name="people-outline" size={20} color={isVerified ? "#2ecc71" : "#7f8c8d"} />
                   </View>
                   <Text style={{
                     fontSize: 24,
                     fontWeight: 'bold',
-                    color: '#2ecc71',
+                    color: isVerified ? '#2ecc71' : '#7f8c8d',
                     marginBottom: 4,
                   }}>
                     {loadingStats ? '...' : stats.students}
@@ -858,34 +921,40 @@ const Dashboard = () => {
                   }}>
                     {t('total_students')}
                   </Text>
+                  {!isVerified && (
+                    <View style={{ position: 'absolute', top: 10, right: 10 }}>
+                      <Ionicons name="lock-closed" size={14} color="#7f8c8d" />
+                    </View>
+                  )}
                 </HoverCard>
 
                 <HoverCard
-                  onPress={() => router.push('/grading')}
+                  onPress={() => isVerified ? router.push('/grading') : handleRestrictedAction()}
                   style={{
                     flex: isDesktop ? 1 : 0,
                     minWidth: isDesktop ? 280 : (width - 60) / 2,
                     padding: 24,
                     marginBottom: 16,
-                    height: 'auto'
+                    height: 'auto',
+                    opacity: isVerified ? 1 : 0.7,
                   }}
-                  hoverBorderColor="#f1c40f"
+                  hoverBorderColor={isVerified ? "#f1c40f" : "transparent"}
                 >
                   <View style={{
                     width: 40,
                     height: 40,
                     borderRadius: 20,
-                    backgroundColor: 'rgba(241, 196, 15, 0.2)',
+                    backgroundColor: isVerified ? 'rgba(241, 196, 15, 0.2)' : 'rgba(255, 255, 255, 0.05)',
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginBottom: 12,
                   }}>
-                    <Ionicons name="document-text-outline" size={20} color="#f1c40f" />
+                    <Ionicons name="document-text-outline" size={20} color={isVerified ? "#f1c40f" : "#7f8c8d"} />
                   </View>
                   <Text style={{
                     fontSize: 24,
                     fontWeight: 'bold',
-                    color: '#f1c40f',
+                    color: isVerified ? '#f1c40f' : '#7f8c8d',
                     marginBottom: 4,
                   }}>
                     {loadingStats ? '...' : stats.pendingGrades}
@@ -896,34 +965,40 @@ const Dashboard = () => {
                   }}>
                     {t('pending_grades')}
                   </Text>
+                  {!isVerified && (
+                    <View style={{ position: 'absolute', top: 10, right: 10 }}>
+                      <Ionicons name="lock-closed" size={14} color="#7f8c8d" />
+                    </View>
+                  )}
                 </HoverCard>
 
                 <HoverCard
-                  onPress={() => router.push('/timetable')}
+                  onPress={() => isVerified ? router.push('/timetable') : handleRestrictedAction()}
                   style={{
                     flex: isDesktop ? 1 : 0,
                     minWidth: isDesktop ? 280 : (width - 60) / 2,
                     padding: 24,
                     marginBottom: 16,
-                    height: 'auto'
+                    height: 'auto',
+                    opacity: isVerified ? 1 : 0.7,
                   }}
-                  hoverBorderColor="#9b59b6"
+                  hoverBorderColor={isVerified ? "#9b59b6" : "transparent"}
                 >
                   <View style={{
                     width: 40,
                     height: 40,
                     borderRadius: 20,
-                    backgroundColor: 'rgba(155, 89, 182, 0.2)',
+                    backgroundColor: isVerified ? 'rgba(155, 89, 182, 0.2)' : 'rgba(255, 255, 255, 0.05)',
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginBottom: 12,
                   }}>
-                    <Ionicons name="calendar-outline" size={20} color="#9b59b6" />
+                    <Ionicons name="calendar-outline" size={20} color={isVerified ? "#9b59b6" : "#7f8c8d"} />
                   </View>
                   <Text style={{
                     fontSize: 24,
                     fontWeight: 'bold',
-                    color: '#9b59b6',
+                    color: isVerified ? "#9b59b6" : "#7f8c8d",
                     marginBottom: 4,
                   }}>
                     {loadingStats ? '...' : stats.todayClasses}
@@ -934,27 +1009,32 @@ const Dashboard = () => {
                   }}>
                     {t('classes_today')}
                   </Text>
+                  {!isVerified && (
+                    <View style={{ position: 'absolute', top: 10, right: 10 }}>
+                      <Ionicons name="lock-closed" size={14} color="#7f8c8d" />
+                    </View>
+                  )}
                 </HoverCard>
 
                 {/* AI Companion Widget */}
                 <HoverCard
-                  onPress={() => router.push('/ai-assistant')}
+                  onPress={() => isVerified ? router.push('/ai-assistant') : handleRestrictedAction()}
                   style={{
                     flex: isDesktop ? 1 : 0,
                     minWidth: isDesktop ? 280 : (width - 60) / 2,
                     padding: 24,
                     marginBottom: 16,
                     height: 'auto',
-                    backgroundColor: 'rgba(52, 152, 219, 0.15)',
+                    backgroundColor: isVerified ? 'rgba(52, 152, 219, 0.15)' : 'rgba(255, 255, 255, 0.05)',
                   }}
-                  baseBorderColor="rgba(52, 152, 219, 0.4)"
-                  hoverBorderColor="#3498db"
+                  baseBorderColor={isVerified ? "rgba(52, 152, 219, 0.4)" : "rgba(255, 255, 255, 0.05)"}
+                  hoverBorderColor={isVerified ? "#3498db" : "transparent"}
                 >
                   <View style={{
                     width: 56,
                     height: 56,
                     borderRadius: 28,
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    backgroundColor: isVerified ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.05)',
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginBottom: 12,
@@ -962,14 +1042,14 @@ const Dashboard = () => {
                   }}>
                     <Image
                       source={require('../assets/aibot.png')}
-                      style={{ width: 56, height: 56, borderRadius: 28 }}
+                      style={{ width: 56, height: 56, borderRadius: 28, opacity: isVerified ? 1 : 0.4 }}
                       resizeMode="cover"
                     />
                   </View>
                   <Text style={{
                     fontSize: 24,
                     fontWeight: 'bold',
-                    color: '#3498db',
+                    color: isVerified ? '#3498db' : '#7f8c8d',
                     marginBottom: 4,
                   }}>
                     AI
@@ -980,6 +1060,11 @@ const Dashboard = () => {
                   }}>
                     Companion
                   </Text>
+                  {!isVerified && (
+                    <View style={{ position: 'absolute', top: 12, right: 12 }}>
+                      <Ionicons name="lock-closed" size={16} color="#7f8c8d" />
+                    </View>
+                  )}
                 </HoverCard>
               </View>
             </View>
@@ -1012,33 +1097,39 @@ const Dashboard = () => {
                     marginBottom: isDesktop ? 16 : 0,
                     alignItems: 'center',
                     justifyContent: 'center',
+                    opacity: isVerified ? 1 : 0.7,
                   }}
-                  onPress={() => router.push('/intakes')}
-                  baseBorderColor="rgba(255, 255, 255, 0.1)"
-                  hoverBorderColor="#3498db"
+                  onPress={() => isVerified ? router.push('/intakes') : handleRestrictedAction()}
+                  baseBorderColor={isVerified ? "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.05)"}
+                  hoverBorderColor={isVerified ? "#3498db" : "transparent"}
                 >
                   <View style={{
                     width: 50,
                     height: 50,
                     borderRadius: 25,
-                    backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                    backgroundColor: isVerified ? 'rgba(52, 152, 219, 0.2)' : 'rgba(255, 255, 255, 0.05)',
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginBottom: 12,
                   }}>
-                    <Ionicons name="school-outline" size={24} color="#3498db" />
+                    <Ionicons name="school-outline" size={24} color={isVerified ? "#3498db" : "#7f8c8d"} />
                   </View>
                   <Text
                     style={{
                       fontSize: 14,
                       fontWeight: '600',
-                      color: '#ecf0f1',
+                      color: isVerified ? '#ecf0f1' : '#7f8c8d',
                       textAlign: 'center',
                     }}
                     numberOfLines={2}
                   >
                     {t('manage_intakes')}
                   </Text>
+                  {!isVerified && (
+                    <View style={{ position: 'absolute', top: 10, right: 10 }}>
+                      <Ionicons name="lock-closed" size={14} color="#7f8c8d" />
+                    </View>
+                  )}
                 </HoverCard>
 
                 <HoverCard
@@ -1051,33 +1142,39 @@ const Dashboard = () => {
                     marginBottom: isDesktop ? 16 : 0,
                     alignItems: 'center',
                     justifyContent: 'center',
+                    opacity: isVerified ? 1 : 0.7,
                   }}
-                  onPress={() => router.push('/upload-video/new')}
-                  baseBorderColor="rgba(255, 255, 255, 0.1)"
-                  hoverBorderColor="#d35400"
+                  onPress={() => isVerified ? router.push('/upload-video/new') : handleRestrictedAction()}
+                  baseBorderColor={isVerified ? "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.05)"}
+                  hoverBorderColor={isVerified ? "#d35400" : "transparent"}
                 >
                   <View style={{
                     width: 50,
                     height: 50,
                     borderRadius: 25,
-                    backgroundColor: 'rgba(211, 84, 0, 0.2)',
+                    backgroundColor: isVerified ? 'rgba(211, 84, 0, 0.2)' : 'rgba(255, 255, 255, 0.05)',
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginBottom: 12,
                   }}>
-                    <Ionicons name="videocam-outline" size={24} color="#d35400" />
+                    <Ionicons name="videocam-outline" size={24} color={isVerified ? "#d35400" : "#7f8c8d"} />
                   </View>
                   <Text
                     style={{
                       fontSize: 14,
                       fontWeight: '600',
-                      color: '#ecf0f1',
+                      color: isVerified ? '#ecf0f1' : '#7f8c8d',
                       textAlign: 'center',
                     }}
                     numberOfLines={2}
                   >
                     Upload Video
                   </Text>
+                  {!isVerified && (
+                    <View style={{ position: 'absolute', top: 10, right: 10 }}>
+                      <Ionicons name="lock-closed" size={14} color="#7f8c8d" />
+                    </View>
+                  )}
                 </HoverCard>
 
                 <HoverCard
@@ -1090,33 +1187,39 @@ const Dashboard = () => {
                     marginBottom: isDesktop ? 16 : 0,
                     alignItems: 'center',
                     justifyContent: 'center',
+                    opacity: isVerified ? 1 : 0.7,
                   }}
-                  onPress={() => setShowQuizIntakeModal(true)}
-                  baseBorderColor="rgba(255, 255, 255, 0.1)"
-                  hoverBorderColor="#e74c3c"
+                  onPress={() => isVerified ? setShowQuizIntakeModal(true) : handleRestrictedAction()}
+                  baseBorderColor={isVerified ? "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.05)"}
+                  hoverBorderColor={isVerified ? "#e74c3c" : "transparent"}
                 >
                   <View style={{
                     width: 50,
                     height: 50,
                     borderRadius: 25,
-                    backgroundColor: 'rgba(231, 76, 60, 0.2)',
+                    backgroundColor: isVerified ? 'rgba(231, 76, 60, 0.2)' : 'rgba(255, 255, 255, 0.05)',
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginBottom: 12,
                   }}>
-                    <Ionicons name="clipboard-outline" size={24} color="#e74c3c" />
+                    <Ionicons name="clipboard-outline" size={24} color={isVerified ? "#e74c3c" : "#7f8c8d"} />
                   </View>
                   <Text
                     style={{
                       fontSize: 14,
                       fontWeight: '600',
-                      color: '#ecf0f1',
+                      color: isVerified ? '#ecf0f1' : '#7f8c8d',
                       textAlign: 'center',
                     }}
                     numberOfLines={2}
                   >
                     {t('create_start_quiz')}
                   </Text>
+                  {!isVerified && (
+                    <View style={{ position: 'absolute', top: 10, right: 10 }}>
+                      <Ionicons name="lock-closed" size={14} color="#7f8c8d" />
+                    </View>
+                  )}
                 </HoverCard>
 
                 <HoverCard
@@ -1129,33 +1232,39 @@ const Dashboard = () => {
                     marginBottom: isDesktop ? 16 : 0,
                     alignItems: 'center',
                     justifyContent: 'center',
+                    opacity: isVerified ? 1 : 0.7,
                   }}
-                  onPress={() => handleNavigation('Send Announcement')}
-                  baseBorderColor="rgba(255, 255, 255, 0.1)"
-                  hoverBorderColor="#9b59b6"
+                  onPress={() => isVerified ? handleNavigation('Send Announcement') : handleRestrictedAction()}
+                  baseBorderColor={isVerified ? "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.05)"}
+                  hoverBorderColor={isVerified ? "#9b59b6" : "transparent"}
                 >
                   <View style={{
                     width: 50,
                     height: 50,
                     borderRadius: 25,
-                    backgroundColor: 'rgba(155, 89, 182, 0.2)',
+                    backgroundColor: isVerified ? 'rgba(155, 89, 182, 0.2)' : 'rgba(255, 255, 255, 0.05)',
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginBottom: 12,
                   }}>
-                    <Ionicons name="mail-outline" size={24} color="#9b59b6" />
+                    <Ionicons name="mail-outline" size={24} color={isVerified ? "#9b59b6" : "#7f8c8d"} />
                   </View>
                   <Text
                     style={{
                       fontSize: 14,
                       fontWeight: '600',
-                      color: '#ecf0f1',
+                      color: isVerified ? '#ecf0f1' : '#7f8c8d',
                       textAlign: 'center',
                     }}
                     numberOfLines={2}
                   >
                     {t('send_announcement')}
                   </Text>
+                  {!isVerified && (
+                    <View style={{ position: 'absolute', top: 10, right: 10 }}>
+                      <Ionicons name="lock-closed" size={14} color="#7f8c8d" />
+                    </View>
+                  )}
                 </HoverCard>
 
                 <HoverCard
@@ -1207,23 +1316,24 @@ const Dashboard = () => {
                     marginBottom: isDesktop ? 16 : 0,
                     alignItems: 'center',
                     justifyContent: 'center',
+                    opacity: isVerified ? 1 : 0.7,
                   }}
-                  onPress={() => router.push('/bookings')}
-                  baseBorderColor="rgba(255, 255, 255, 0.1)"
-                  hoverBorderColor="#f39c12"
+                  onPress={() => isVerified ? router.push('/bookings') : handleRestrictedAction()}
+                  baseBorderColor={isVerified ? "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.05)"}
+                  hoverBorderColor={isVerified ? "#f39c12" : "transparent"}
                 >
                   <View style={{
                     width: 50,
                     height: 50,
                     borderRadius: 25,
-                    backgroundColor: 'rgba(243, 156, 18, 0.2)',
+                    backgroundColor: isVerified ? 'rgba(243, 156, 18, 0.2)' : 'rgba(255, 255, 255, 0.05)',
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginBottom: 12,
                   }}>
-                    <Ionicons name="calendar-outline" size={24} color="#f39c12" />
+                    <Ionicons name="calendar-outline" size={24} color={isVerified ? "#f39c12" : "#7f8c8d"} />
                   </View>
-                  {stats.pendingBookings > 0 && (
+                  {stats.pendingBookings > 0 && isVerified && (
                     <View style={{
                       position: 'absolute',
                       top: 10,
@@ -1249,13 +1359,18 @@ const Dashboard = () => {
                     style={{
                       fontSize: 14,
                       fontWeight: '600',
-                      color: '#ecf0f1',
+                      color: isVerified ? '#ecf0f1' : '#7f8c8d',
                       textAlign: 'center',
                     }}
                     numberOfLines={2}
                   >
                     {t('manage_bookings')}
                   </Text>
+                  {!isVerified && (
+                    <View style={{ position: 'absolute', top: 10, right: 10 }}>
+                      <Ionicons name="lock-closed" size={14} color="#7f8c8d" />
+                    </View>
+                  )}
                 </HoverCard>
 
                 <HoverCard
@@ -1268,33 +1383,39 @@ const Dashboard = () => {
                     marginBottom: isDesktop ? 16 : 0,
                     alignItems: 'center',
                     justifyContent: 'center',
+                    opacity: isVerified ? 1 : 0.7,
                   }}
-                  onPress={() => router.push('/attendance')}
-                  baseBorderColor="rgba(255, 255, 255, 0.1)"
-                  hoverBorderColor="#e74c3c"
+                  onPress={() => isVerified ? router.push('/attendance') : handleRestrictedAction()}
+                  baseBorderColor={isVerified ? "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.05)"}
+                  hoverBorderColor={isVerified ? "#e74c3c" : "transparent"}
                 >
                   <View style={{
                     width: 50,
                     height: 50,
                     borderRadius: 25,
-                    backgroundColor: 'rgba(231, 76, 60, 0.2)',
+                    backgroundColor: isVerified ? 'rgba(231, 76, 60, 0.2)' : 'rgba(255, 255, 255, 0.05)',
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginBottom: 12,
                   }}>
-                    <Ionicons name="checkmark-circle-outline" size={24} color="#e74c3c" />
+                    <Ionicons name="checkmark-circle-outline" size={24} color={isVerified ? "#e74c3c" : "#7f8c8d"} />
                   </View>
                   <Text
                     style={{
                       fontSize: 14,
                       fontWeight: '600',
-                      color: '#ecf0f1',
+                      color: isVerified ? '#ecf0f1' : '#7f8c8d',
                       textAlign: 'center',
                     }}
                     numberOfLines={2}
                   >
                     {t('attendance')}
                   </Text>
+                  {!isVerified && (
+                    <View style={{ position: 'absolute', top: 10, right: 10 }}>
+                      <Ionicons name="lock-closed" size={14} color="#7f8c8d" />
+                    </View>
+                  )}
                 </HoverCard>
 
                 <HoverCard
@@ -1307,33 +1428,39 @@ const Dashboard = () => {
                     marginBottom: isDesktop ? 16 : 0,
                     alignItems: 'center',
                     justifyContent: 'center',
+                    opacity: isVerified ? 1 : 0.7,
                   }}
-                  onPress={() => router.push('/wallet')}
-                  baseBorderColor="rgba(255, 255, 255, 0.1)"
-                  hoverBorderColor="#2980b9"
+                  onPress={() => isVerified ? router.push('/wallet') : handleRestrictedAction()}
+                  baseBorderColor={isVerified ? "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.05)"}
+                  hoverBorderColor={isVerified ? "#2980b9" : "transparent"}
                 >
                   <View style={{
                     width: 50,
                     height: 50,
                     borderRadius: 25,
-                    backgroundColor: 'rgba(41, 128, 185, 0.2)',
+                    backgroundColor: isVerified ? 'rgba(41, 128, 185, 0.2)' : 'rgba(255, 255, 255, 0.05)',
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginBottom: 12,
                   }}>
-                    <Ionicons name="wallet-outline" size={24} color="#2980b9" />
+                    <Ionicons name="wallet-outline" size={24} color={isVerified ? "#2980b9" : "#7f8c8d"} />
                   </View>
                   <Text
                     style={{
                       fontSize: 14,
                       fontWeight: '600',
-                      color: '#ecf0f1',
+                      color: isVerified ? '#ecf0f1' : '#7f8c8d',
                       textAlign: 'center',
                     }}
                     numberOfLines={2}
                   >
                     {t('wallet')}
                   </Text>
+                  {!isVerified && (
+                    <View style={{ position: 'absolute', top: 10, right: 10 }}>
+                      <Ionicons name="lock-closed" size={14} color="#7f8c8d" />
+                    </View>
+                  )}
                 </HoverCard>
 
                 <HoverCard
@@ -1346,34 +1473,35 @@ const Dashboard = () => {
                     marginBottom: isDesktop ? 16 : 0,
                     alignItems: 'center',
                     justifyContent: 'center',
+                    opacity: isVerified ? 1 : 0.7,
                   }}
-                  onPress={() => router.push('/messages')}
-                  baseBorderColor="rgba(255, 255, 255, 0.1)"
-                  hoverBorderColor="#2980b9"
+                  onPress={() => isVerified ? router.push('/messages') : handleRestrictedAction()}
+                  baseBorderColor={isVerified ? "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.05)"}
+                  hoverBorderColor={isVerified ? "#2980b9" : "transparent"}
                 >
                   <View style={{
                     width: 50,
                     height: 50,
                     borderRadius: 25,
-                    backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                    backgroundColor: isVerified ? 'rgba(52, 152, 219, 0.2)' : 'rgba(255, 255, 255, 0.05)',
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginBottom: 12,
                   }}>
-                    <Ionicons name="chatbubbles-outline" size={24} color="#3498db" />
+                    <Ionicons name="chatbubbles-outline" size={24} color={isVerified ? "#3498db" : "#7f8c8d"} />
                   </View>
                   <Text
                     style={{
                       fontSize: 14,
                       fontWeight: '600',
-                      color: '#ecf0f1',
+                      color: isVerified ? '#ecf0f1' : '#7f8c8d',
                       textAlign: 'center',
                     }}
                     numberOfLines={2}
                   >
                     {t('messages')}
                   </Text>
-                  {unreadMessages > 0 && (
+                  {unreadMessages > 0 && isVerified && (
                     <View style={{
                       position: 'absolute',
                       top: 10,
@@ -1395,6 +1523,11 @@ const Dashboard = () => {
                       </Text>
                     </View>
                   )}
+                  {!isVerified && (
+                    <View style={{ position: 'absolute', top: 10, right: 10 }}>
+                      <Ionicons name="lock-closed" size={14} color="#7f8c8d" />
+                    </View>
+                  )}
                 </HoverCard>
 
                 <HoverCard
@@ -1407,33 +1540,39 @@ const Dashboard = () => {
                     marginBottom: isDesktop ? 16 : 0,
                     alignItems: 'center',
                     justifyContent: 'center',
+                    opacity: isVerified ? 1 : 0.7,
                   }}
-                  onPress={() => router.push('/lecturer-hub')}
-                  baseBorderColor="rgba(255, 255, 255, 0.1)"
-                  hoverBorderColor="#9b59b6"
+                  onPress={() => isVerified ? router.push('/lecturer-hub') : handleRestrictedAction()}
+                  baseBorderColor={isVerified ? "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.05)"}
+                  hoverBorderColor={isVerified ? "#9b59b6" : "transparent"}
                 >
                   <View style={{
                     width: 50,
                     height: 50,
                     borderRadius: 25,
-                    backgroundColor: 'rgba(155, 89, 182, 0.2)',
+                    backgroundColor: isVerified ? 'rgba(155, 89, 182, 0.2)' : 'rgba(255, 255, 255, 0.05)',
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginBottom: 12,
                   }}>
-                    <Ionicons name="people-outline" size={24} color="#9b59b6" />
+                    <Ionicons name="people-outline" size={24} color={isVerified ? "#9b59b6" : "#7f8c8d"} />
                   </View>
                   <Text
                     style={{
                       fontSize: 14,
                       fontWeight: '600',
-                      color: '#ecf0f1',
+                      color: isVerified ? '#ecf0f1' : '#7f8c8d',
                       textAlign: 'center',
                     }}
                     numberOfLines={2}
                   >
                     {t('lecturer_hub.title')}
                   </Text>
+                  {!isVerified && (
+                    <View style={{ position: 'absolute', top: 10, right: 10 }}>
+                      <Ionicons name="lock-closed" size={14} color="#7f8c8d" />
+                    </View>
+                  )}
                 </HoverCard>
               </View>
             </View>
@@ -1918,41 +2057,43 @@ const Dashboard = () => {
         }}
       />
 
-      {/* Floating AI Toggle Button */}
-      <TouchableOpacity
-        onPress={() => setIsAIChatVisible(!isAIChatVisible)}
-        style={{
-          position: 'absolute',
-          bottom: 30,
-          [i18n.dir() === 'rtl' ? 'left' : 'right']: 30,
-          width: 80,
-          height: 80,
-          borderRadius: 40,
-          backgroundColor: isAIChatVisible ? 'rgba(231, 76, 60, 0.9)' : 'rgba(52, 152, 219, 0.9)',
-          alignItems: 'center',
-          justifyContent: 'center',
-          shadowColor: '#3498db',
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 0.5,
-          shadowRadius: 12,
-          elevation: 10,
-          borderWidth: 1,
-          borderColor: 'rgba(255, 255, 255, 0.2)',
-          zIndex: 999,
-        }}
-      >
-        {isAIChatVisible ? (
-          <Ionicons name="close" size={40} color="#fff" />
-        ) : (
-          <View style={{ width: 80, height: 80, borderRadius: 40, overflow: 'hidden' }}>
-            <Image
-              source={require('../assets/aibot.png')}
-              style={{ width: 80, height: 80, borderRadius: 40 }}
-              resizeMode="cover"
-            />
-          </View>
-        )}
-      </TouchableOpacity>
+      {/* Floating AI Toggle Button - Only show if verified */}
+      {isVerified && (
+        <TouchableOpacity
+          onPress={() => setIsAIChatVisible(!isAIChatVisible)}
+          style={{
+            position: 'absolute',
+            bottom: 30,
+            [i18n.dir() === 'rtl' ? 'left' : 'right']: 30,
+            width: 80,
+            height: 80,
+            borderRadius: 40,
+            backgroundColor: isAIChatVisible ? 'rgba(231, 76, 60, 0.9)' : 'rgba(52, 152, 219, 0.9)',
+            alignItems: 'center',
+            justifyContent: 'center',
+            shadowColor: '#3498db',
+            shadowOffset: { width: 0, height: 8 },
+            shadowOpacity: 0.5,
+            shadowRadius: 12,
+            elevation: 10,
+            borderWidth: 1,
+            borderColor: 'rgba(255, 255, 255, 0.2)',
+            zIndex: 999,
+          }}
+        >
+          {isAIChatVisible ? (
+            <Ionicons name="close" size={40} color="#fff" />
+          ) : (
+            <View style={{ width: 80, height: 80, borderRadius: 40, overflow: 'hidden' }}>
+              <Image
+                source={require('../assets/aibot.png')}
+                style={{ width: 80, height: 80, borderRadius: 40 }}
+                resizeMode="cover"
+              />
+            </View>
+          )}
+        </TouchableOpacity>
+      )}
 
       <MiniAIChat
         isVisible={isAIChatVisible}
