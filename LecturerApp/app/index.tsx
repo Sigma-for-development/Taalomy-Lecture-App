@@ -28,16 +28,16 @@ import Animated, {
 const AsyncStorage = tokenStorage;
 
 // --- Particle System Component ---
-const PARTICLE_COUNT = 30;
+const PARTICLE_COUNT = 12; // Optimized for Safari
 const ParticleSystem = () => {
-  const particles = Array.from({ length: PARTICLE_COUNT }).map((_, i) => ({
+  const particles = React.useMemo(() => Array.from({ length: PARTICLE_COUNT }).map((_, i) => ({
     id: i,
     x: Math.random() * 100, // %
     y: Math.random() * 100, // %
     size: Math.random() * 3 + 1,
     duration: Math.random() * 10000 + 5000,
     delay: Math.random() * 5000
-  }));
+  })), []);
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
@@ -186,39 +186,48 @@ export default function Index() {
     );
   }, []);
 
-  const auroraStyle1 = useAnimatedStyle(() => ({
-    opacity: 0.6,
-    transform: [
-      { translateX: withTiming(aurora1.value * 50 - 25, { duration: 0 }) },
-      { scale: 1 + aurora1.value * 0.2 },
-      { rotate: `${aurora1.value * 10}deg` }
-    ]
-  }));
-
-  const auroraStyle2 = useAnimatedStyle(() => ({
-    opacity: 0.5,
-    transform: [
-      { translateX: withTiming(aurora2.value * -60 + 30, { duration: 0 }) },
-      { translateY: withTiming(aurora2.value * 40 - 20, { duration: 0 }) },
-      { scale: 1.2 - aurora2.value * 0.2 }
-    ]
-  }));
-
-  // Parallax Animations
-  const heroParallax = useAnimatedStyle(() => {
+  const auroraStyle1 = useAnimatedStyle(() => {
+    if (!isDesktop) return {}; // Freeze on mobile
     return {
-      transform: [{ translateY: scrollY.value * 0.5 }], // Moves slower -> appears far away
+      opacity: 0.6,
+      transform: [
+        { translateX: withTiming(aurora1.value * 50 - 25, { duration: 0 }) },
+        { scale: 1 + aurora1.value * 0.2 },
+        { rotate: `${aurora1.value * 10}deg` }
+      ]
+    };
+  });
+
+  const auroraStyle2 = useAnimatedStyle(() => {
+    if (!isDesktop) return {}; // Freeze on mobile
+    return {
+      opacity: 0.5,
+      transform: [
+        { translateX: withTiming(aurora2.value * -60 + 30, { duration: 0 }) },
+        { translateY: withTiming(aurora2.value * 40 - 20, { duration: 0 }) },
+        { scale: 1.2 - aurora2.value * 0.2 }
+      ]
+    };
+  });
+
+  // Parallax Animations (Disabled on mobile for thermal efficiency)
+  const heroParallax = useAnimatedStyle(() => {
+    if (!isDesktop) return { opacity: interpolate(scrollY.value, [0, 400], [1, 0], Extrapolate.CLAMP) };
+    return {
+      transform: [{ translateY: scrollY.value * 0.5 }],
       opacity: interpolate(scrollY.value, [0, 400], [1, 0], Extrapolate.CLAMP)
     };
   });
 
   const bentoParallax = useAnimatedStyle(() => {
+    if (!isDesktop) return {};
     return {
-      transform: [{ translateY: scrollY.value * 0.1 }] // Moves slightly slower
+      transform: [{ translateY: scrollY.value * 0.1 }]
     };
   });
 
   const bigBrandWatermarkStyle = useAnimatedStyle(() => {
+    if (!isDesktop) return { transform: [{ rotate: '-10deg' }], opacity: 0.1 };
     return {
       transform: [
         { translateY: scrollY.value * 0.2 },
@@ -272,15 +281,15 @@ export default function Index() {
 
       {/* --- FIXED BACKGROUND LAYER --- */}
       <View style={styles.fixedBackground}>
-        <ParticleSystem />
+        {isDesktop && <ParticleSystem />}
 
         {/* Huge Brand Watermark */}
         <Animated.View style={[{
           position: 'absolute',
           top: '10%',
-          right: '-10%',
-          width: 1000,
-          height: 1000,
+          right: isDesktop ? '-10%' : '-30%',
+          width: isDesktop ? 1000 : 600,
+          height: isDesktop ? 1000 : 600,
           zIndex: -2,
           opacity: 0.1
         }, bigBrandWatermarkStyle]}>
@@ -291,34 +300,60 @@ export default function Index() {
           />
         </Animated.View>
 
-        {/* Aurora Blobs */}
+        {/* Aurora Blobs - Simplified for Mobile */}
         <Animated.View style={[styles.auroraBlob, {
           backgroundColor: '#1e3a8a', // Blue 900
-          top: -200, left: '20%', width: 1000, height: 1000, opacity: 0.2,
-          ...(Platform.OS === 'web' ? { filter: 'blur(120px)' } : {}) as any
-        }, auroraStyle1]} />
+          top: isDesktop ? -300 : -150,
+          left: isDesktop ? '10%' : '-10%',
+          width: isDesktop ? 1200 : 600,
+          height: isDesktop ? 1200 : 600,
+          opacity: isDesktop ? 0.2 : 0.3,
+          ...(isWeb && isDesktop ? { filter: 'blur(70px)' } : {}) as any
+        }, auroraStyle1]}>
+          {!isDesktop && (
+            <LinearGradient
+              colors={['#1e3a8a', 'transparent']}
+              style={StyleSheet.absoluteFill}
+            />
+          )}
+        </Animated.View>
 
         <Animated.View style={[styles.auroraBlob, {
           backgroundColor: '#0369a1', // Sky 700
-          top: 200, right: '-10%', width: 800, height: 800, opacity: 0.15,
-          ...(Platform.OS === 'web' ? { filter: 'blur(150px)' } : {}) as any
-        }, auroraStyle2]} />
+          top: isDesktop ? 100 : 200,
+          right: isDesktop ? '-20%' : '-20%',
+          width: isDesktop ? 1000 : 500,
+          height: isDesktop ? 1000 : 500,
+          opacity: isDesktop ? 0.15 : 0.2,
+          ...(isWeb && isDesktop ? { filter: 'blur(90px)' } : {}) as any
+        }, auroraStyle2]}>
+          {!isDesktop && (
+            <LinearGradient
+              colors={['#0369a1', 'transparent']}
+              style={StyleSheet.absoluteFill}
+            />
+          )}
+        </Animated.View>
       </View>
 
 
       {/* --- SCROLLABLE CONTENT --- */}
       <Animated.ScrollView
         onScroll={scrollHandler}
-        scrollEventThrottle={16}
+        scrollEventThrottle={32} // Optimized for Safari fluid scroll
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
 
         {/* Navbar */}
-        <Animated.View entering={FadeInUp.duration(800)} style={[styles.navHeader, { paddingHorizontal: isDesktop ? 60 : 24, paddingTop: isDesktop ? 48 : 40 }]}>
+        <Animated.View entering={FadeInUp.duration(800)} style={[styles.navHeader, { paddingHorizontal: isDesktop ? 60 : 20, paddingTop: isDesktop ? 48 : 28 }]}>
           <Image
             source={require('../assets/taalomy-white-txt.png')}
-            style={{ width: isDesktop ? 340 : 160, height: isDesktop ? 85 : 40 }} // Fixed mobile logo scaling
+            style={{
+              width: isDesktop ? 340 : 44, // Square-ish look on mobile
+              height: isDesktop ? 85 : 44,
+              marginLeft: isDesktop ? -10 : 0
+            }}
             resizeMode="contain"
           />
           <TouchableOpacity onPress={() => router.push('/login')} style={[styles.navButton, { paddingHorizontal: 16, paddingVertical: 8 }]}>
@@ -356,8 +391,8 @@ export default function Index() {
               entering={FadeInUp.delay(800).duration(1000)}
               style={[styles.heroSubtitle, {
                 fontSize: isDesktop ? heroSubTitleSize : 15,
-                maxWidth: isDesktop ? 660 : '90%',
-                paddingHorizontal: isDesktop ? 0 : 10,
+                maxWidth: isDesktop ? 660 : screenWidth * 0.85, // More consistent width on mobile
+                paddingHorizontal: isDesktop ? 0 : 4,
                 lineHeight: isDesktop ? 32 : 24
               }]}
             >
@@ -454,20 +489,20 @@ export default function Index() {
                 subtitle="Instant check-ins."
                 icon="qr-code"
                 color="#3b82f6"
-                height={420}
+                height={isDesktop ? 420 : 220} // Dynamic height
                 delay={400}
                 isLarge
                 isDesktop={isDesktop}
               />
               <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 24 }}>
-                <BentoCard icon="stats-chart" title="Analytics" subtitle="Deep data." color="#0ea5e9" height={280} delay={500} flex={1} isDesktop={isDesktop} />
-                <BentoCard icon="cloud-done" title="Sync" subtitle="Auto-save." color="#10b981" height={280} delay={600} flex={1} isDesktop={isDesktop} />
+                <BentoCard icon="stats-chart" title="Analytics" subtitle="Deep data." color="#0ea5e9" height={isDesktop ? 280 : 180} delay={500} flex={1} isDesktop={isDesktop} />
+                <BentoCard icon="cloud-done" title="Sync" subtitle="Auto-save." color="#10b981" height={isDesktop ? 280 : 180} delay={600} flex={1} isDesktop={isDesktop} />
               </View>
             </View>
             {/* Col 2 */}
             <View style={{ flex: isDesktop ? 4 : 1, gap: 24 }}>
-              <BentoCard title="Chat" subtitle="Private channels." icon="chatbox-ellipses" color="#f59e0b" height={320} delay={700} isDesktop={isDesktop} />
-              <BentoCard title="Hub" subtitle="Command center." icon="layers" color="#ef4444" height={380} delay={800} isDesktop={isDesktop} />
+              <BentoCard title="Chat" subtitle="Private channels." icon="chatbox-ellipses" color="#f59e0b" height={isDesktop ? 320 : 200} delay={700} isDesktop={isDesktop} />
+              <BentoCard title="Hub" subtitle="Command center." icon="layers" color="#ef4444" height={isDesktop ? 380 : 220} delay={800} isDesktop={isDesktop} />
             </View>
           </View>
         </Animated.View>
@@ -656,7 +691,7 @@ const BentoCard = ({ title, subtitle, icon, color, height, flex, delay, isLarge,
         onHoverOut={() => { scale.value = 1; glow.value = 0.1; }}
         style={{ flex: 1 }}
       >
-        <Animated.View style={[styles.card, animatedStyle]}>
+        <Animated.View style={[styles.card, animatedStyle, { padding: isDesktop ? 36 : 20 }]}>
           <LinearGradient
             colors={['rgba(255,255,255,0.08)', 'transparent']}
             style={StyleSheet.absoluteFill}
@@ -667,9 +702,9 @@ const BentoCard = ({ title, subtitle, icon, color, height, flex, delay, isLarge,
           {/* Brand Watermark in Card */}
           <Ionicons
             name={icon}
-            size={180}
+            size={isDesktop ? 180 : 100} // Responsive watermark
             color={color}
-            style={{ position: 'absolute', right: -40, bottom: -40, opacity: 0.05, transform: [{ rotate: '-15deg' }] }}
+            style={{ position: 'absolute', right: isDesktop ? -40 : -20, bottom: isDesktop ? -40 : -20, opacity: 0.05, transform: [{ rotate: '-15deg' }] }}
           />
 
           <View style={[styles.iconBox, { backgroundColor: `${color}20`, width: isDesktop ? 72 : 56, height: isDesktop ? 72 : 56 }]}>
@@ -760,7 +795,7 @@ const styles = StyleSheet.create({
     letterSpacing: -3,
     color: '#3b82f6', // System Blue
     textShadowColor: 'rgba(59, 130, 246, 0.5)',
-    textShadowRadius: 60,
+    textShadowRadius: Platform.OS === 'web' ? 60 : 20, // Reduced for mobile
   },
   heroSubtitle: {
     color: '#a1a1aa',
@@ -779,7 +814,7 @@ const styles = StyleSheet.create({
     shadowColor: '#fff',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.4,
-    shadowRadius: 30,
+    shadowRadius: Platform.OS === 'web' ? 30 : 10, // Simplified for thermal efficiency
     elevation: 10,
   },
   primaryButtonText: {
@@ -797,7 +832,7 @@ const styles = StyleSheet.create({
   card: {
     flex: 1,
     borderRadius: 32,
-    padding: 36,
+    padding: Platform.OS === 'web' ? 36 : 24,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
     overflow: 'hidden',
@@ -956,9 +991,9 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.15)',
     backgroundColor: '#000',
     shadowColor: '#3b82f6',
-    shadowOffset: { width: 0, height: 20 },
-    shadowOpacity: 0.2,
-    shadowRadius: 40,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20, // Reduced from 40 for Safari
   },
   monitorHeader: {
     height: 32,
@@ -1014,9 +1049,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#3b82f6',
-    shadowOffset: { width: 0, height: 30 },
-    shadowOpacity: 0.12,
-    shadowRadius: 80,
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.1,
+    shadowRadius: 40, // Reduced from 80 for Safari
   },
   aiChatImage: {
     width: '100%',
