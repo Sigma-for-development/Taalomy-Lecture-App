@@ -14,13 +14,13 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { tokenStorage } from '../../utils/tokenStorage';
-const AsyncStorage = tokenStorage;
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import axios from 'axios';
 import { API_CONFIG } from '../../src/config/api';
 import { useTranslation } from 'react-i18next';
 import { formatGregorianDate, formatGregorianDateTime } from '../../src/utils/dateFormatter';
+const AsyncStorage = tokenStorage;
 
 interface SupportMessage {
     id: number;
