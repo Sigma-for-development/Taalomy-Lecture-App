@@ -1531,5 +1531,10 @@
     "status_success": "Success",
     "setup_complete": "Setup Complete",
     "setup_complete_desc": "You can now use the app",
+    "confirm_setup_action": "Confirm Setup",
+    "groups_count_plural": "{{count}} groups",
+    "classes_count_plural": "{{count}} classes",
+    "confirm_intake_setup": "Confirm Intake Setup",
+    "confirm_intake_setup_desc": "Are you sure you want to setup this intake?",
     "message_error": "Failed to send message"
 }

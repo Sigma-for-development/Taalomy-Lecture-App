@@ -1,9 +1,9 @@
+
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { View, Text, ActivityIndicator, Image, Platform, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ActivityIndicator, Image, Platform, ScrollView, TouchableOpacity, StyleSheet, Dimensions, Pressable } from 'react-native';
 import { Redirect, useRouter } from "expo-router";
 import { tokenStorage } from '../utils/tokenStorage';
-const AsyncStorage = tokenStorage;
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
@@ -17,17 +17,93 @@ import Animated, {
   withRepeat,
   withTiming,
   withDelay,
-  interpolate
+  Easing,
+  withSequence,
+  interpolate,
+  useAnimatedScrollHandler,
+  Extrapolate,
+  interpolateColor,
+  cancelAnimation
 } from 'react-native-reanimated';
+const AsyncStorage = tokenStorage;
 
+// --- Particle System Component ---
+const PARTICLE_COUNT = 30;
+const ParticleSystem = () => {
+  const particles = Array.from({ length: PARTICLE_COUNT }).map((_, i) => ({
+    id: i,
+    x: Math.random() * 100, // %
+    y: Math.random() * 100, // %
+    size: Math.random() * 3 + 1,
+    duration: Math.random() * 10000 + 5000,
+    delay: Math.random() * 5000
+  }));
+
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      {particles.map((p) => (
+        <Particle key={p.id} {...p} />
+      ))}
+    </View>
+  );
+};
+
+const Particle = ({ x, y, size, duration, delay }: any) => {
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(0);
+
+  useEffect(() => {
+    opacity.value = withRepeat(
+      withSequence(
+        withDelay(delay, withTiming(Math.random() * 0.5 + 0.2, { duration: 1000 })),
+        withTiming(0, { duration: duration })
+      ),
+      -1,
+      true
+    );
+    translateY.value = withRepeat(
+      withDelay(delay, withTiming(-100, { duration: duration, easing: Easing.linear })),
+      -1,
+      false
+    );
+  }, []);
+
+  const style = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }]
+  }));
+
+  return (
+    <Animated.View style={[
+      {
+        position: 'absolute',
+        left: `${x}%`,
+        top: `${y}%`,
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        backgroundColor: '#fff',
+      },
+      style
+    ]} />
+  );
+};
 
 export default function Index() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
-  const { isDesktop } = useResponsive();
+  const { isDesktop, isTablet } = useResponsive();
   const isWeb = Platform.OS === 'web';
   const [isLoading, setIsLoading] = useState(!isWeb);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+
+  // Parallax Scroll Handler
+  const scrollY = useSharedValue(0);
+  const scrollHandler = useAnimatedScrollHandler((event) => {
+    scrollY.value = event.contentOffset.y;
+  });
+
 
   useEffect(() => {
     checkLoginStatus();
@@ -35,12 +111,9 @@ export default function Index() {
 
   const validateToken = async (accessToken: string) => {
     try {
-      // Try to make a request to a protected endpoint to validate the token
       const response = await axios.get(`${API_CONFIG.ACCOUNTS_BASE_URL}userID/`, {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        },
-        timeout: 5000 // 5 second timeout to prevent hanging
+        headers: { 'Authorization': `Bearer ${accessToken}` },
+        timeout: 5000
       });
       return response.status === 200;
     } catch (error) {
@@ -51,155 +124,132 @@ export default function Index() {
 
   const checkLoginStatus = async () => {
     try {
-      // Check if access token exists
       const accessToken = await AsyncStorage.getItem('access_token');
       const userData = await AsyncStorage.getItem('user_data');
 
       if (accessToken && userData) {
-        // Validate the token
         const isTokenValid = await validateToken(accessToken);
-
         if (isTokenValid) {
-          // Check if user is a lecturer
           const user = JSON.parse(userData);
           if (user.user_type === 'lecturer') {
-            const hasSeenOnboarding = await AsyncStorage.getItem('has_seen_onboarding');
-            console.log('Lecturer auto-login successful', { hasSeenOnboarding });
-
-            if (hasSeenOnboarding === 'true') {
-              setIsLoggedIn(true);
-            } else {
-              setIsLoggedIn(true); // Treat as logged in regardless
-            }
+            setIsLoggedIn(true);
           } else {
-            console.log('User is not a lecturer, clearing storage');
             await AsyncStorage.removeItem('access_token');
             await AsyncStorage.removeItem('refresh_token');
             await AsyncStorage.removeItem('user_data');
             setIsLoggedIn(false);
           }
         } else {
-          // Token is invalid, clear storage and redirect to login
-          console.log('Token expired, clearing storage');
           await AsyncStorage.removeItem('access_token');
           await AsyncStorage.removeItem('refresh_token');
           await AsyncStorage.removeItem('user_data');
           setIsLoggedIn(false);
         }
       } else {
-        // No tokens found, redirect to login
         setIsLoggedIn(false);
       }
     } catch (error) {
       console.error('Error checking login status:', error);
-      // On error, clear storage and redirect to login
-      try {
-        await AsyncStorage.removeItem('access_token');
-        await AsyncStorage.removeItem('refresh_token');
-        await AsyncStorage.removeItem('user_data');
-      } catch (clearError) {
-        console.error('Error clearing storage:', clearError);
-      }
       setIsLoggedIn(false);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Background Animation Shared Values
-  const drift1X = useSharedValue(0);
-  const drift1Y = useSharedValue(0);
-  const drift2X = useSharedValue(0);
-  const drift2Y = useSharedValue(0);
+  // --- Animation Setup ---
+  const aurora1 = useSharedValue(0);
+  const aurora2 = useSharedValue(0);
+  const ctaPulse = useSharedValue(1);
+
+  // Auto-scroll animation for Marquee
+  const marqueeOffset = useSharedValue(0);
 
   useEffect(() => {
-    // Main Glow Drift
-    drift1X.value = withRepeat(
-      withTiming(40, { duration: 25000 }),
-      -1,
-      true
-    );
-    drift1Y.value = withRepeat(
-      withTiming(-60, { duration: 30000 }),
+    aurora1.value = withRepeat(withTiming(1, { duration: 15000, easing: Easing.inOut(Easing.ease) }), -1, true);
+    aurora2.value = withRepeat(withTiming(1, { duration: 20000, easing: Easing.inOut(Easing.ease) }), -1, true);
+
+    ctaPulse.value = withRepeat(
+      withSequence(
+        withTiming(1.05, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
+        withTiming(1, { duration: 1500, easing: Easing.inOut(Easing.ease) })
+      ),
       -1,
       true
     );
 
-    // Secondary Glow Drift
-    drift2X.value = withRepeat(
-      withDelay(2000, withTiming(-50, { duration: 22000 })),
+    // Infinite Marquee Animation
+    // Doubled speed: 25000 -> 12000 -> 24000 (slower)
+    marqueeOffset.value = withRepeat(
+      withTiming(-1, { duration: 24000, easing: Easing.linear }),
       -1,
-      true
-    );
-    drift2Y.value = withRepeat(
-      withDelay(1000, withTiming(80, { duration: 28000 })),
-      -1,
-      true
+      false
     );
   }, []);
 
-  const animatedGlow1 = useAnimatedStyle(() => ({
+  const auroraStyle1 = useAnimatedStyle(() => ({
+    opacity: 0.6,
     transform: [
-      { translateX: drift1X.value },
-      { translateY: drift1Y.value },
-    ],
+      { translateX: withTiming(aurora1.value * 50 - 25, { duration: 0 }) },
+      { scale: 1 + aurora1.value * 0.2 },
+      { rotate: `${aurora1.value * 10}deg` }
+    ]
   }));
 
-  const animatedGlow2 = useAnimatedStyle(() => ({
+  const auroraStyle2 = useAnimatedStyle(() => ({
+    opacity: 0.5,
     transform: [
-      { translateX: drift2X.value },
-      { translateY: drift2Y.value },
-    ],
+      { translateX: withTiming(aurora2.value * -60 + 30, { duration: 0 }) },
+      { translateY: withTiming(aurora2.value * 40 - 20, { duration: 0 }) },
+      { scale: 1.2 - aurora2.value * 0.2 }
+    ]
   }));
+
+  // Parallax Animations
+  const heroParallax = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: scrollY.value * 0.5 }], // Moves slower -> appears far away
+      opacity: interpolate(scrollY.value, [0, 400], [1, 0], Extrapolate.CLAMP)
+    };
+  });
+
+  const bentoParallax = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: scrollY.value * 0.1 }] // Moves slightly slower
+    };
+  });
+
+  const bigBrandWatermarkStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        { translateY: scrollY.value * 0.2 },
+        { rotate: '-10deg' }
+      ],
+      opacity: interpolate(scrollY.value, [0, 500], [0.2, 0], Extrapolate.CLAMP)
+    }
+  });
+
+
+  // Triple duplicated list for marquee
+  const screenshots = [
+    { id: 1, src: require('../assets/english-pics/english-dashboard.png'), title: 'Lecturer Dashboard' },
+    { id: 2, src: require('../assets/english-pics/english-intakes.png'), title: 'Intake Management' },
+    { id: 3, src: require('../assets/english-pics/english-professional.png'), title: 'Professional Tools' },
+    { id: 4, src: require('../assets/english-pics/english-timetable.png'), title: 'Timetable' },
+    { id: 5, src: require('../assets/english-pics/english-wallet.png'), title: 'Wallet & Earnings' },
+  ];
+  const seamlessScreenshots = [...screenshots, ...screenshots, ...screenshots];
+
+  const marqueeStyle = useAnimatedStyle(() => {
+    // 5 cards * (640 width + 40 gap) = 3400px total single set width
+    return {
+      transform: [{ translateX: marqueeOffset.value * 3400 }]
+    };
+  });
 
   if (!isWeb && isLoading) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#0a0a0a' }}>
-        <LinearGradient
-          colors={['#0a0a0a', '#1a1a1a', '#2d2d2d']}
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            top: 0,
-            bottom: 0,
-          }}
-        />
-        <View style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center'
-        }}>
-          <View style={{
-            width: 150,
-            height: 150,
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: 20,
-          }}>
-            <Image
-              source={require('../assets/taalomy-white-txt.png')}
-              style={{ width: '100%', height: '100%' }}
-              resizeMode="contain"
-            />
-          </View>
-          <Text style={{
-            fontSize: 24,
-            fontWeight: 'bold',
-            color: '#ecf0f1',
-            marginBottom: 20
-          }}>
-            {t('app_name')}
-          </Text>
-          <ActivityIndicator size="large" color="#3498db" />
-          <Text style={{
-            fontSize: 16,
-            color: '#bdc3c7',
-            marginTop: 20
-          }}>
-            {t('loading')}
-          </Text>
-        </View>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#3498db" />
       </View>
     );
   }
@@ -208,449 +258,640 @@ export default function Index() {
     return <Redirect href="/dashboard" />;
   }
 
-  if (!isWeb) {
-    return <Redirect href="/login" />;
-  }
-
+  const heroTitleSize = isDesktop ? 120 : 52;
+  const heroSubTitleSize = isDesktop ? 22 : 18;
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: '#0a0a0f' }} contentContainerStyle={{ paddingBottom: 80 }}>
+    <View style={styles.container}>
       <SeoHead
-        title="Professional Class Management"
-        description="Streamline your teaching with Taalomy Lecturer. Manage attendance, student communication, schedules, and more in one powerful dashboard."
+        title="Taalomy - Pro"
+        description="The ultimate tool for modern educators."
         path="/"
-        keywords="lecturer dashboard, class management software, attendance tracker web, teacher tools, Taalomy"
+        keywords="lecturer, education, management, apple style"
       />
 
-      {/* Dynamic Visual Background - Unified Coverage */}
-      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#0a0a0f', overflow: 'hidden' }}>
-        {/* Vibrant Radial Glow - Centered Circle */}
+      {/* --- FIXED BACKGROUND LAYER --- */}
+      <View style={styles.fixedBackground}>
+        <ParticleSystem />
+
+        {/* Huge Brand Watermark */}
         <Animated.View style={[{
           position: 'absolute',
-          width: 1400,
-          height: 1400,
-          top: -700,
-          left: '50%',
-          marginLeft: -700,
-          borderRadius: 700,
-        }, animatedGlow1]}>
-          <LinearGradient
-            colors={['rgba(52, 152, 219, 0.18)', 'transparent']}
-            style={{ flex: 1, borderRadius: 700 }}
-          />
-        </Animated.View>
-
-        {/* Secondary Glow - Accent Circle */}
-        <Animated.View style={[{
-          position: 'absolute',
-          width: 800,
-          height: 800,
-          top: 200,
-          right: -300,
-          borderRadius: 400,
-        }, animatedGlow2]}>
-          <LinearGradient
-            colors={['rgba(52, 152, 219, 0.08)', 'transparent']}
-            style={{ flex: 1, borderRadius: 400 }}
-          />
-        </Animated.View>
-
-
-      </View>
-
-      {/* Centered Hero Section */}
-      <View style={{ paddingHorizontal: 24, paddingTop: isDesktop ? 120 : 60, alignItems: 'center' }}>
-        <Animated.View
-          entering={FadeInUp.springify().damping(12).stiffness(120)}
-          style={{ alignItems: 'center', maxWidth: 900 }}
-        >
-          {/* Prominent Logo Integration - Significantly Enlarged */}
-          <View style={{ marginBottom: 48, alignItems: 'center' }}>
-            <Image
-              source={require('../assets/taalomy-white-txt.png')}
-              style={{ width: isDesktop ? 420 : 260, height: isDesktop ? 120 : 80 }}
-              resizeMode="contain"
-            />
-          </View>
-
-          <View style={{
-            backgroundColor: 'rgba(52, 152, 219, 0.18)',
-            paddingHorizontal: 16,
-            paddingVertical: 8,
-            borderRadius: 30,
-            marginBottom: 32,
-            borderWidth: 1,
-            borderColor: 'rgba(255, 255, 255, 0.2)',
-          }}>
-            <Text style={{ color: '#ffffff', fontSize: 13, fontWeight: '700', letterSpacing: 0.5 }}>
-              Available for Web & Mobile
-            </Text>
-          </View>
-
-          <Text style={{
-            color: '#ffffff',
-            fontSize: isDesktop ? 84 : 48,
-            fontWeight: '800',
-            textAlign: 'center',
-            lineHeight: isDesktop ? 92 : 54,
-            letterSpacing: isDesktop ? -3 : -1.5,
-          }}>
-            Teach with{'\n'}
-            <Text style={{
-              color: '#3498db',
-              textShadowColor: 'rgba(52, 152, 219, 0.3)',
-              textShadowOffset: { width: 0, height: 0 },
-              textShadowRadius: 20
-            }}>unmatched precision.</Text>
-          </Text>
-
-          <Text style={{
-            color: '#bdc3c7',
-            fontSize: isDesktop ? 22 : 18,
-            marginTop: 32,
-            lineHeight: isDesktop ? 34 : 28,
-            textAlign: 'center',
-            maxWidth: 700,
-            fontWeight: '400'
-          }}>
-            A minimalist, high-performance platform for modern educators.{'\n'}
-            Manage attendance, messaging, and scheduling with a single click.
-          </Text>
-
-          <View style={{
-            flexDirection: isDesktop ? 'row' : 'column',
-            gap: 20,
-            marginTop: 56,
-            width: isDesktop ? 'auto' : '100%',
-          }}>
-            <TouchableOpacity
-              onPress={() => router.push('/login')}
-              activeOpacity={0.8}
-              style={{
-                backgroundColor: '#ffffff',
-                paddingVertical: 18,
-                paddingHorizontal: 40,
-                borderRadius: 40,
-                alignItems: 'center',
-                shadowColor: '#3498db',
-                shadowOffset: { width: 0, height: 10 },
-                shadowOpacity: 0.3,
-                shadowRadius: 20,
-              }}
-            >
-              <Text style={{ color: '#000000', fontSize: 17, fontWeight: '700' }}>Get Started Free</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => router.push('/register')}
-              activeOpacity={0.7}
-              style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                paddingVertical: 18,
-                paddingHorizontal: 40,
-                borderRadius: 40,
-                borderWidth: 1,
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-                alignItems: 'center',
-              }}
-            >
-              <Text style={{ color: '#ffffff', fontSize: 17, fontWeight: '600' }}>Create Account</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Trusted Badge */}
-          <View style={{ marginTop: 48, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              {[1, 2, 3].map(i => (
-                <View key={i} style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 18,
-                  backgroundColor: '#111111',
-                  borderWidth: 2,
-                  borderColor: '#000000',
-                  marginLeft: i > 1 ? -12 : 0,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  overflow: 'hidden'
-                }}>
-                  <Ionicons name="person" size={18} color="#475569" />
-                </View>
-              ))}
-            </View>
-            <Text style={{ color: '#64748b', fontSize: 15, fontWeight: '500' }}>
-              Trusted by Educators
-            </Text>
-          </View>
-        </Animated.View>
-      </View>
-
-      {/* Bento Grid Feature Section - Center Locked */}
-      <View style={{
-        paddingHorizontal: 24,
-        marginTop: isDesktop ? 160 : 80,
-        maxWidth: 1200,
-        width: '100%',
-        alignSelf: 'center'
-      }}>
-        <Animated.View
-          entering={FadeInUp.springify()}
-          style={{ marginBottom: 64, alignItems: 'center' }}
-        >
-          <Text style={{
-            color: '#ffffff',
-            fontSize: isDesktop ? 48 : 32,
-            fontWeight: '800',
-            textAlign: 'center',
-            letterSpacing: -1
-          }}>
-            Every detail, simplified.
-          </Text>
-          <View style={{ height: 4, width: 60, backgroundColor: '#e67e22', marginTop: 16, borderRadius: 2 }} />
-        </Animated.View>
-
-        <View style={{
-          flexDirection: isDesktop ? 'row' : 'column',
-          gap: 24,
-          alignItems: 'stretch'
-        }}>
-          {/* Bento Card 1: Attendance (Large) */}
-          <Animated.View
-            entering={FadeInUp.delay(200).springify()}
-            style={{
-              flex: isDesktop ? 2 : undefined,
-              backgroundColor: 'rgba(255, 255, 255, 0.03)',
-              borderRadius: 32,
-              padding: isDesktop ? 48 : 32,
-              borderWidth: 1,
-              borderColor: 'rgba(255, 255, 255, 0.08)',
-              minHeight: 340,
-              justifyContent: 'center',
-              overflow: 'hidden'
-            }}
-          >
-            {/* Logo Watermark Integration */}
-            <View style={{
-              position: 'absolute',
-              right: -40,
-              bottom: -20,
-              opacity: 0.05,
-              transform: [{ rotate: '-15deg' }]
-            }}>
-              <Image
-                source={require('../assets/taalomy-white-txt.png')}
-                style={{ width: 400, height: 400 }}
-                resizeMode="contain"
-              />
-            </View>
-            <Ionicons name="checkmark-done-outline" size={32} color="#3498db" style={{ marginBottom: 20 }} />
-            <Text style={{ color: '#ffffff', fontSize: 32, fontWeight: '700' }}>Attendance Redefined</Text>
-            <Text style={{ color: '#bdc3c7', fontSize: 18, marginTop: 16, lineHeight: 28, maxWidth: 400 }}>
-              Quick check-ins, automated history, and detailed rosters. Speed through administrative tasks and focus on your students.
-            </Text>
-          </Animated.View>
-
-          {/* Vertical Stack for Smaller Cards - For Perfect Alignment */}
-          <View style={{
-            flex: 1,
-            gap: 24,
-            flexDirection: 'column',
-          }}>
-            {/* Bento Card 2: Messaging (Small) */}
-            <Animated.View
-              entering={FadeInUp.delay(300).springify()}
-              style={{
-                flex: 1,
-                backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                borderRadius: 32,
-                padding: 32,
-                borderWidth: 1,
-                borderColor: 'rgba(255, 255, 255, 0.08)',
-              }}
-            >
-              <Ionicons name="chatbubbles-outline" size={28} color="#3498db" style={{ marginBottom: 16 }} />
-              <Text style={{ color: '#ffffff', fontSize: 22, fontWeight: '700' }}>Direct Connect</Text>
-              <Text style={{ color: '#95a5a6', fontSize: 15, marginTop: 8, lineHeight: 22 }}>
-                Announcements and direct messaging that actually get read.
-              </Text>
-            </Animated.View>
-
-            {/* Bento Card 3: Management (Small) */}
-            <Animated.View
-              entering={FadeInUp.delay(400).springify()}
-              style={{
-                flex: 1,
-                backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                borderRadius: 32,
-                padding: 32,
-                borderWidth: 1,
-                borderColor: 'rgba(255, 255, 255, 0.08)',
-              }}
-            >
-              <Ionicons name="people-outline" size={28} color="#3498db" style={{ marginBottom: 16 }} />
-              <Text style={{ color: '#ffffff', fontSize: 22, fontWeight: '700' }}>Group Control</Text>
-              <Text style={{ color: '#95a5a6', fontSize: 15, marginTop: 8, lineHeight: 22 }}>
-                Organize intakes and student details with professional clarity.
-              </Text>
-            </Animated.View>
-          </View>
-        </View>
-
-        {/* Bento Card 4: Scheduling (Large Row Below) */}
-        <Animated.View
-          entering={FadeInUp.delay(500).springify()}
-          style={{
-            marginTop: 24,
-            width: '100%',
-            backgroundColor: 'rgba(255, 255, 255, 0.03)',
-            borderRadius: 32,
-            padding: isDesktop ? 48 : 32,
-            borderWidth: 1,
-            borderColor: 'rgba(255, 255, 255, 0.08)',
-            minHeight: 220,
-            flexDirection: isDesktop ? 'row' : 'column',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 24
-          }}
-        >
-          <View style={{ flex: 1.5 }}>
-            <Ionicons name="calendar-outline" size={32} color="#3498db" style={{ marginBottom: 20 }} />
-            <Text style={{ color: '#ffffff', fontSize: 32, fontWeight: '700' }}>Master Schedule</Text>
-            <Text style={{ color: '#bdc3c7', fontSize: 17, marginTop: 12, lineHeight: 26, maxWidth: 500 }}>
-              Visualize your academic path. Coordinate sessions and bookings without cross-platform friction.
-            </Text>
-          </View>
-          <View style={{
-            flex: 1,
-            backgroundColor: 'rgba(52, 152, 219, 0.08)',
-            height: '100%',
-            minHeight: 140,
-            borderRadius: 24,
-            borderWidth: 1,
-            borderColor: 'rgba(52, 152, 219, 0.15)',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 32,
-            width: isDesktop ? 'auto' : '100%'
-          }}>
-            <Ionicons name="time-outline" size={56} color="#3498db" />
-            <Text style={{ color: '#ffffff', fontSize: 18, fontWeight: '700', marginTop: 16 }}>Optimized Bookings</Text>
-          </View>
-        </Animated.View>
-      </View>
-
-      <Animated.View
-        entering={FadeInUp.delay(1000)}
-        style={{
-          marginTop: 80,
-          backgroundColor: 'rgba(52, 152, 219, 0.08)',
-          borderRadius: 32,
-          padding: isDesktop ? 48 : 24,
-          borderWidth: 1,
-          borderColor: 'rgba(52, 152, 219, 0.2)',
-          maxWidth: 1200,
-          width: '100%',
-          alignSelf: 'center',
-        }}
-      >
-        <Text style={{ color: '#f9fafb', fontSize: 26, fontWeight: '800' }}>
-          Built for professional workflows
-        </Text>
-        <Text style={{ color: '#bdc3c7', fontSize: 16, lineHeight: 26, marginTop: 16, maxWidth: 800 }}>
-          Taalomy Lecturer isn't just a dashboard—it's a productivity engine. From automated attendance to seamless group communication, we've optimized every interaction to save you time and reduce administrative friction.
-        </Text>
-        <View style={{ marginTop: 40, flexDirection: isDesktop ? 'row' : 'column', gap: 32 }}>
-          <View style={{ flex: 1 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-              <Ionicons name="analytics" size={20} color="#3498db" />
-              <Text style={{ color: '#f3f4f6', fontSize: 18, fontWeight: '700' }}>Smart Insights</Text>
-            </View>
-            <Text style={{ color: '#95a5a6', fontSize: 15, lineHeight: 24 }}>
-              Track student progress and attendance trends with real-time analytics. Make data-driven decisions that improve classroom outcomes.
-            </Text>
-          </View>
-          <View style={{ flex: 1 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-              <Ionicons name="lock-closed" size={20} color="#3498db" />
-              <Text style={{ color: '#f3f4f6', fontSize: 18, fontWeight: '700' }}>Privacy First</Text>
-            </View>
-            <Text style={{ color: '#95a5a6', fontSize: 15, lineHeight: 24 }}>
-              Your data is yours. We use institutional-grade encryption to ensure student records and personal communications stay private and secure.
-            </Text>
-          </View>
-        </View>
-      </Animated.View>
-
-      <Animated.View
-        entering={FadeInUp.delay(1200)}
-        style={{ marginTop: 100, marginBottom: 100, alignItems: 'center', maxWidth: 900, alignSelf: 'center', width: '90%' }}
-      >
-        <View style={{
-          backgroundColor: '#3498db',
-          width: 80,
-          height: 80,
-          borderRadius: 40,
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: 24,
-          shadowColor: '#3498db',
-          shadowOffset: { width: 0, height: 10 },
-          shadowOpacity: 0.4,
-          shadowRadius: 20,
-        }}>
-          <Ionicons name="rocket" size={40} color="#ffffff" />
-        </View>
-        <Text style={{ color: '#f9fafb', fontSize: isDesktop ? 40 : 28, fontWeight: '800', textAlign: 'center', maxWidth: 700 }}>
-          Ready to elevate your teaching{'\n'}
-          experience?
-        </Text>
-        <Text style={{ color: '#bdc3c7', fontSize: 18, textAlign: 'center', marginTop: 16, maxWidth: 500 }}>
-          Join the community of modern educators using Taalomy to run their sessions.
-        </Text>
-        <TouchableOpacity
-          onPress={() => router.push('/login')}
-          activeOpacity={0.8}
-          style={{
-            backgroundColor: '#3498db',
-            paddingVertical: 18,
-            paddingHorizontal: 40,
-            borderRadius: 16,
-            alignItems: 'center',
-            marginTop: 40,
-            shadowColor: '#3498db',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 12,
-          }}
-        >
-          <Text style={{ color: '#ffffff', fontSize: 18, fontWeight: '700' }}>Get Started Now</Text>
-        </TouchableOpacity>
-      </Animated.View>
-
-      {/* Footer */}
-      <View style={{ paddingVertical: 40, borderTopWidth: 1, borderTopColor: 'rgba(255, 255, 255, 0.05)', alignItems: 'center' }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+          top: '10%',
+          right: '-10%',
+          width: 1000,
+          height: 1000,
+          zIndex: -2,
+          opacity: 0.1
+        }, bigBrandWatermarkStyle]}>
           <Image
             source={require('../assets/taalomy-white-txt.png')}
-            style={{ width: 140, height: 40 }}
+            style={{ width: '100%', height: '100%', tintColor: '#3498db' }}
             resizeMode="contain"
           />
-        </View>
-        <Text style={{ color: '#6b7280', fontSize: 14 }}>
-          © 2026 Taalomy Lecturer. All rights reserved.
-        </Text>
-        <View style={{ flexDirection: 'row', gap: 24, marginTop: 16 }}>
-          <TouchableOpacity onPress={() => router.push('/privacy-policy')}>
-            <Text style={{ color: '#9ca3af', fontSize: 14 }}>Privacy</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push('/terms-of-service')}>
-            <Text style={{ color: '#9ca3af', fontSize: 14 }}>Terms</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push('/contact')}>
-            <Text style={{ color: '#9ca3af', fontSize: 14 }}>Support</Text>
-          </TouchableOpacity>
-        </View>
+        </Animated.View>
+
+        {/* Aurora Blobs */}
+        <Animated.View style={[styles.auroraBlob, {
+          backgroundColor: '#1e3a8a', // Blue 900
+          top: -200, left: '20%', width: 1000, height: 1000, opacity: 0.2,
+          ...(Platform.OS === 'web' ? { filter: 'blur(120px)' } : {}) as any
+        }, auroraStyle1]} />
+
+        <Animated.View style={[styles.auroraBlob, {
+          backgroundColor: '#0369a1', // Sky 700
+          top: 200, right: '-10%', width: 800, height: 800, opacity: 0.15,
+          ...(Platform.OS === 'web' ? { filter: 'blur(150px)' } : {}) as any
+        }, auroraStyle2]} />
       </View>
-    </ScrollView>
+
+
+      {/* --- SCROLLABLE CONTENT --- */}
+      <Animated.ScrollView
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
+        contentContainerStyle={{ paddingBottom: 100 }}
+        showsVerticalScrollIndicator={false}
+      >
+
+        {/* Navbar */}
+        <Animated.View entering={FadeInUp.duration(800)} style={[styles.navHeader, { paddingHorizontal: isDesktop ? 60 : 24 }]}>
+          <Image
+            source={require('../assets/taalomy-white-txt.png')}
+            style={{ width: 240, height: 60 }} // Larger logo
+            resizeMode="contain"
+          />
+          <TouchableOpacity onPress={() => router.push('/login')} style={styles.navButton}>
+            <Text style={styles.navButtonText}>Sign In</Text>
+          </TouchableOpacity>
+        </Animated.View>
+
+        {/* --- HERO SECTION --- */}
+        <View style={[styles.section, { minHeight: screenHeight * 0.9, alignItems: 'center', justifyContent: 'flex-start', paddingTop: isDesktop ? 160 : 100 }]}>
+          <Animated.View style={[{ alignItems: 'center', maxWidth: 1200 }, heroParallax]}>
+
+            <Animated.View entering={FadeInUp.delay(200).springify()} style={styles.pillContainer}>
+              <LinearGradient
+                colors={['rgba(255,255,255,0.15)', 'rgba(255,255,255,0.05)']}
+                style={StyleSheet.absoluteFill}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              />
+              <Text style={styles.pillText}>The Future of Teaching</Text>
+            </Animated.View>
+
+            <Animated.Text
+              entering={FadeInUp.delay(400).duration(1000)}
+              style={[styles.heroTitle, { fontSize: heroTitleSize, lineHeight: heroTitleSize * 1.05 }]}
+            >
+              Teaching,
+            </Animated.Text>
+            <Animated.Text
+              entering={FadeInUp.delay(600).duration(1000)}
+              style={[styles.heroTitleGradient, { fontSize: heroTitleSize, lineHeight: heroTitleSize * 1.05 }]}
+            >
+              Elevated.
+            </Animated.Text>
+
+            <Animated.Text
+              entering={FadeInUp.delay(800).duration(1000)}
+              style={[styles.heroSubtitle, { fontSize: heroSubTitleSize, maxWidth: 660 }]}
+            >
+              Experience the dashboard designed for the world&apos;s most demanding educators.
+              Manage effortlessly. Teach passionately.
+            </Animated.Text>
+
+            <Animated.View entering={FadeInUp.delay(1000).springify()} style={{ marginTop: 56 }}>
+              <Pressable
+                onPress={() => router.push('/login')}
+                style={({ pressed }) => [
+                  styles.primaryButton,
+                  { transform: [{ scale: pressed ? 0.96 : 1 }] }
+                ]}
+              >
+                <LinearGradient
+                  colors={['#fff', '#f0f0f0']}
+                  style={StyleSheet.absoluteFill}
+                />
+                <Text style={styles.primaryButtonText}>Get Started</Text>
+              </Pressable>
+            </Animated.View>
+          </Animated.View>
+
+          <Animated.View
+            style={{ position: 'absolute', bottom: 40 }}
+            entering={FadeInUp.delay(1400)}
+          >
+            <Ionicons name="chevron-down" size={24} color="rgba(255,255,255,0.3)" />
+          </Animated.View>
+        </View>
+
+        {/* --- APP SHOWCASE (Auto-Scrolling Marquee) --- */}
+        <Animated.View style={[styles.section, { paddingVertical: 80, overflow: 'hidden', width: '100%', alignItems: 'center' }]}>
+          <View style={{ marginBottom: 40, alignItems: 'center' }}>
+            <Animated.Text
+              entering={FadeInUp.delay(200)}
+              style={[styles.sectionHeader, { textShadowColor: 'rgba(59, 130, 246, 0.4)', textShadowRadius: 30 }]}
+            >
+              The Interface.
+            </Animated.Text>
+            <Text style={{ color: '#71717a', fontSize: 16, marginTop: 8, fontWeight: '500' }}>A professional glimpse into your next workspace.</Text>
+          </View>
+
+          <View style={{ height: 580, width: '100%', maxWidth: '100%', overflow: 'hidden' }}>
+            <Animated.View style={[{ flexDirection: 'row', gap: 40, paddingTop: 40 }, marqueeStyle]}>
+              {seamlessScreenshots.map((shot, index) => (
+                <View
+                  key={`${shot.id}-${index}`}
+                  style={[styles.screenshotCard, { transform: [{ perspective: 1000 }, { rotateY: '-5deg' }, { skewY: '2deg' }] }]}
+                >
+                  {/* Monitor Frame Cap/Header */}
+                  <View style={styles.monitorHeader}>
+                    <View style={styles.monitorDots}>
+                      <View style={[styles.monitorDot, { backgroundColor: '#ef4444' }]} />
+                      <View style={[styles.monitorDot, { backgroundColor: '#fbbf24' }]} />
+                      <View style={[styles.monitorDot, { backgroundColor: '#22c55e' }]} />
+                    </View>
+                    <Text style={styles.monitorHeaderText}>{shot.title}</Text>
+                  </View>
+
+                  <View style={styles.monitorContent}>
+                    <Image
+                      source={shot.src}
+                      style={styles.screenshotImage}
+                      resizeMode="cover"
+                    />
+                    <LinearGradient
+                      colors={['transparent', 'rgba(0,0,0,0.2)']}
+                      style={StyleSheet.absoluteFill}
+                    />
+                  </View>
+                </View>
+              ))}
+            </Animated.View>
+          </View>
+        </Animated.View>
+
+
+        {/* --- BENTO GRID WITH PARALLAX --- */}
+        <Animated.View style={[styles.section, { paddingVertical: 100 }, bentoParallax]}>
+          <View style={[styles.bentoGrid, { flexDirection: isDesktop ? 'row' : 'column' }]}>
+            {/* Col 1 */}
+            <View style={{ flex: isDesktop ? 6 : 1, gap: 24 }}>
+              <BentoCard
+                title="Smart Attendance"
+                subtitle="Instant check-ins."
+                icon="qr-code"
+                color="#3b82f6"
+                height={420}
+                delay={400}
+                isLarge
+              />
+              <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 24 }}>
+                <BentoCard icon="stats-chart" title="Analytics" subtitle="Deep data." color="#0ea5e9" height={280} delay={500} flex={1} />
+                <BentoCard icon="cloud-done" title="Sync" subtitle="Auto-save." color="#10b981" height={280} delay={600} flex={1} />
+              </View>
+            </View>
+            {/* Col 2 */}
+            <View style={{ flex: isDesktop ? 4 : 1, gap: 24 }}>
+              <BentoCard title="Chat" subtitle="Private channels." icon="chatbox-ellipses" color="#f59e0b" height={320} delay={700} />
+              <BentoCard title="Hub" subtitle="Command center." icon="layers" color="#ef4444" height={380} delay={800} />
+            </View>
+          </View>
+        </Animated.View>
+
+        {/* --- AI AUTOMATION SECTION --- */}
+        <Animated.View style={[styles.section, { paddingVertical: 120, alignItems: 'center' }, bentoParallax]}>
+          <View style={{ maxWidth: 1200, width: '100%', flexDirection: isDesktop ? 'row' : 'column', alignItems: 'center', gap: 60 }}>
+            {/* AI Text Content */}
+            <View style={{ flex: 1, alignItems: isDesktop ? 'flex-start' : 'center' }}>
+              <Text style={styles.featureLabel}>AI COPILOT</Text>
+              <Text style={[styles.featureTitle, { textAlign: isDesktop ? 'left' : 'center', fontSize: isDesktop ? 72 : 48, lineHeight: isDesktop ? 72 : 54 }]}>
+                Chat to{'\n'}Automate.
+              </Text>
+              <Text style={[styles.heroSubtitle, { textAlign: isDesktop ? 'left' : 'center', marginTop: 24, fontSize: 18 }]}>
+                Your AI Copilot doesn't just talk. It acts.{'\n'}Manage your entire academic workflow through{'\n'}natural conversation.
+              </Text>
+
+              <View style={{ marginTop: 40, gap: 24 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+                  <View style={[styles.iconBox, { width: 44, height: 44, marginBottom: 0, backgroundColor: 'rgba(59, 130, 246, 0.1)' }]}>
+                    <Ionicons name="flash-outline" size={20} color="#3b82f6" />
+                  </View>
+                  <Text style={{ color: '#fff', fontSize: 16, fontWeight: '600' }}>Instant Schedule Shifts</Text>
+                </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+                  <View style={[styles.iconBox, { width: 44, height: 44, marginBottom: 0, backgroundColor: 'rgba(16, 185, 129, 0.1)' }]}>
+                    <Ionicons name="megaphone-outline" size={20} color="#10b981" />
+                  </View>
+                  <Text style={{ color: '#fff', fontSize: 16, fontWeight: '600' }}>Automated Announcements</Text>
+                </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+                  <View style={[styles.iconBox, { width: 44, height: 44, marginBottom: 0, backgroundColor: 'rgba(245, 158, 11, 0.1)' }]}>
+                    <Ionicons name="analytics-outline" size={20} color="#f59e0b" />
+                  </View>
+                  <Text style={{ color: '#fff', fontSize: 16, fontWeight: '600' }}>Smart Grading Summaries</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* AI Chat Image Asset */}
+            <View style={{ flex: isDesktop ? 1.6 : 1, width: '100%', alignItems: isDesktop ? 'flex-end' : 'center', justifyContent: 'center' }}>
+              <Animated.View
+                entering={FadeInUp.delay(400)}
+                style={[
+                  styles.aiAssetContainer,
+                  {
+                    maxWidth: isDesktop ? 800 : '100%',
+                    transform: isDesktop ? [
+                      { perspective: 2000 },
+                      { rotateY: '-15deg' },
+                      { rotateX: '5deg' }
+                    ] : []
+                  }
+                ]}
+              >
+                <Image
+                  source={require('../assets/english-pics/aichat.png')}
+                  style={styles.aiChatImage}
+                  resizeMode="contain"
+                />
+              </Animated.View>
+            </View>
+          </View>
+        </Animated.View>
+
+        {/* --- INFRASTRUCTURE SECTION --- */}
+        <Animated.View style={[styles.section, { paddingVertical: 160, paddingTop: 240, alignItems: 'center' }, bentoParallax]}>
+          <View style={{ maxWidth: 1000, width: '100%', alignItems: 'center' }}>
+            <Text style={styles.featureLabel}>THE INFRASTRUCTURE</Text>
+            <Text style={styles.featureTitle}>Modernized for{'\n'}Lecturer Success.</Text>
+
+            <View style={{
+              marginTop: 80,
+              width: '100%',
+              height: 1,
+              backgroundColor: 'rgba(255,255,255,0.1)'
+            }} />
+
+            <View style={{ flexDirection: isDesktop ? 'row' : 'column', justifyContent: 'space-between', width: '100%', marginTop: 80, gap: 40 }}>
+              <FeatureStat value="5x" label="Faster Academic Grading" delay={0} icon="school-outline" />
+              <FeatureStat value="Live" label="Real-time Student Insights" delay={100} icon="stats-chart-outline" />
+              <FeatureStat value="24/7" label="AI Teaching Support" delay={200} icon="chatbubbles-outline" />
+            </View>
+          </View>
+        </Animated.View>
+
+        {/* --- FOOTER --- */}
+        <Animated.View style={[styles.footer, bentoParallax]}>
+          <View style={{ flexDirection: 'row', gap: 32, marginBottom: 32 }}>
+            <TouchableOpacity onPress={() => router.push('/privacy-policy')}>
+              <Text style={styles.footerLink}>Privacy</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push('/terms-of-service')}>
+              <Text style={styles.footerLink}>Terms</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push('/contact')}>
+              <Text style={styles.footerLink}>Support</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={{ color: '#52525b', fontSize: 13, fontWeight: '500' }}>© 2026 Taalomy Inc.</Text>
+        </Animated.View>
+
+      </Animated.ScrollView>
+    </View>
   );
 }
+
+// --- Components ---
+
+const FeatureStat = ({ value, label, delay, icon }: any) => (
+  <Animated.View
+    entering={FadeInUp.delay(delay + 200).springify()}
+    style={{ alignItems: 'center', marginVertical: 20, flex: 1 }}
+  >
+    <View style={styles.statIconBox}>
+      <Ionicons name={icon} size={28} color="#3b82f6" />
+    </View>
+    <Text style={{ color: '#fff', fontSize: 52, fontWeight: '800', letterSpacing: -2 }}>{value}</Text>
+    <Text style={{ color: '#71717a', fontSize: 13, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, marginTop: 12, textAlign: 'center', lineHeight: 20 }}>{label}</Text>
+  </Animated.View>
+);
+
+const BentoCard = ({ title, subtitle, icon, color, height, flex, delay, isLarge }: any) => {
+  const scale = useSharedValue(1);
+  const glow = useSharedValue(0);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { scale: withTiming(scale.value, { duration: 400, easing: Easing.out(Easing.ease) }) },
+      { translateY: withTiming(scale.value === 1 ? 0 : -5, { duration: 400 }) } // Lift effect
+    ],
+    borderColor: `rgba(255, 255, 255, ${withTiming(glow.value, { duration: 300 })})`,
+    backgroundColor: interpolateColor(
+      glow.value,
+      [0.1, 0.3],
+      ['rgba(255, 255, 255, 0.03)', 'rgba(255, 255, 255, 0.07)']
+    )
+  }));
+
+  return (
+    <Animated.View
+      entering={FadeInUp.delay(delay).springify()}
+      style={[{ height, flex, borderRadius: 32 }, styles.shadow]}
+    >
+      <Pressable
+        onHoverIn={() => { scale.value = 1.03; glow.value = 0.3; }}
+        onHoverOut={() => { scale.value = 1; glow.value = 0.1; }}
+        style={{ flex: 1 }}
+      >
+        <Animated.View style={[styles.card, animatedStyle]}>
+          <LinearGradient
+            colors={['rgba(255,255,255,0.08)', 'transparent']}
+            style={StyleSheet.absoluteFill}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 0.6 }}
+          />
+
+          {/* Brand Watermark in Card */}
+          <Ionicons
+            name={icon}
+            size={180}
+            color={color}
+            style={{ position: 'absolute', right: -40, bottom: -40, opacity: 0.05, transform: [{ rotate: '-15deg' }] }}
+          />
+
+          <View style={[styles.iconBox, { backgroundColor: `${color}20` }]}>
+            <Ionicons name={icon} size={isLarge ? 36 : 28} color={color} />
+          </View>
+
+          <View style={{ flex: 1 }} />
+          <Text style={[styles.cardTitle, isLarge && { fontSize: 36 }]}>{title}</Text>
+          <Text style={styles.cardSubtitle}>{subtitle}</Text>
+        </Animated.View>
+      </Pressable>
+    </Animated.View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#000000',
+  },
+  fixedBackground: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: 'hidden',
+  },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: '#000',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  auroraBlob: {
+    position: 'absolute',
+    borderRadius: 999,
+  },
+  navHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 48,
+    paddingBottom: 20,
+    width: '100%',
+    maxWidth: 1400,
+    alignSelf: 'center',
+    zIndex: 10,
+  },
+  navButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+    borderRadius: 100,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  navButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  section: {
+    paddingHorizontal: 24,
+    width: '100%',
+  },
+  pillContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 100,
+    marginBottom: 40,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
+    overflow: 'hidden',
+  },
+  pillText: {
+    color: '#e4e4e7',
+    fontSize: 14,
+    fontWeight: '600',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  heroTitle: {
+    color: '#ffffff',
+    fontWeight: '800',
+    textAlign: 'center',
+    letterSpacing: -3,
+  },
+  heroTitleGradient: {
+    fontWeight: '800',
+    textAlign: 'center',
+    letterSpacing: -3,
+    color: '#3b82f6', // System Blue
+    textShadowColor: 'rgba(59, 130, 246, 0.5)',
+    textShadowRadius: 60,
+  },
+  heroSubtitle: {
+    color: '#a1a1aa',
+    textAlign: 'center',
+    lineHeight: 32,
+    fontWeight: '400',
+    marginTop: 32,
+    opacity: 0.8,
+  },
+  primaryButton: {
+    overflow: 'hidden',
+    paddingVertical: 20,
+    paddingHorizontal: 56,
+    borderRadius: 100,
+    alignItems: 'center',
+    shadowColor: '#fff',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.4,
+    shadowRadius: 30,
+    elevation: 10,
+  },
+  primaryButtonText: {
+    color: '#000',
+    fontSize: 18,
+    fontWeight: '700',
+    zIndex: 1,
+  },
+  bentoGrid: {
+    maxWidth: 1200,
+    alignSelf: 'center',
+    width: '100%',
+    gap: 24,
+  },
+  card: {
+    flex: 1,
+    borderRadius: 32,
+    padding: 36,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+    overflow: 'hidden',
+  },
+  shadow: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.5,
+    shadowRadius: 40,
+  },
+  iconBox: {
+    width: 72,
+    height: 72,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+  },
+  cardTitle: {
+    color: '#fff',
+    fontSize: 26,
+    fontWeight: '700',
+    marginBottom: 8,
+    letterSpacing: -0.5,
+  },
+  cardSubtitle: {
+    color: '#a1a1aa',
+    fontSize: 17,
+    fontWeight: '500',
+  },
+  featureLabel: {
+    color: '#3498db',
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 4,
+    fontSize: 14,
+    marginBottom: 24,
+  },
+  featureTitle: {
+    color: '#fff',
+    fontSize: 80,
+    fontWeight: '800',
+    textAlign: 'center',
+    letterSpacing: -3,
+    lineHeight: 80,
+  },
+  footer: {
+    paddingBottom: 80,
+    alignItems: 'center',
+  },
+  footerLink: {
+    color: '#71717a',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  sectionHeader: {
+    color: '#fff',
+    fontSize: 32,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  statIconBox: {
+    width: 60,
+    height: 60,
+    borderRadius: 20,
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.2)',
+  },
+  screenshotCard: {
+    width: 640,
+    height: 440,
+    borderRadius: 16,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: '#000',
+    shadowColor: '#3b82f6',
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.2,
+    shadowRadius: 40,
+  },
+  monitorHeader: {
+    height: 32,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.1)',
+  },
+  monitorDots: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  monitorDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  monitorHeaderText: {
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: 11,
+    fontWeight: '600',
+    marginLeft: 20,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  monitorContent: {
+    flex: 1,
+    backgroundColor: '#111',
+  },
+  screenshotImage: {
+    width: '100%',
+    height: '100%',
+  },
+  screenshotOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 60,
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+  screenshotTitle: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  aiAssetContainer: {
+    width: '100%',
+    height: 750,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#3b82f6',
+    shadowOffset: { width: 0, height: 30 },
+    shadowOpacity: 0.12,
+    shadowRadius: 80,
+  },
+  aiChatImage: {
+    width: '100%',
+    height: '100%',
+  }
+});

@@ -1577,5 +1577,10 @@
     "status_failed": "فشل",
     "setup_complete": "تم الإعداد",
     "setup_complete_desc": "يمكنك الآن استخدام التطبيق",
+    "confirm_setup_action": "تأكيد الإعداد",
+    "groups_count_plural": "{{count}} مجموعات",
+    "classes_count_plural": "{{count}} فصول",
+    "confirm_intake_setup": "تأكيد إعداد الدفعة",
+    "confirm_intake_setup_desc": "هل أنت متأكد من إعداد هذه الدفعة؟",
     "message_error": "فشل في إرسال الرسالة"
 }

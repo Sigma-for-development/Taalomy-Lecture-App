@@ -1,15 +1,13 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Platform, StyleSheet, Image, Animated, Easing } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Platform, StyleSheet, Image, Animated, Easing , Alert , I18nManager } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useResponsive } from '../hooks/useResponsive';
 import { LinearGradient } from 'expo-linear-gradient';
 import { tokenStorage } from '../../utils/tokenStorage';
-import { Alert } from 'react-native';
 import ProfilePicture from './ProfilePicture';
 import { appEventEmitter } from '../utils/eventEmitter';
 import { useTranslation } from 'react-i18next';
-import { I18nManager } from 'react-native';
 
 interface WebLayoutProps {
     children: React.ReactNode;
