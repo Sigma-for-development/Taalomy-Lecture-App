@@ -99,44 +99,16 @@ export default function Index() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
-  // Performance Guardian Engine
-  const [performanceMode, setPerformanceMode] = useState<'full' | 'lite'>('full');
+  // Performance Guardian Engine - Lite Version Defaulted for Security/Reliability
+  const [performanceMode, setPerformanceMode] = useState<'full' | 'lite'>('lite');
   const [showPerformanceToast, setShowPerformanceToast] = useState(false);
 
   useEffect(() => {
     if (!isWeb) return;
 
-    // Phase 1: Hardware Heuristics
-    const cores = (navigator as any).hardwareConcurrency || 4;
-    if (cores < 4) {
-      setPerformanceMode('lite');
-      return;
-    }
-
-    // Phase 2: Live FPS Sentinel (monitor first 3 seconds)
-    let frameCount = 0;
-    let startTime = performance.now();
-    let frameId: number;
-
-    const monitor = () => {
-      frameCount++;
-      const now = performance.now();
-      const elapsed = now - startTime;
-
-      if (elapsed >= 3000) {
-        const fps = (frameCount * 1000) / elapsed;
-        if (fps < 45) { // Threshold for struggling hardware
-          setPerformanceMode('lite');
-          setShowPerformanceToast(true);
-          setTimeout(() => setShowPerformanceToast(false), 5000);
-        }
-        return;
-      }
-      frameId = requestAnimationFrame(monitor);
-    };
-
-    frameId = requestAnimationFrame(monitor);
-    return () => cancelAnimationFrame(frameId);
+    // Guardian remains for potential manual override or debugging
+    // But we start in 'lite' for a guaranteed smooth experience
+    console.log('Zenith Platform: High-Efficiency Mode active by default.');
   }, []);
 
   const isLite = performanceMode === 'lite' || !isDesktop;
@@ -350,12 +322,12 @@ export default function Index() {
           left: isDesktop ? '10%' : '-20%',
           width: isDesktop ? 1200 : 800,
           height: isDesktop ? 1200 : 800,
-          opacity: isDesktop ? 0.2 : 0.4,
+          opacity: isDesktop ? 0.2 : 0.25, // Reduced mobile opacity
           ...(isWeb && !isLite ? { filter: 'blur(70px)' } : {}) as any
         }, auroraStyle1]}>
           {isLite && (
             <LinearGradient
-              colors={['rgba(30, 58, 138, 0.4)', 'rgba(30, 58, 138, 0.1)', 'transparent']}
+              colors={['rgba(30, 58, 138, 0.25)', 'rgba(30, 58, 138, 0.05)', 'transparent']}
               style={StyleSheet.absoluteFill}
               start={{ x: 0.5, y: 0.5 }}
               end={{ x: 1, y: 1 }}
@@ -369,12 +341,12 @@ export default function Index() {
           right: isDesktop ? '-20%' : '-30%',
           width: isDesktop ? 1000 : 700,
           height: isDesktop ? 1000 : 700,
-          opacity: isDesktop ? 0.15 : 0.3,
+          opacity: isDesktop ? 0.15 : 0.2, // Reduced mobile opacity
           ...(isWeb && !isLite ? { filter: 'blur(90px)' } : {}) as any
         }, auroraStyle2]}>
           {isLite && (
             <LinearGradient
-              colors={['rgba(3, 105, 161, 0.3)', 'rgba(3, 105, 161, 0.1)', 'transparent']}
+              colors={['rgba(3, 105, 161, 0.2)', 'rgba(3, 105, 161, 0.05)', 'transparent']}
               style={StyleSheet.absoluteFill}
               start={{ x: 0.5, y: 0.5 }}
               end={{ x: 0, y: 0 }}
@@ -428,8 +400,8 @@ export default function Index() {
             }}
             resizeMode="contain"
           />
-          <TouchableOpacity onPress={() => router.push('/login')} style={[styles.navButton, { paddingHorizontal: 20, paddingVertical: 10 }]}>
-            <Text style={[styles.navButtonText, { fontSize: 14 }]}>Sign In</Text>
+          <TouchableOpacity onPress={() => router.push('/login')} style={[styles.navButton, { paddingHorizontal: 28, paddingVertical: 14 }]}>
+            <Text style={[styles.navButtonText, { fontSize: 17, fontWeight: '700' }]}>Sign In</Text>
           </TouchableOpacity>
         </Animated.View>
 
@@ -487,7 +459,7 @@ export default function Index() {
                   colors={['#fff', '#f0f0f0']}
                   style={StyleSheet.absoluteFill}
                 />
-                <Text style={[styles.primaryButtonText, { fontSize: isDesktop ? 18 : 16 }]}>Get Started</Text>
+                <Text style={[styles.primaryButtonText, { fontSize: isDesktop ? 22 : 18 }]}>Get Started</Text>
               </Pressable>
             </Animated.View>
           </Animated.View>
@@ -552,27 +524,27 @@ export default function Index() {
 
 
         {/* --- BENTO GRID WITH PARALLAX --- */}
-        <Animated.View style={[styles.section, { paddingVertical: isDesktop ? 100 : 60 }, bentoParallax]}>
-          <View style={[styles.bentoGrid, { flexDirection: isDesktop ? 'row' : 'column', gap: isDesktop ? 24 : 16 }]}>
+        <Animated.View style={[styles.section, { paddingVertical: isDesktop ? 100 : 60, alignItems: 'center' }, bentoParallax]}>
+          <View style={[styles.bentoGrid, { flexDirection: isDesktop ? 'row' : 'column', gap: isDesktop ? 24 : 32 }]}>
             {/* Col 1 */}
-            <View style={{ flex: isDesktop ? 6 : 1, gap: isDesktop ? 24 : 16 }}>
+            <View style={{ flex: isDesktop ? 6 : 0, width: '100%', gap: isDesktop ? 24 : 32 }}>
               <BentoCard
                 title="Smart Attendance"
                 subtitle="Instant check-ins."
                 icon="qr-code"
                 color="#3b82f6"
-                height={isDesktop ? 420 : 300} // Increased mobile height
+                height={isDesktop ? 420 : 300}
                 delay={400}
                 isLarge
                 isDesktop={isDesktop}
               />
-              <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: isDesktop ? 24 : 16 }}>
+              <View style={{ flexDirection: isDesktop ? 'row' : 'column', width: '100%', gap: isDesktop ? 24 : 32 }}>
                 <BentoCard icon="stats-chart" title="Analytics" subtitle="Deep data." color="#0ea5e9" height={isDesktop ? 280 : 220} delay={500} flex={isDesktop ? 1 : 0} isDesktop={isDesktop} />
                 <BentoCard icon="cloud-done" title="Sync" subtitle="Auto-save." color="#10b981" height={isDesktop ? 280 : 220} delay={600} flex={isDesktop ? 1 : 0} isDesktop={isDesktop} />
               </View>
             </View>
             {/* Col 2 */}
-            <View style={{ flex: isDesktop ? 4 : 1, gap: isDesktop ? 24 : 16 }}>
+            <View style={{ flex: isDesktop ? 4 : 0, width: '100%', gap: isDesktop ? 24 : 32 }}>
               <BentoCard title="Chat" subtitle="Private channels." icon="chatbox-ellipses" color="#f59e0b" height={isDesktop ? 320 : 260} delay={700} isDesktop={isDesktop} />
               <BentoCard title="Hub" subtitle="Command center." icon="layers" color="#ef4444" height={isDesktop ? 380 : 300} delay={800} isDesktop={isDesktop} />
             </View>
