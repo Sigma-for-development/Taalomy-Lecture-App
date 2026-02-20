@@ -284,6 +284,31 @@ const ProfileEditScreen = () => {
     setEditingField(field);
   };
 
+  const handleLogout = async () => {
+    Alert.alert(
+      t('logout'),
+      t('confirm_logout'),
+      [
+        {
+          text: t('cancel'),
+          style: 'cancel',
+        },
+        {
+          text: t('logout'),
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await tokenStorage.clearAuth();
+              router.replace('/login');
+            } catch (error) {
+              console.error('Logout error:', error);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const renderEditableField = (field: string, label: string, value: string) => {
     const isEditing = editingField === field;
 
@@ -541,6 +566,17 @@ const ProfileEditScreen = () => {
                   </Text>
                 </TouchableOpacity>
               </View>
+            </View>
+
+            {/* Logout Section (Separate Card) */}
+            <View style={[isDesktop && { backgroundColor: 'rgba(255, 255, 255, 0.03)', padding: 24, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.05)', marginTop: 0 }]}>
+              <TouchableOpacity
+                style={[styles.logoutButton, { marginTop: 0 }]}
+                onPress={handleLogout}
+              >
+                <Ionicons name="log-out-outline" size={20} color="#e74c3c" />
+                <Text style={styles.logoutButtonText}>{t('logout')}</Text>
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -837,6 +873,24 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '600',
     fontSize: 16,
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 25,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(231, 76, 60, 0.2)',
+    width: '100%',
+  },
+  logoutButtonText: {
+    color: '#e74c3c',
+    marginStart: 8,
+    fontWeight: '600',
   },
 });
 
