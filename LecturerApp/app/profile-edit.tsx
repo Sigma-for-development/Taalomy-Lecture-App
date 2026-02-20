@@ -286,28 +286,43 @@ const ProfileEditScreen = () => {
   };
 
   const handleLogout = async () => {
-    Alert.alert(
-      t('logout'),
-      t('confirm_logout'),
-      [
-        {
-          text: t('cancel'),
-          style: 'cancel',
-        },
-        {
-          text: t('logout'),
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await tokenStorage.clearAuth();
-              router.replace('/login');
-            } catch (error) {
-              console.error('Logout error:', error);
-            }
+    const performLogout = async () => {
+      try {
+        await tokenStorage.clearAuth();
+        // Force a small delay to ensure storage is cleared before navigation
+        if (Platform.OS === 'web') {
+          // On web, sometimes localStorage events or race conditions can happen
+          localStorage.clear(); // Complete clear for good measure if we're logging out
+          window.location.href = '/login'; // Hard redirect on web is often more reliable for full state reset
+        } else {
+          router.replace('/login');
+        }
+      } catch (error) {
+        console.error('Logout error:', error);
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      if (window.confirm(t('confirm_logout'))) {
+        await performLogout();
+      }
+    } else {
+      Alert.alert(
+        t('logout'),
+        t('confirm_logout'),
+        [
+          {
+            text: t('cancel'),
+            style: 'cancel',
           },
-        },
-      ]
-    );
+          {
+            text: t('logout'),
+            style: 'destructive',
+            onPress: performLogout,
+          },
+        ]
+      );
+    }
   };
 
   const renderEditableField = (field: string, label: string, value: string) => {
