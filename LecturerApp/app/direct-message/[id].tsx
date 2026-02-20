@@ -37,7 +37,6 @@ export default function DirectMessageScreen() {
   const flatListRef = useRef<FlatList>(null);
   const chatRoomRef = useRef<any>(null);
   const router = useRouter();
-  const scaleValue = useSharedValue(1);
   const sendScaleValue = useSharedValue(1);
 
   // Validate that id exists and is not undefined
@@ -83,10 +82,6 @@ export default function DirectMessageScreen() {
       subscription.remove();
     };
   }, [chatRoom]);
-
-  const buttonAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scaleValue.value }],
-  }));
 
   const sendButtonAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: sendScaleValue.value }],
@@ -742,16 +737,6 @@ export default function DirectMessageScreen() {
       >
         <View style={styles.inputContainer}>
           <View style={styles.inputContent}>
-            <Animated.View style={buttonAnimatedStyle}>
-              <TouchableOpacity
-                style={styles.attachButton}
-                onPress={() => Alert.alert(t('attachment'), t('coming_soon'))}
-                onPressIn={() => scaleValue.value = withTiming(0.9, { duration: 100 })}
-                onPressOut={() => scaleValue.value = withTiming(1, { duration: 100 })}
-              >
-                <Ionicons name="attach-outline" size={24} color="#bdc3c7" />
-              </TouchableOpacity>
-            </Animated.View>
             <View style={styles.inputWrapper}>
               <TextInput
                 style={styles.textInput}
@@ -1078,15 +1063,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', // Centered for better desktop symmetry
   },
   attachButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginEnd: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    display: 'none', // Effectively removed
   },
   inputWrapper: {
     flex: 1,
