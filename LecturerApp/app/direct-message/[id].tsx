@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown, FadeInUp, FadeOutDown, FadeIn, Layout, useAnimatedStyle, withTiming, useSharedValue, FadeInRight, FadeInLeft, LinearTransition } from 'react-native-reanimated';
 import api, { API_CONFIG } from '../../src/config/api';
-import { socketIOManager, ChatMessage, TypingEvent, UserEvent } from '../../src/utils/socketio';
+import { socketIOManager, ChatMessage, UserEvent } from '../../src/utils/socketio';
 import { tokenStorage } from '../../utils/tokenStorage';
 import { useTranslation } from 'react-i18next';
 const AsyncStorage = tokenStorage;
@@ -27,7 +27,6 @@ export default function DirectMessageScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  // const [typingUsers, setTypingUsers] = useState<TypingEvent[]>([]); // Removed
   const [sending, setSending] = useState(false);
   const [showScrollBottom, setShowScrollBottom] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -468,18 +467,6 @@ export default function DirectMessageScreen() {
     );
   };
 
-  const renderTypingIndicator = () => {
-    return (
-      <View style={styles.typingContainer}>
-        <Text style={styles.typingText}>{student?.first_name || 'Someone'} is typing</Text>
-        <View style={styles.typingDots}>
-          <Animated.View entering={FadeIn.delay(0).duration(400)} style={[styles.dot, styles.dot1]} />
-          <Animated.View entering={FadeIn.delay(200).duration(400)} style={[styles.dot, styles.dot2]} />
-          <Animated.View entering={FadeIn.delay(400).duration(400)} style={[styles.dot, styles.dot3]} />
-        </View>
-      </View>
-    );
-  };
 
   // Show error screen if we don't have a valid ID
   if (!isValidStudentId) {
@@ -631,7 +618,10 @@ export default function DirectMessageScreen() {
                       ? `${student.first_name || ''} ${student.last_name || ''}`
                       : 'Taalomy Support'}
                   </Text>
-                  <Text style={styles.modalEmail}>{student?.email || 'Student'}</Text>
+                  <Text style={styles.modalRole}>
+                    {student?.user_type ? t(student.user_type.toLowerCase()) : t('student')}
+                  </Text>
+                  {student?.email && <Text style={styles.modalEmail}>{student.email}</Text>}
                 </View>
 
                 {/* Intakes Section */}
@@ -705,7 +695,6 @@ export default function DirectMessageScreen() {
         inverted={true}
         onScroll={handleScroll}
         scrollEventThrottle={16}
-        ListFooterComponent={renderTypingIndicator}
         ListHeaderComponent={() => <View style={{ height: 10 }} />}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
@@ -1007,42 +996,6 @@ const styles = StyleSheet.create({
   otherMessageText: {
     color: 'rgba(255, 255, 255, 0.9)',
   },
-  typingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 16,
-    alignSelf: 'flex-start',
-    marginStart: 16,
-  },
-  typingText: {
-    fontSize: 12,
-    color: '#bdc3c7',
-    marginEnd: 8,
-    fontStyle: 'italic',
-  },
-  typingDots: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  dot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#bdc3c7',
-    marginHorizontal: 1,
-  },
-  dot1: {
-  },
-  dot2: {
-    opacity: 0.6,
-  },
-  dot3: {
-    opacity: 0.3,
-  },
   inputContainer: {
     paddingHorizontal: 16,
     paddingTop: 12,
@@ -1203,6 +1156,14 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginBottom: 4,
     textAlign: 'center'
+  },
+  modalRole: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#3498db',
+    textAlign: 'center',
+    marginBottom: 4,
+    textTransform: 'capitalize',
   },
   modalEmail: {
     fontSize: 14,

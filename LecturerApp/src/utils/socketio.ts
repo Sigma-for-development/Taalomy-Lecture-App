@@ -19,12 +19,6 @@ export interface ChatMessage {
   use_for_quizzes?: boolean;
 }
 
-export interface TypingEvent {
-  user_id: number;
-  username: string;
-  first_name: string;
-  typing: boolean;
-}
 
 export interface UserEvent {
   user_id: number;
@@ -41,7 +35,6 @@ export interface EntityDeletedEvent {
 class SocketIOManager {
   private socket: Socket | null = null;
   private messageCallbacks: ((message: ChatMessage) => void)[] = [];
-  private typingCallbacks: ((event: TypingEvent) => void)[] = [];
   private userJoinCallbacks: ((event: UserEvent) => void)[] = [];
   private userLeaveCallbacks: ((event: UserEvent) => void)[] = [];
   private connectionCallbacks: ((connected: boolean) => void)[] = [];
@@ -141,9 +134,6 @@ class SocketIOManager {
         this.messageCallbacks.forEach(callback => callback(message));
       });
 
-      this.socket.on('user_typing', (data: TypingEvent) => {
-        this.typingCallbacks.forEach(callback => callback(data));
-      });
 
       this.socket.on('user_joined', (data: UserEvent) => {
         this.userJoinCallbacks.forEach(callback => callback(data));
@@ -257,8 +247,6 @@ class SocketIOManager {
       console.log('Sending message with data:', messageData);
       this.socket.emit('send_message', messageData);
 
-      // Clear typing indicator when sending a message
-      // this.sendTyping(false); // Removed
 
       // Track if we've already handled the response to prevent duplicate handling
       let handled = false;
@@ -313,24 +301,12 @@ class SocketIOManager {
     }
   }
 
-  async sendTyping(typing: boolean) {
-    if (this.socket && this.currentRoomId && this.socket.connected) {
-      console.log('Sending typing indicator:', typing, 'for room:', this.currentRoomId);
-      this.socket.emit('typing', {
-        room_id: this.currentRoomId,
-        typing: typing
-      });
-    }
-  }
 
   // Event listener methods
   onMessage(callback: (message: ChatMessage) => void) {
     this.messageCallbacks.push(callback);
   }
 
-  onTyping(callback: (event: TypingEvent) => void) {
-    this.typingCallbacks.push(callback);
-  }
 
   onUserJoin(callback: (event: UserEvent) => void) {
     this.userJoinCallbacks.push(callback);
@@ -360,12 +336,6 @@ class SocketIOManager {
     }
   }
 
-  removeTypingCallback(callback: (event: TypingEvent) => void) {
-    const index = this.typingCallbacks.indexOf(callback);
-    if (index > -1) {
-      this.typingCallbacks.splice(index, 1);
-    }
-  }
 
   removeUserJoinCallback(callback: (event: UserEvent) => void) {
     const index = this.userJoinCallbacks.indexOf(callback);

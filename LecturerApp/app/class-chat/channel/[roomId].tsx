@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { API_CONFIG } from '../../../src/config/api';
-import { socketIOManager, ChatMessage, TypingEvent, UserEvent } from '../../../src/utils/socketio';
+import { socketIOManager, ChatMessage, UserEvent } from '../../../src/utils/socketio';
 import { tokenStorage } from '../../../utils/tokenStorage';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
@@ -31,7 +31,6 @@ export default function ClassChatScreen() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isConnected, setIsConnected] = useState(false);
-    const [typingUsers, setTypingUsers] = useState<TypingEvent[]>([]);
     const [sending, setSending] = useState(false);
     const [currentUser, setCurrentUser] = useState<any>(null);
     const flatListRef = useRef<FlatList>(null);
@@ -137,57 +136,10 @@ export default function ClassChatScreen() {
             }, 100);
         };
 
-        const handleTyping = (event: TypingEvent) => {
-            setTypingUsers(prev => {
-                const filtered = prev.filter(u => u.user_id !== event.user_id);
-                if (event.typing) {
-                    return [...filtered, event];
-                }
-                return filtered;
-            });
-        };
-
-        const handleUserJoin = (event: UserEvent) => {
-            // Could show a notification or update UI
-            console.log(`${event.username} joined the chat`);
-        };
-
-        const handleUserLeave = (event: UserEvent) => {
-            // Could show a notification or update UI
-            console.log(`${event.username} left the chat`);
-        };
-
-        const handleConnectionChange = (connected: boolean) => {
-            setIsConnected(connected);
-        };
-
-        const handleError = (errorMessage: string) => {
-            setError(errorMessage);
-        };
-
-        const loadUserFromStorage = async () => {
-            const userDataString = await AsyncStorage.getItem('user_data');
-            if (userDataString) {
-                setCurrentUser(JSON.parse(userDataString));
-            }
-        };
-
-        loadUserFromStorage();
-
         socketIOManager.onMessage(handleMessage);
-        socketIOManager.onTyping(handleTyping);
-        socketIOManager.onUserJoin(handleUserJoin);
-        socketIOManager.onUserLeave(handleUserLeave);
-        socketIOManager.onConnectionChange(handleConnectionChange);
-        socketIOManager.onError(handleError);
 
         return () => {
             socketIOManager.removeMessageCallback(handleMessage);
-            socketIOManager.removeTypingCallback(handleTyping);
-            socketIOManager.removeUserJoinCallback(handleUserJoin);
-            socketIOManager.removeUserLeaveCallback(handleUserLeave);
-            socketIOManager.removeConnectionCallback(handleConnectionChange);
-            socketIOManager.removeErrorCallback(handleError);
         };
     }, []);
 
@@ -457,8 +409,6 @@ export default function ClassChatScreen() {
 
     const handleTyping = (text: string) => {
         setNewMessage(text);
-        // Send typing indicator
-        socketIOManager.sendTyping(text.length > 0);
     };
 
     const retryLoad = () => {
@@ -774,22 +724,6 @@ export default function ClassChatScreen() {
         );
     };
 
-    const renderTypingIndicator = () => {
-        if (typingUsers.length === 0) return null;
-
-        return (
-            <View style={styles.typingContainer}>
-                <Text style={styles.typingText}>
-                    {typingUsers.map(u => u.first_name).join(', ')} {t(typingUsers.length === 1 ? 'typing_single' : 'typing_plural')}
-                </Text>
-                <View style={styles.typingDots}>
-                    <View style={[styles.dot, styles.dot1]} />
-                    <View style={[styles.dot, styles.dot2]} />
-                    <View style={[styles.dot, styles.dot3]} />
-                </View>
-            </View>
-        );
-    };
 
     // Show error screen if we don't have a valid room ID
     if (!isValidRoomId) {
@@ -897,7 +831,6 @@ export default function ClassChatScreen() {
                 style={styles.messagesList}
                 contentContainerStyle={styles.messagesContainer}
                 onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
-                ListFooterComponent={renderTypingIndicator}
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
                         <Ionicons name="chatbubbles-outline" size={64} color="#7f8c8d" />
@@ -948,7 +881,7 @@ export default function ClassChatScreen() {
                             <TextInput
                                 style={styles.textInput}
                                 value={newMessage}
-                                onChangeText={handleTyping}
+                                onChangeText={setNewMessage}
                                 placeholder={t('type_message_placeholder')}
                                 placeholderTextColor="rgba(255, 255, 255, 0.4)"
                                 multiline
@@ -1308,35 +1241,6 @@ const styles = StyleSheet.create({
         textAlign: 'right',
         marginTop: 4,
     },
-    typingContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 12,
-        marginBottom: 8,
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-        borderRadius: 15,
-        alignSelf: 'flex-start',
-    },
-    typingText: {
-        fontSize: 12,
-        color: 'rgba(255, 255, 255, 0.5)',
-        marginEnd: 8,
-    },
-    typingDots: {
-        flexDirection: 'row',
-    },
-    dot: {
-        width: 4,
-        height: 4,
-        borderRadius: 2,
-        backgroundColor: 'rgba(255, 255, 255, 0.4)',
-        marginHorizontal: 1.5,
-    },
-    dot1: {},
-    dot2: {},
-    dot3: {},
     keyboardView: {
         width: '100%',
     },

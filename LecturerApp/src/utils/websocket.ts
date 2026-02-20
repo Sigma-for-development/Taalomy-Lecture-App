@@ -10,15 +10,9 @@ export interface ChatMessage {
   last_name: string;
   message: string;
   timestamp: string;
-  type: 'message' | 'user_joined' | 'user_left' | 'typing';
+  type: 'message' | 'user_joined' | 'user_left';
 }
 
-export interface TypingEvent {
-  user_id: number;
-  username: string;
-  first_name: string;
-  typing: boolean;
-}
 
 class WebSocketManager {
   private ws: WebSocket | null = null;
@@ -27,7 +21,6 @@ class WebSocketManager {
   private maxReconnectAttempts = 3;
   private reconnectDelay = 1000;
   private messageCallbacks: ((message: ChatMessage) => void)[] = [];
-  private typingCallbacks: ((event: TypingEvent) => void)[] = [];
   private connectionCallbacks: ((connected: boolean) => void)[] = [];
 
   async connect(roomId: string) {
@@ -77,14 +70,6 @@ class WebSocketManager {
               type: 'message'
             };
             this.messageCallbacks.forEach(callback => callback(chatMessage));
-          } else if (data.type === 'typing') {
-            const typingEvent: TypingEvent = {
-              user_id: data.user_id,
-              username: data.username,
-              first_name: data.first_name,
-              typing: data.typing
-            };
-            this.typingCallbacks.forEach(callback => callback(typingEvent));
           } else if (data.type === 'user_joined' || data.type === 'user_left') {
             // Handle user join/leave events if needed
             console.log(`${data.type}: ${data.message}`);
@@ -247,15 +232,6 @@ class WebSocketManager {
     }
   }
 
-  sendTyping(typing: boolean) {
-    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      const data = {
-        type: 'typing',
-        typing: typing
-      };
-      this.ws.send(JSON.stringify(data));
-    }
-  }
 
   sendReadReceipt(messageId: string) {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
@@ -271,9 +247,6 @@ class WebSocketManager {
     this.messageCallbacks.push(callback);
   }
 
-  onTyping(callback: (event: TypingEvent) => void) {
-    this.typingCallbacks.push(callback);
-  }
 
   onConnectionChange(callback: (connected: boolean) => void) {
     this.connectionCallbacks.push(callback);
@@ -286,12 +259,6 @@ class WebSocketManager {
     }
   }
 
-  removeTypingCallback(callback: (event: TypingEvent) => void) {
-    const index = this.typingCallbacks.indexOf(callback);
-    if (index > -1) {
-      this.typingCallbacks.splice(index, 1);
-    }
-  }
 
   removeConnectionCallback(callback: (connected: boolean) => void) {
     const index = this.connectionCallbacks.indexOf(callback);

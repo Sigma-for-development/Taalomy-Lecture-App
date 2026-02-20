@@ -19,7 +19,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { tokenStorage } from '../../utils/tokenStorage';
 import api, { API_CONFIG } from '../../src/config/api';
 import { Ionicons } from '@expo/vector-icons';
-import { socketIOManager, ChatMessage, TypingEvent, UserEvent } from '../../src/utils/socketio';
+import { socketIOManager, ChatMessage, UserEvent } from '../../src/utils/socketio';
 import { useTranslation } from 'react-i18next';
 
 const baseurl = API_CONFIG.CHAT_BASE_URL;
@@ -34,7 +34,6 @@ export default function GroupChatScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [typingUsers, setTypingUsers] = useState<TypingEvent[]>([]);
   const [sending, setSending] = useState(false);
   const flatListRef = useRef<FlatList>(null);
   const router = useRouter();
@@ -74,48 +73,10 @@ export default function GroupChatScreen() {
       }, 100);
     };
 
-    const handleTyping = (event: TypingEvent) => {
-      setTypingUsers(prev => {
-        const filtered = prev.filter(u => u.user_id !== event.user_id);
-        if (event.typing) {
-          return [...filtered, event];
-        }
-        return filtered;
-      });
-    };
-
-    const handleUserJoin = (event: UserEvent) => {
-      // Could show a notification or update UI
-      console.log(`${event.username} joined the chat`);
-    };
-
-    const handleUserLeave = (event: UserEvent) => {
-      // Could show a notification or update UI
-      console.log(`${event.username} left the chat`);
-    };
-
-    const handleConnectionChange = (connected: boolean) => {
-      setIsConnected(connected);
-    };
-
-    const handleError = (errorMessage: string) => {
-      setError(errorMessage);
-    };
-
     socketIOManager.onMessage(handleMessage);
-    socketIOManager.onTyping(handleTyping);
-    socketIOManager.onUserJoin(handleUserJoin);
-    socketIOManager.onUserLeave(handleUserLeave);
-    socketIOManager.onConnectionChange(handleConnectionChange);
-    socketIOManager.onError(handleError);
 
     return () => {
       socketIOManager.removeMessageCallback(handleMessage);
-      socketIOManager.removeTypingCallback(handleTyping);
-      socketIOManager.removeUserJoinCallback(handleUserJoin);
-      socketIOManager.removeUserLeaveCallback(handleUserLeave);
-      socketIOManager.removeConnectionCallback(handleConnectionChange);
-      socketIOManager.removeErrorCallback(handleError);
     };
   }, []);
 
@@ -197,8 +158,6 @@ export default function GroupChatScreen() {
 
   const handleTyping = (text: string) => {
     setNewMessage(text);
-    // Send typing indicator
-    socketIOManager.sendTyping(text.length > 0);
   };
 
   const retryLoad = () => {
@@ -244,22 +203,6 @@ export default function GroupChatScreen() {
     );
   };
 
-  const renderTypingIndicator = () => {
-    if (typingUsers.length === 0) return null;
-
-    return (
-      <View style={styles.typingContainer}>
-        <Text style={styles.typingText}>
-          {typingUsers.map(u => u.first_name).join(', ')} {typingUsers.length === 1 ? t('typing_single') : t('typing_plural')}
-        </Text>
-        <View style={styles.typingDots}>
-          <View style={[styles.dot, styles.dot1]} />
-          <View style={[styles.dot, styles.dot2]} />
-          <View style={[styles.dot, styles.dot3]} />
-        </View>
-      </View>
-    );
-  };
 
   if (loading) {
     return (
@@ -316,7 +259,6 @@ export default function GroupChatScreen() {
         style={styles.messagesList}
         contentContainerStyle={styles.messagesContainer}
         onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
-        ListFooterComponent={renderTypingIndicator}
       />
 
       {/* Input Area */}
@@ -481,37 +423,6 @@ const styles = StyleSheet.create({
   },
   otherMessageText: {
     color: '#000',
-  },
-  typingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-    padding: 8,
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    alignSelf: 'flex-start',
-  },
-  typingText: {
-    fontSize: 14,
-    color: '#8e8e93',
-    marginEnd: 8,
-  },
-  typingDots: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#8e8e93',
-    marginHorizontal: 2,
-  },
-  dot1: {
-  },
-  dot2: {
-  },
-  dot3: {
   },
   inputContainer: {
     backgroundColor: '#fff',

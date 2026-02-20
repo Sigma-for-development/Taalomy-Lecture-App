@@ -21,6 +21,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { useResponsive } from '../src/hooks/useResponsive';
+import ProfilePicture from '../src/components/ProfilePicture';
 const AsyncStorage = tokenStorage;
 
 interface ChatRoom {
@@ -375,46 +376,46 @@ const MessagesScreen = () => {
         onPress={() => handleChatRoomPress(item)}
       >
         <View style={styles.avatarContainer}>
-          {(item.chat_type === 'direct' || item.chat_type === 'dm') && item.participants && currentUserId ? (
-            (() => {
+          {(() => {
+            if ((item.chat_type === 'direct' || item.chat_type === 'dm') && item.participants && currentUserId) {
               const others = item.participants.filter(p => String(p.id) !== String(currentUserId));
               const other = others.find(p => p.username !== 'admin' && p.user_type !== 'admin' && p.id !== 1) || others[0];
               const isSupport = chatName === 'Taalomy Support' || (other?.username === 'admin' && others.length === 1);
 
               if (isSupport) {
                 return (
-                  <Image
-                    source={require('../assets/taalomy-dark-back.png')}
-                    style={[styles.avatarImage, { backgroundColor: '#000' }]}
-                    resizeMode="cover"
-                  />
+                  <View style={styles.avatar}>
+                    <Image
+                      source={require('../assets/taalomy-dark-back.png')}
+                      style={[styles.avatarImage, { backgroundColor: '#000' }]}
+                      resizeMode="cover"
+                    />
+                  </View>
                 );
               }
 
-              if (other?.profile_picture_url) {
-                return (
-                  <Image
-                    source={{ uri: other.profile_picture_url }}
-                    style={styles.avatarImage}
-                  />
-                );
-              }
+              // For direct chats, if no 'other' is found (self-chat), use the 'me' participant
+              const displayParticipant = other || item.participants.find(p => String(p.id) === String(currentUserId));
 
               return (
-                <View style={styles.avatar}>
-                  <Ionicons name={avatarIcon} size={24} color="#007AFF" />
-                </View>
+                <ProfilePicture
+                  imageUrl={displayParticipant?.profile_picture_url}
+                  size={50}
+                />
               );
-            })()
-          ) : (
-            <View style={styles.avatar}>
-              <Ionicons
-                name={avatarIcon}
-                size={24}
-                color="#007AFF"
-              />
-            </View>
-          )}
+            }
+
+            // Default fallback for classes/groups if needed
+            return (
+              <View style={styles.avatar}>
+                <Ionicons
+                  name={avatarIcon}
+                  size={24}
+                  color="#007AFF"
+                />
+              </View>
+            );
+          })()}
 
           {unreadCount > 0 && (
             <View style={styles.badge}>
