@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
     View, Text, StyleSheet, StatusBar, ActivityIndicator, Alert, TouchableOpacity, FlatList, TextInput, KeyboardAvoidingView, Platform, Image, TouchableWithoutFeedback, Keyboard, Linking, Modal
 } from 'react-native';
+import Animated, { FadeInRight, FadeInLeft, FadeOutDown, LinearTransition, useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -32,7 +33,10 @@ export default function ClassChatScreen() {
     const [isConnected, setIsConnected] = useState(false);
     const [typingUsers, setTypingUsers] = useState<TypingEvent[]>([]);
     const [sending, setSending] = useState(false);
+    const [currentUser, setCurrentUser] = useState<any>(null);
     const flatListRef = useRef<FlatList>(null);
+    const chatRoomRef = useRef<any>(null);
+    const sendScaleValue = useSharedValue(1);
     const router = useRouter();
 
     // AI Quiz State
@@ -41,6 +45,9 @@ export default function ClassChatScreen() {
     const [generatingQuiz, setGeneratingQuiz] = useState(false);
     const [showQuizPreview, setShowQuizPreview] = useState(false);
     const [generatedQuiz, setGeneratedQuiz] = useState<any>(null);
+
+    const isMaterialsChannel = chatRoom?.channel_type === 'materials';
+    const isDesktop = Platform.OS === 'web' && typeof window !== 'undefined' && window.innerWidth > 768;
 
     // Validate that id exists and is not undefined
     const validRoomId = Array.isArray(roomId) ? roomId[0] : roomId;
@@ -73,33 +80,48 @@ export default function ClassChatScreen() {
         // Socket.IO event listeners
         const handleMessage = (message: ChatMessage) => {
             setMessages(prev => {
-                // Check if message already exists to prevent duplicates
-                const messageExists = prev.some(m => m.message_id === message.message_id);
-                if (messageExists) {
+                // 1. Check if message already exists by official ID to prevent duplicates
+                if (prev.some(m => m.message_id === message.message_id)) {
                     return prev;
                 }
 
-                const isOwnMessage = message.user_id === chatRoom?.current_user_id;
+                // 2. Identify if this is our own message to check for optimistic replacement
+                const isOwnMessage = chatRoomRef.current?.current_user_id && message.user_id === chatRoomRef.current.current_user_id;
+
+                if (isOwnMessage) {
+                    // Look for an optimistic message with the same content (text or file_url)
+                    const optimisticIndex = prev.findIndex(m =>
+                        (m as any).isOptimistic &&
+                        (m.message === message.message || (m.file_url && m.file_url === message.file_url))
+                    );
+
+                    if (optimisticIndex !== -1) {
+                        const updated = [...prev];
+                        updated[optimisticIndex] = {
+                            ...message,
+                            file_url: message.file_url ? getAbsoluteUrl(message.file_url) : undefined
+                        };
+                        return updated;
+                    }
+                }
 
                 // Ensure file_url is absolute
                 if (message.file_url) {
                     message.file_url = getAbsoluteUrl(message.file_url);
                 }
 
-                // Determine if we should use the fallback for the profile picture
+                // Default fallback logic for names/PFPs
                 const baseurl = API_CONFIG.CHAT_BASE_URL || '';
                 const needsPfpFallback = !message.profile_picture_url ||
                     (message.profile_picture_url.includes('52.59.250.11') && !baseurl.includes('52.59.250.11')) ||
                     (message.profile_picture_url.includes('localhost') && !baseurl.includes('localhost'));
 
-                if (isOwnMessage && needsPfpFallback && chatRoom?.current_user) {
-                    message.profile_picture_url = chatRoom.current_user.profile_picture_url;
-                    message.first_name = chatRoom.current_user.first_name;
-                    message.last_name = chatRoom.current_user.last_name;
-                } else if (needsPfpFallback && chatRoom?.participants) {
-                    // Fallback: search for the sender in the participants list
-                    // Use == for loose equality to handle string/number mismatches
-                    const sender = chatRoom.participants.find((p: any) => p.id == message.user_id);
+                if (isOwnMessage && needsPfpFallback && chatRoomRef.current?.current_user) {
+                    message.profile_picture_url = chatRoomRef.current.current_user.profile_picture_url;
+                    message.first_name = chatRoomRef.current.current_user.first_name;
+                    message.last_name = chatRoomRef.current.current_user.last_name;
+                } else if (needsPfpFallback && chatRoomRef.current?.participants) {
+                    const sender = chatRoomRef.current.participants.find((p: any) => p.id == message.user_id);
                     if (sender) {
                         message.profile_picture_url = sender.profile_picture_url;
                         if (!message.first_name) message.first_name = sender.first_name;
@@ -143,6 +165,15 @@ export default function ClassChatScreen() {
             setError(errorMessage);
         };
 
+        const loadUserFromStorage = async () => {
+            const userDataString = await AsyncStorage.getItem('user_data');
+            if (userDataString) {
+                setCurrentUser(JSON.parse(userDataString));
+            }
+        };
+
+        loadUserFromStorage();
+
         socketIOManager.onMessage(handleMessage);
         socketIOManager.onTyping(handleTyping);
         socketIOManager.onUserJoin(handleUserJoin);
@@ -159,6 +190,10 @@ export default function ClassChatScreen() {
             socketIOManager.removeErrorCallback(handleError);
         };
     }, []);
+
+    const sendButtonAnimatedStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: sendScaleValue.value }],
+    }));
 
     const loadChatRoom = async () => {
         try {
@@ -189,6 +224,7 @@ export default function ClassChatScreen() {
             });
 
             setChatRoom(response.data);
+            chatRoomRef.current = response.data;
 
             // Load existing messages
             const messagesResponse = await axios.get(`${baseurl}rooms/${response.data.id}/messages/`, {
@@ -365,8 +401,9 @@ export default function ClassChatScreen() {
                         type: type,
                         file_url: getAbsoluteUrl(response.data.file_url),
                         message_type: type,
-                        use_for_quizzes: false // Default new uploads to false
-                    };
+                        use_for_quizzes: false, // Default new uploads to false
+                        isOptimistic: true
+                    } as any;
 
                     setMessages(prev => [...prev, optimisticMessage]);
 
@@ -387,11 +424,29 @@ export default function ClassChatScreen() {
     const sendMessage = async () => {
         if (!newMessage.trim() || sending || !chatRoom) return;
 
+        const messageText = newMessage.trim();
+        setNewMessage('');
         setSending(true);
+
         try {
+            // Optimistic update for text
+            const optimisticMessage: ChatMessage = {
+                message_id: Date.now(),
+                user_id: chatRoom.current_user_id,
+                username: chatRoom.current_user?.username || '',
+                first_name: chatRoom.current_user?.first_name || '',
+                last_name: chatRoom.current_user?.last_name || '',
+                profile_picture_url: chatRoom.current_user?.profile_picture_url,
+                message: messageText,
+                timestamp: new Date().toISOString(),
+                type: 'message',
+                isOptimistic: true
+            } as any;
+
+            setMessages(prev => [...prev, optimisticMessage]);
+
             // Send message via Socket.IO
-            socketIOManager.sendMessage(newMessage.trim());
-            setNewMessage('');
+            socketIOManager.sendMessage(messageText);
         } catch (error) {
             console.error('Error sending message:', error);
             Alert.alert(t('error_title'), t('error_send_message'));
@@ -563,80 +618,124 @@ export default function ClassChatScreen() {
         );
     };
 
-    const renderMessage = ({ item }: { item: ChatMessage }) => {
-        // For own messages, we need to make sure we have the profile picture data
+    const renderMessage = ({ item, index }: { item: ChatMessage, index: number }) => {
         const isOwnMessage = item.user_id === chatRoom?.current_user_id;
 
-        // If it's our own message but we don't have profile picture data, try to get it from chatRoom
+        // Grouping Logic
+        // In this chat, messages are ordered by timestamp (not inverted in current view)
+        // Wait, looking at the DM code, it was inverted=true.
+        // Let's check the FlatList in this file. It is NOT inverted currently.
+        // If it's NOT inverted, index 0 is the oldest message.
+        const isFirstInGroup = index === 0 || messages[index - 1].user_id !== item.user_id;
+        const isLastInGroup = index === messages.length - 1 || messages[index + 1].user_id !== item.user_id;
+
         let profilePictureUrl = item.profile_picture_url;
         let firstName = item.first_name;
         let lastName = item.last_name;
 
-        if (isOwnMessage && !profilePictureUrl && chatRoom?.current_user) {
-            profilePictureUrl = chatRoom.current_user.profile_picture_url;
-            firstName = chatRoom.current_user.first_name;
-            lastName = chatRoom.current_user.last_name;
+        if (isOwnMessage) {
+            if (currentUser) {
+                if (!profilePictureUrl) profilePictureUrl = currentUser.profile_picture_url;
+                if (!firstName) firstName = currentUser.first_name;
+                if (!lastName) lastName = currentUser.last_name;
+            } else if (chatRoom?.current_user) {
+                if (!profilePictureUrl) profilePictureUrl = chatRoom.current_user.profile_picture_url;
+                if (!firstName) firstName = chatRoom.current_user.first_name;
+                if (!lastName) lastName = chatRoom.current_user.last_name;
+            }
         }
 
         const isMaterialsChannel = chatRoom?.channel_type === 'materials';
         const hasMaterialFile = item.file_url && item.type === 'file';
         const canManage = isOwnMessage && isMaterialsChannel && hasMaterialFile;
 
+        const radii = {
+            topLeft: isOwnMessage ? 20 : (isFirstInGroup ? 20 : 4),
+            bottomLeft: isOwnMessage ? 20 : (isLastInGroup ? 20 : 4),
+            topRight: isOwnMessage ? (isFirstInGroup ? 20 : 4) : 20,
+            bottomRight: isOwnMessage ? (isLastInGroup ? 20 : 4) : 20,
+        };
+
+        const bubbleStyle = [
+            styles.messageBubble,
+            {
+                borderTopLeftRadius: radii.topLeft,
+                borderBottomLeftRadius: radii.bottomLeft,
+                borderTopRightRadius: radii.topRight,
+                borderBottomRightRadius: radii.bottomRight,
+                marginTop: isFirstInGroup ? 12 : 2,
+            }
+        ];
+
+        const innerRadiusStyle = {
+            borderTopLeftRadius: radii.topLeft,
+            borderBottomLeftRadius: radii.bottomLeft,
+            borderTopRightRadius: radii.topRight,
+            borderBottomRightRadius: radii.bottomRight,
+        };
+
         return (
             <TouchableOpacity
                 activeOpacity={canManage ? 0.7 : 1}
                 onLongPress={() => canManage && handleMaterialLongPress(item)}
                 delayLongPress={500}
+                style={{ width: '100%' }}
             >
-                <View style={[styles.messageContainer, isOwnMessage ? styles.ownMessage : styles.otherMessage]}>
-                    {!isOwnMessage && (
-                        <View style={styles.otherMessageRow}>
+                <Animated.View
+                    entering={isOwnMessage ? FadeInRight.duration(400).springify() : FadeInLeft.duration(400).springify()}
+                    layout={LinearTransition.springify()}
+                    style={[styles.messageContainer, isOwnMessage ? styles.ownMessage : styles.otherMessage]}
+                >
+                    {isFirstInGroup && (
+                        <View style={[styles.messageHeaderWithAvatar, isOwnMessage && { flexDirection: 'row-reverse' }]}>
                             <Image
                                 source={profilePictureUrl ? { uri: profilePictureUrl } : require('../../../src/assets/images/default-avatar.png')}
                                 style={styles.avatar as any}
                             />
-                            <View style={styles.otherMessageContent}>
-                                <View style={styles.messageHeaderInfo}>
-                                    <Text style={styles.messageSender}>{firstName} {lastName}</Text>
-                                    <Text style={styles.messageTime}>
-                                        {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                    </Text>
-                                </View>
-                                <View style={[styles.messageBubble, styles.otherBubble]}>
-                                    {renderMessageContent(item, isOwnMessage)}
-                                </View>
+                            <View style={[styles.messageHeaderInfo, isOwnMessage ? { marginEnd: 10, marginStart: 0, flexDirection: 'row-reverse' } : {}]}>
+                                <Text style={styles.messageSender}>{firstName} {lastName}</Text>
                             </View>
                         </View>
                     )}
 
-                    {isOwnMessage && (
-                        <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'flex-end' }}>
-                            {canManage && (
-                                <TouchableOpacity
-                                    onPress={() => handleToggleQuizMarking(item.message_id)}
-                                    style={styles.quizToggleBadge}
-                                >
-                                    <Ionicons
-                                        name={item.use_for_quizzes ? "checkbox" : "square-outline"}
-                                        size={16}
-                                        color="#fff"
-                                    />
-                                    <Text style={styles.quizToggleText}>
-                                        {t('quiz_toggle') || 'Quiz'}
-                                    </Text>
-                                </TouchableOpacity>
-                            )}
-                            <View style={styles.ownMessageContent}>
-                                <View style={[styles.messageBubble, styles.ownBubble]}>
-                                    {renderMessageContent(item, isOwnMessage)}
-                                </View>
-                                <Text style={[styles.messageTime, styles.ownMessageTime]}>
+                    <View style={bubbleStyle}>
+                        {isOwnMessage ? (
+                            <LinearGradient
+                                colors={['#3498db', '#2980b9']}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 1 }}
+                                style={[styles.bubbleGradient, innerRadiusStyle]}
+                            >
+                                {canManage && (
+                                    <TouchableOpacity
+                                        onPress={() => handleToggleQuizMarking(item.message_id)}
+                                        style={styles.quizToggleBadge}
+                                    >
+                                        <Ionicons
+                                            name={item.use_for_quizzes ? "checkbox" : "square-outline"}
+                                            size={14}
+                                            color="#fff"
+                                        />
+                                        <Text style={styles.quizToggleText}>
+                                            {t('quiz_toggle') || 'Quiz'}
+                                        </Text>
+                                    </TouchableOpacity>
+                                )}
+                                {renderMessageContent(item, isOwnMessage)}
+                                <Text style={styles.bubbleTimeInnerMe}>
+                                    {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </Text>
+                            </LinearGradient>
+                        ) : (
+                            <View style={[styles.otherBubbleInner, innerRadiusStyle]}>
+                                {renderMessageContent(item, isOwnMessage)}
+                                <Text style={styles.bubbleTimeInnerOther}>
                                     {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </Text>
                             </View>
-                        </View>
-                    )}
-                </View>
+                        )}
+                    </View>
+                </Animated.View>
             </TouchableOpacity>
         );
     };
@@ -748,15 +847,13 @@ export default function ClassChatScreen() {
     return (
         <View style={styles.container}>
             <StatusBar barStyle="light-content" />
-            <LinearGradient
-                colors={['#0a0a0a', '#1a1a1a', '#2d2d2d']}
-                style={styles.backgroundGradient}
-            />
 
             {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color="#fff" />
+                    <View style={styles.glassButton}>
+                        <Ionicons name="arrow-back" size={24} color="#fff" />
+                    </View>
                 </TouchableOpacity>
                 <View style={styles.headerContent}>
                     <Text style={styles.headerTitle} numberOfLines={1}>
@@ -813,56 +910,75 @@ export default function ClassChatScreen() {
             {/* Input Area */}
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? (isMaterialsChannel ? 80 : 0) : 0}
+                style={styles.keyboardView}
             >
-                <View style={styles.inputContainer}>
-                    <View style={styles.inputWrapper}>
-                        <TextInput
-                            style={styles.textInput}
-                            value={newMessage}
-                            onChangeText={handleTyping}
-                            placeholder={t('type_message_placeholder')}
-                            placeholderTextColor="#7f8c8d"
-                            multiline
-                            maxLength={1000}
-                        />
-                        {Platform.OS === 'web' ? (
-                            <>
-                                <TouchableOpacity
-                                    style={styles.attachButton}
-                                    onPress={pickImage}
-                                    disabled={sending}
-                                >
-                                    <Ionicons name="image" size={24} color="#bdc3c7" />
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={styles.attachButton}
-                                    onPress={pickDocument}
-                                    disabled={sending}
-                                >
-                                    <Ionicons name="document-text" size={24} color="#bdc3c7" />
-                                </TouchableOpacity>
-                            </>
-                        ) : (
-                            <TouchableOpacity
-                                style={styles.attachButton}
-                                onPress={handleAttachment}
-                                disabled={sending}
-                            >
-                                <Ionicons name="attach" size={24} color="#bdc3c7" />
-                            </TouchableOpacity>
-                        )}
-                        <TouchableOpacity
-                            style={[styles.sendButton, (!newMessage.trim() || sending) && styles.sendButtonDisabled]}
-                            onPress={sendMessage}
-                            disabled={!newMessage.trim() || sending}
-                        >
-                            {sending ? (
-                                <ActivityIndicator size="small" color="#fff" />
+                <View style={styles.footerContainer}>
+                    <View style={styles.inputBarInner}>
+                        <View style={styles.inputActionsLeft}>
+                            {Platform.OS === 'web' ? (
+                                <>
+                                    <TouchableOpacity
+                                        style={styles.iconActionButton}
+                                        onPress={pickImage}
+                                        disabled={sending}
+                                    >
+                                        <Ionicons name="image" size={22} color="#bdc3c7" />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={styles.iconActionButton}
+                                        onPress={pickDocument}
+                                        disabled={sending}
+                                    >
+                                        <Ionicons name="document-text" size={22} color="#bdc3c7" />
+                                    </TouchableOpacity>
+                                </>
                             ) : (
-                                <Ionicons name="send" size={20} color="#fff" />
+                                <TouchableOpacity
+                                    style={styles.iconActionButton}
+                                    onPress={handleAttachment}
+                                    disabled={sending}
+                                >
+                                    <Ionicons name="attach-outline" size={24} color="#bdc3c7" />
+                                </TouchableOpacity>
                             )}
-                        </TouchableOpacity>
+                        </View>
+
+                        <View style={styles.inputWrapper}>
+                            <TextInput
+                                style={styles.textInput}
+                                value={newMessage}
+                                onChangeText={handleTyping}
+                                placeholder={t('type_message_placeholder')}
+                                placeholderTextColor="rgba(255, 255, 255, 0.4)"
+                                multiline
+                                maxLength={1000}
+                                onKeyPress={(e: any) => {
+                                    if (Platform.OS === 'web' && e.nativeEvent.key === 'Enter' && !e.nativeEvent.shiftKey) {
+                                        e.preventDefault();
+                                        sendMessage();
+                                    }
+                                }}
+                            />
+                        </View>
+
+                        <View style={styles.inputActionsRight}>
+                            <Animated.View style={sendButtonAnimatedStyle}>
+                                <TouchableOpacity
+                                    style={[styles.sendButton, (!newMessage.trim() || sending) && styles.sendButtonDisabled]}
+                                    onPress={sendMessage}
+                                    disabled={!newMessage.trim() || sending}
+                                    onPressIn={() => { sendScaleValue.value = withTiming(0.9, { duration: 100 }); }}
+                                    onPressOut={() => { sendScaleValue.value = withTiming(1, { duration: 100 }); }}
+                                >
+                                    {sending ? (
+                                        <ActivityIndicator size="small" color="#fff" />
+                                    ) : (
+                                        <Ionicons name="paper-plane" size={18} color="#fff" style={{ marginLeft: 2 }} />
+                                    )}
+                                </TouchableOpacity>
+                            </Animated.View>
+                        </View>
                     </View>
                 </View>
             </KeyboardAvoidingView>
@@ -996,7 +1112,7 @@ export default function ClassChatScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0a0a0a',
+        backgroundColor: '#1b1b1b',
     },
     backgroundGradient: {
         position: 'absolute',
@@ -1041,19 +1157,30 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingTop: 60,
-        paddingBottom: 16,
+        paddingHorizontal: 24,
+        height: 80,
+        marginTop: Platform.OS === 'ios' ? 40 : 0,
         zIndex: 10,
+        backgroundColor: '#1b1b1b',
         borderBottomWidth: 1,
-        borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+        borderBottomColor: '#2d2d2d',
     },
     backButton: {
-        padding: 8,
-        marginEnd: 8,
+        padding: 4,
+    },
+    glassButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     headerContent: {
         flex: 1,
+        marginStart: 12,
     },
     headerTitle: {
         fontSize: 18,
@@ -1102,170 +1229,188 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     messagesContainer: {
-        padding: 16,
-        paddingBottom: 20,
+        padding: 24,
+        paddingBottom: 40,
     },
     messageContainer: {
-        marginBottom: 16,
-        maxWidth: '85%',
+        marginBottom: 2,
+        width: '100%',
     },
     ownMessage: {
-        alignSelf: 'flex-end',
-    },
-    otherMessage: {
-        alignSelf: 'flex-start',
-    },
-    otherMessageRow: {
-        flexDirection: 'row',
         alignItems: 'flex-end',
     },
-    avatar: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        backgroundColor: 'rgba(52, 152, 219, 0.2)',
-        marginRight: 8,
-        marginBottom: 4,
+    otherMessage: {
+        alignItems: 'flex-start',
     },
-    otherMessageContent: {
-        flex: 1,
-    },
-    messageHeaderInfo: {
-        marginBottom: 4,
-        marginLeft: 4,
+    messageHeaderWithAvatar: {
         flexDirection: 'row',
         alignItems: 'center',
+        marginBottom: 4,
+        marginTop: 12,
+    },
+    avatar: {
+        width: 28,
+        height: 28,
+        borderRadius: 14,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    messageHeaderInfo: {
+        marginStart: 10,
     },
     messageSender: {
         fontSize: 12,
-        fontWeight: '600',
-        color: '#bdc3c7',
-    },
-    messageTime: {
-        fontSize: 10,
-        color: '#7f8c8d',
-        marginStart: 8,
-    },
-    ownMessageTime: {
-        textAlign: 'right',
-        marginTop: 2,
-        marginEnd: 2,
+        fontWeight: '700',
+        color: 'rgba(255, 255, 255, 0.6)',
     },
     messageBubble: {
-        borderRadius: 20,
+        maxWidth: Platform.OS === 'web' ? '70%' : '85%',
+        overflow: 'hidden',
+    },
+    bubbleGradient: {
         padding: 12,
+        paddingBottom: 8,
     },
-    ownBubble: {
-        backgroundColor: '#3498db',
-        borderBottomEndRadius: 4,
-    },
-    otherBubble: {
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-        borderBottomStartRadius: 4,
+    otherBubbleInner: {
+        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+        padding: 12,
+        paddingBottom: 8,
         borderWidth: 1,
         borderColor: 'rgba(255, 255, 255, 0.05)',
+        ...Platform.select({
+            web: {
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+            }
+        })
     },
     messageText: {
-        fontSize: 16,
+        fontSize: 15,
         lineHeight: 22,
-    },
-    ownMessageContent: {
-        flex: 1,
-        alignItems: 'flex-end'
+        color: '#fff',
     },
     ownMessageText: {
         color: '#fff',
     },
     otherMessageText: {
-        color: '#ecf0f1',
+        color: 'rgba(255, 255, 255, 0.9)',
+    },
+    bubbleTimeInnerMe: {
+        fontSize: 10,
+        color: 'rgba(255, 255, 255, 0.6)',
+        textAlign: 'right',
+        marginTop: 4,
+    },
+    bubbleTimeInnerOther: {
+        fontSize: 10,
+        color: 'rgba(255, 255, 255, 0.4)',
+        textAlign: 'right',
+        marginTop: 4,
     },
     typingContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 16,
-        paddingHorizontal: 16,
-        paddingVertical: 8,
+        marginTop: 12,
+        marginBottom: 8,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
         backgroundColor: 'rgba(255, 255, 255, 0.05)',
-        borderRadius: 16,
+        borderRadius: 15,
         alignSelf: 'flex-start',
-        marginStart: 16,
     },
     typingText: {
         fontSize: 12,
-        color: '#bdc3c7',
+        color: 'rgba(255, 255, 255, 0.5)',
         marginEnd: 8,
-        fontStyle: 'italic',
     },
     typingDots: {
         flexDirection: 'row',
-        alignItems: 'center',
     },
     dot: {
         width: 4,
         height: 4,
         borderRadius: 2,
-        backgroundColor: '#bdc3c7',
-        marginHorizontal: 1,
+        backgroundColor: 'rgba(255, 255, 255, 0.4)',
+        marginHorizontal: 1.5,
     },
-    dot1: {
+    dot1: {},
+    dot2: {},
+    dot3: {},
+    keyboardView: {
+        width: '100%',
     },
-    dot2: {
-        opacity: 0.6,
-    },
-    dot3: {
-        opacity: 0.3,
-    },
-    inputContainer: {
-        paddingHorizontal: 16,
-        paddingTop: 12,
-        paddingBottom: 34,
-        backgroundColor: 'rgba(10, 10, 10, 0.95)',
+    footerContainer: {
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        backgroundColor: 'rgba(27, 27, 27, 0.7)',
         borderTopWidth: 1,
-        borderTopColor: 'rgba(255, 255, 255, 0.05)',
+        borderTopColor: 'rgba(255, 255, 255, 0.1)',
+        ...Platform.select({
+            web: {
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+            }
+        })
+    },
+    inputBarInner: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        maxWidth: 900,
+        alignSelf: 'center',
+        width: '100%',
+    },
+    inputActionsLeft: {
+        flexDirection: 'row',
+        marginRight: 8,
+    },
+    iconActionButton: {
+        width: 42,
+        height: 42,
+        borderRadius: 21,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        marginRight: 8,
     },
     inputWrapper: {
-        flexDirection: 'row',
-        alignItems: 'flex-end',
-    },
-    textInput: {
         flex: 1,
         backgroundColor: 'rgba(255, 255, 255, 0.08)',
         borderRadius: 24,
-        paddingHorizontal: 20,
-        paddingVertical: 12,
-        paddingTop: 12,
-        marginEnd: 10,
-        fontSize: 16,
-        color: '#fff',
+        paddingHorizontal: 18,
+        minHeight: 44,
         maxHeight: 120,
+        justifyContent: 'center',
         borderWidth: 1,
         borderColor: 'rgba(255, 255, 255, 0.05)',
     },
-    attachButton: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(255, 255, 255, 0.08)',
-        marginEnd: 10,
+    textInput: {
+        fontSize: 15,
+        color: '#fff',
+        paddingVertical: 10,
+        ...Platform.select({
+            web: { outlineStyle: 'none' } as any
+        })
+    },
+    inputActionsRight: {
+        marginLeft: 12,
     },
     sendButton: {
+        width: 42,
+        height: 42,
+        borderRadius: 21,
         backgroundColor: '#3498db',
-        width: 48,
-        height: 48,
-        borderRadius: 24,
         justifyContent: 'center',
         alignItems: 'center',
         shadowColor: '#3498db',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 8,
-        elevation: 4,
+        elevation: 5,
     },
     sendButtonDisabled: {
-        backgroundColor: 'rgba(52, 152, 219, 0.3)',
-        shadowOpacity: 0.1,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        shadowOpacity: 0,
     },
     emptyContainer: {
         flex: 1,
@@ -1285,8 +1430,8 @@ const styles = StyleSheet.create({
         marginTop: 8,
     },
     messageImage: {
-        width: 200,
-        height: 200,
+        width: 240,
+        height: 180,
         borderRadius: 12,
     },
     fileMessageLayout: {
@@ -1315,7 +1460,6 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '80%',
     },
-    // Modal Styles
     modalOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0,0,0,0.7)',
@@ -1379,7 +1523,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     cancelButton: {
-        backgroundColor: 'rgba(255,255,255,0.1)',
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
     },
     createButton: {
         backgroundColor: '#3498db',
@@ -1406,8 +1550,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 12,
-        marginRight: 8,
-        alignSelf: 'center',
+        marginBottom: 8,
+        alignSelf: 'flex-start',
     },
     quizToggleText: {
         color: '#fff',

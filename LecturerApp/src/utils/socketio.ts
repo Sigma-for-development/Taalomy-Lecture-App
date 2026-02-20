@@ -133,8 +133,9 @@ class SocketIOManager {
           profile_picture_url: data.profile_picture_url || data.sender?.profile_picture_url,
           message: data.message || data.content || '', // Handle both message and content fields
           timestamp: data.timestamp || data.created_at,
-          type: data.type || 'message',
-          recipient_id: data.recipient_id // Include recipient_id for direct messages
+          type: data.type || data.message_type || 'message',
+          recipient_id: data.recipient_id, // Include recipient_id for direct messages
+          file_url: data.file_url
         };
 
         this.messageCallbacks.forEach(callback => callback(message));
