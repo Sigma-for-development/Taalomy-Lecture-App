@@ -17,9 +17,9 @@ export const useResponsive = () => {
         return Math.floor(contentWidth / itemMinWidth);
     };
 
-    const containerStyle = isDesktop ? {
+    const containerStyle: any = isDesktop ? {
         maxWidth: 1600,
-        alignSelf: 'flex-start' as 'flex-start',
+        alignSelf: 'flex-start',
         width: '100%',
         paddingHorizontal: 24
     } : {

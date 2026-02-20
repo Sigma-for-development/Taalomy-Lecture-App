@@ -1000,6 +1000,7 @@
     "tab_class": "الفصل",
     "tab_group": "المجموعة",
     "select_intake": "اختر الدفعة",
+    "send_message": "إرسال الرسالة",
     "your_message_label": "رسالتك",
     "announcement_placeholder": "اكتب إعلانك هنا...",
     "announcement_target_hint": "سيتم إرسال الرسالة إلى جميع الطلاب في \"{{name}}\"",

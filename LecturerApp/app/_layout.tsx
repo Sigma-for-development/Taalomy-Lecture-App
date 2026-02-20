@@ -1,6 +1,7 @@
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
+import Toast from 'react-native-toast-message';
+import { GlassToast } from '../src/components/GlassToast';
 import { useEffect, useState } from 'react';
 import * as Notifications from 'expo-notifications';
 import { registerForPushNotificationsAsync } from '../src/utils/notifications';
@@ -17,50 +18,13 @@ SplashScreen.preventAutoHideAsync();
 
 const toastConfig = {
   success: (props: any) => (
-    <BaseToast
-      {...props}
-      style={{
-        borderLeftColor: '#2ecc71',
-        backgroundColor: '#1E1E1E',
-        borderLeftWidth: 5,
-        height: 70,
-        width: '90%',
-        borderRadius: 10,
-      }}
-      contentContainerStyle={{ paddingHorizontal: 15 }}
-      text1Style={{
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#FFFFFF'
-      }}
-      text2Style={{
-        fontSize: 14,
-        color: '#BDC3C7'
-      }}
-    />
+    <GlassToast {...props} type="success" />
   ),
   error: (props: any) => (
-    <ErrorToast
-      {...props}
-      style={{
-        borderLeftColor: '#e74c3c',
-        backgroundColor: '#1E1E1E',
-        borderLeftWidth: 5,
-        height: 70,
-        width: '90%',
-        borderRadius: 10,
-      }}
-      contentContainerStyle={{ paddingHorizontal: 15 }}
-      text1Style={{
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#FFFFFF'
-      }}
-      text2Style={{
-        fontSize: 14,
-        color: '#BDC3C7'
-      }}
-    />
+    <GlassToast {...props} type="error" />
+  ),
+  info: (props: any) => (
+    <GlassToast {...props} type="info" />
   )
 };
 
