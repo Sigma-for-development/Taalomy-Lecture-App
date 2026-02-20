@@ -187,6 +187,10 @@ export const lecturerAPI = {
   inviteStudentToIntake: (intakeId: string, inviteData: any) => api.post(`/lecturer/intakes/${intakeId}/invite/`, inviteData),
   removeStudentFromIntake: (intakeId: string, studentId: string) => api.delete(`/lecturer/intakes/${intakeId}/students/${studentId}/remove/`),
 
+  // Student details
+  getStudentDetails: (studentId: string | number) => api.get(`/lecturer/student/${studentId}/details/`),
+  getStudents: () => api.get('/lecturer/students/'),
+
   // Class students
   getClassStudents: (classId: string) => api.get(`/lecturer/classes/${classId}/students/`),
   inviteStudentToClass: (classId: string, inviteData: any) => api.post(`/lecturer/classes/${classId}/invite/`, inviteData),

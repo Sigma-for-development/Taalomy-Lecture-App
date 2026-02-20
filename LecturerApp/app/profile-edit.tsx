@@ -25,6 +25,7 @@ import { useTranslation } from 'react-i18next';
 import { useResponsive } from '../src/hooks/useResponsive';
 import { HoverCard } from '../src/components/HoverCard';
 import { HoverIcon } from '../src/components/HoverIcon';
+import { Skeleton } from '../src/components/Skeleton';
 const AsyncStorage = tokenStorage; // Added import
 
 interface UserData {
@@ -382,12 +383,87 @@ const ProfileEditScreen = () => {
 
   if (isLoading) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <LinearGradient
-          colors={['#0a0a0a', '#1a1a1a', '#2d2d2d']}
-          style={styles.backgroundGradient}
-        />
-        <ActivityIndicator size="large" color="#3498db" />
+      <View style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+
+        {/* Header Skeleton */}
+        <View style={[
+          styles.header,
+          isWeb && {
+            height: 80,
+            paddingTop: 0,
+            backgroundColor: '#1a1a1a',
+            borderBottomWidth: 1,
+            borderBottomColor: '#2c2c2c',
+            paddingHorizontal: isDesktop ? 24 : 20,
+          }
+        ]}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+            {!isWeb && <Skeleton width={24} height={24} borderRadius={12} style={{ marginRight: 15 }} />}
+            <Skeleton width={150} height={24} borderRadius={4} />
+          </View>
+        </View>
+
+        <ScrollView
+          style={styles.content}
+          contentContainerStyle={{
+            paddingBottom: 40,
+            paddingTop: isDesktop ? 30 : 20,
+            paddingHorizontal: isDesktop ? 24 : 0,
+          }}
+        >
+          <View style={{
+            flexDirection: isDesktop ? 'row' : 'column',
+            alignItems: 'flex-start',
+            gap: 24,
+          }}>
+            {/* Left Column Skeleton */}
+            <View style={{ flex: isDesktop ? 1 : undefined, width: '100%' }}>
+              {/* Profile Card Skeleton */}
+              <View style={[styles.profileSection, isDesktop && { marginBottom: 24, backgroundColor: 'rgba(255, 255, 255, 0.03)', padding: 24, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.05)' }]}>
+                <View style={{ flex: 1 }}>
+                  <Skeleton width={120} height={20} style={{ marginBottom: 8 }} />
+                  <Skeleton width="90%" height={14} style={{ marginBottom: 16 }} />
+                </View>
+                <View style={{ alignItems: 'center' }}>
+                  <Skeleton width={120} height={120} borderRadius={60} style={{ marginBottom: 15 }} />
+                  <Skeleton width={140} height={40} borderRadius={20} />
+                </View>
+              </View>
+
+              {/* Logout Card Skeleton */}
+              <View style={[isDesktop && { backgroundColor: 'rgba(255, 255, 255, 0.03)', padding: 24, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.05)' }]}>
+                <Skeleton width="100%" height={45} borderRadius={25} />
+              </View>
+            </View>
+
+            {/* Right Column Skeleton */}
+            <View style={{ flex: isDesktop ? 2 : undefined, width: '100%' }}>
+              {/* Personal Info Card Skeleton */}
+              <View style={[styles.section, isDesktop && { backgroundColor: 'rgba(255, 255, 255, 0.03)', padding: 24, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.05)', marginBottom: 24 }]}>
+                <Skeleton width={180} height={20} style={{ marginBottom: 20, alignSelf: 'flex-start' }} />
+                {[1, 2, 3, 4].map(i => (
+                  <View key={i} style={{ marginBottom: 20 }}>
+                    <Skeleton width={80} height={14} style={{ marginBottom: 8 }} />
+                    <Skeleton width="100%" height={50} borderRadius={12} />
+                  </View>
+                ))}
+              </View>
+
+              {/* Account Info Card Skeleton */}
+              <View style={[styles.section, isDesktop && { backgroundColor: 'rgba(255, 255, 255, 0.03)', padding: 24, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.05)' }]}>
+                <Skeleton width={180} height={20} style={{ marginBottom: 20, alignSelf: 'flex-start' }} />
+                {[1, 2, 3].map(i => (
+                  <View key={i} style={{ marginBottom: 20 }}>
+                    <Skeleton width={100} height={14} style={{ marginBottom: 8 }} />
+                    <Skeleton width="100%" height={45} borderRadius={12} />
+                  </View>
+                ))}
+                <Skeleton width="100%" height={45} borderRadius={12} />
+              </View>
+            </View>
+          </View>
+        </ScrollView>
       </View>
     );
   }
@@ -477,7 +553,7 @@ const ProfileEditScreen = () => {
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
       {isWeb ? (
-        <View style={[StyleSheet.absoluteFill, { backgroundColor: '#1a1a1a' }]} />
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: '#1b1b1b' }]} />
       ) : (
         <LinearGradient
           colors={['#0a0a0a', '#1a1a1a', '#2d2d2d']}
@@ -694,7 +770,7 @@ const ProfileEditScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0a0a0a',
+    backgroundColor: '#1b1b1b',
   },
   backgroundGradient: {
     position: 'absolute',

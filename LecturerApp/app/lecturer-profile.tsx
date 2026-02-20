@@ -273,64 +273,123 @@ const LecturerProfileScreen = () => {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
-      {/* Hero Skeleton */}
-      <View style={styles.heroContainer}>
-        <View style={styles.heroContent}>
-          {/* Left Col Skeleton */}
-          <View style={styles.heroLeftCol}>
-            <Skeleton width={100} height={100} borderRadius={50} style={{ marginRight: 20 }} />
-            <View>
-              <Skeleton width={200} height={28} style={{ marginBottom: 10 }} />
-              <Skeleton width={100} height={20} />
-            </View>
-          </View>
-
-          {/* Right Col Skeleton (Stats) - Desktop Only */}
-          {isDesktop && (
-            <View style={styles.heroRightCol}>
-              <View style={[styles.heroStatsGroup, { backgroundColor: 'transparent', borderWidth: 0 }]}>
-                <Skeleton width={80} height={40} style={{ marginHorizontal: 10 }} />
-                <Skeleton width={80} height={40} style={{ marginHorizontal: 10 }} />
-                <Skeleton width={80} height={40} style={{ marginHorizontal: 10 }} />
+      {isDesktop ? (
+        <>
+          {/* Desktop Hero Skeleton */}
+          <View style={styles.heroContainer}>
+            <View style={styles.heroContent}>
+              <View style={styles.heroLeftCol}>
+                <Skeleton width={50} height={50} borderRadius={25} style={{ marginRight: 15 }} />
+                <View>
+                  <Skeleton width={180} height={24} style={{ marginBottom: 6 }} />
+                  <Skeleton width={80} height={16} borderRadius={8} />
+                </View>
+              </View>
+              <View style={styles.heroRightCol}>
+                <View style={styles.heroStatsGroup}>
+                  <Skeleton width={40} height={30} style={{ marginHorizontal: 10 }} />
+                  <View style={styles.heroStatsDivider} />
+                  <Skeleton width={40} height={30} style={{ marginHorizontal: 10 }} />
+                  <View style={styles.heroStatsDivider} />
+                  <Skeleton width={40} height={30} style={{ marginHorizontal: 10 }} />
+                </View>
+                <Skeleton width={80} height={36} borderRadius={18} style={{ marginLeft: 15 }} />
               </View>
             </View>
-          )}
-        </View>
-      </View>
-
-      <ScrollView style={styles.content} contentContainerStyle={isDesktop ? styles.desktopContainer : { paddingBottom: 40 }}>
-        <View style={isDesktop ? styles.desktopGrid : {}}>
-          {/* Main Column Skeleton */}
-          <View style={isDesktop ? styles.desktopMainCol : { paddingHorizontal: 20 }}>
-            {/* Basic Info Skeleton */}
-            <View style={[styles.section, isDesktop && styles.card, { height: 300 }]}>
-              <Skeleton width={150} height={24} style={{ marginBottom: 20 }} />
-              <Skeleton width="100%" height={100} style={{ marginBottom: 15 }} />
-              <Skeleton width="100%" height={50} style={{ marginBottom: 15 }} />
-              <Skeleton width="100%" height={50} />
-            </View>
-
-            {/* Teaching Info Skeleton */}
-            <View style={[styles.section, isDesktop && styles.card, { height: 250, marginTop: 20 }]}>
-              <Skeleton width={150} height={24} style={{ marginBottom: 20 }} />
-              <Skeleton width="100%" height={50} style={{ marginBottom: 15 }} />
-              <Skeleton width="100%" height={100} />
-            </View>
           </View>
 
-          {/* Sidebar Column Skeleton */}
-          <View style={isDesktop ? styles.desktopSidebarCol : { paddingHorizontal: 20, marginTop: 20 }}>
-            {/* Pricing Skeleton */}
-            <View style={[styles.section, isDesktop && styles.card, { height: 400 }]}>
-              <Skeleton width={150} height={24} style={{ marginBottom: 20 }} />
-              <Skeleton width="100%" height={50} style={{ marginBottom: 15 }} />
-              <Skeleton width="100%" height={50} style={{ marginBottom: 15 }} />
-              <Skeleton width="100%" height={50} style={{ marginBottom: 15 }} />
-              <Skeleton width="100%" height={50} />
+          <ScrollView style={styles.content} contentContainerStyle={styles.desktopContainer}>
+            <View style={styles.desktopGrid}>
+              {/* Main Column Skeleton */}
+              <View style={styles.desktopMainCol}>
+                {/* Basic Info Skeleton */}
+                <View style={styles.card}>
+                  <Skeleton width={120} height={20} style={{ marginBottom: 20 }} />
+                  <View style={styles.fieldContainer}><Skeleton width="100%" height={120} borderRadius={12} /></View>
+                  <View style={styles.row}>
+                    <View style={{ flex: 1, marginRight: 15 }}><Skeleton width="100%" height={50} borderRadius={12} /></View>
+                    <View style={{ flex: 1 }}><Skeleton width="100%" height={50} borderRadius={12} /></View>
+                  </View>
+                  <View style={[styles.fieldContainer, { marginTop: 20 }]}><Skeleton width="100%" height={50} borderRadius={12} /></View>
+                </View>
+
+                {/* Teaching Info Skeleton */}
+                <View style={styles.card}>
+                  <Skeleton width={140} height={20} style={{ marginBottom: 20 }} />
+                  <View style={styles.fieldContainer}><Skeleton width="100%" height={50} borderRadius={12} /></View>
+                  <View style={styles.fieldContainer}><Skeleton width="100%" height={100} borderRadius={12} /></View>
+                  <Skeleton width="100%" height={50} borderRadius={12} />
+                </View>
+
+                {/* Professional Info Skeleton */}
+                <View style={styles.card}>
+                  <Skeleton width={150} height={20} style={{ marginBottom: 20 }} />
+                  <View style={styles.fieldContainer}><Skeleton width="100%" height={80} borderRadius={12} /></View>
+                  <View style={styles.fieldContainer}><Skeleton width="100%" height={80} borderRadius={12} /></View>
+                  <Skeleton width="100%" height={50} borderRadius={12} />
+                </View>
+
+                {/* Reviews Skeleton */}
+                <View style={styles.card}>
+                  <Skeleton width={100} height={20} style={{ marginBottom: 20 }} />
+                  <Skeleton width="100%" height={150} borderRadius={12} />
+                </View>
+              </View>
+
+              {/* Sidebar Column Skeleton */}
+              <View style={styles.desktopSidebarCol}>
+                {/* Pricing Skeleton */}
+                <View style={styles.card}>
+                  <Skeleton width={150} height={20} style={{ marginBottom: 20 }} />
+                  {[1, 2, 3, 4].map(i => (
+                    <View key={i} style={{ marginBottom: 15, flexDirection: 'row', alignItems: 'center' }}>
+                      <Skeleton width="85%" height={50} borderRadius={12} />
+                      <Skeleton width={40} height={24} borderRadius={12} style={{ marginLeft: 10 }} />
+                    </View>
+                  ))}
+                  <View style={styles.switchContainer}>
+                    <Skeleton width={120} height={20} />
+                    <Skeleton width={45} height={25} borderRadius={15} />
+                  </View>
+                </View>
+
+                {/* Social Portfolio Skeleton */}
+                <View style={styles.card}>
+                  <Skeleton width={150} height={20} style={{ marginBottom: 20 }} />
+                  {[1, 2, 3, 4].map(i => (
+                    <View key={i} style={{ marginBottom: 15 }}><Skeleton width="100%" height={50} borderRadius={12} /></View>
+                  ))}
+                </View>
+              </View>
             </View>
+          </ScrollView>
+        </>
+      ) : (
+        <>
+          {/* Mobile Header Skeleton */}
+          <View style={styles.mobileHeader}>
+            <Skeleton width={30} height={30} borderRadius={15} />
+            <Skeleton width={150} height={20} />
+            <Skeleton width={60} height={30} borderRadius={15} />
           </View>
-        </View>
-      </ScrollView>
+
+          <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 40 }}>
+            {/* Profile Image Skeleton */}
+            <View style={styles.profileImageContainer}>
+              <Skeleton width={120} height={120} borderRadius={60} />
+              <View style={{ marginTop: 15 }}><Skeleton width={100} height={30} borderRadius={15} /></View>
+            </View>
+
+            {/* Section Skeletons */}
+            {[1, 2, 3, 4].map(i => (
+              <View key={i} style={{ paddingHorizontal: 20, marginBottom: 25 }}>
+                <Skeleton width={120} height={20} style={{ marginBottom: 15 }} />
+                <Skeleton width="100%" height={150} borderRadius={12} />
+              </View>
+            ))}
+          </ScrollView>
+        </>
+      )}
     </View>
   );
 

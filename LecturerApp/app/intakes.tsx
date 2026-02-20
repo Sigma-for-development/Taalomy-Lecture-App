@@ -196,7 +196,7 @@ const IntakesScreen = () => {
 
   // Skeleton Loading Component
   const IntakeSkeleton = () => (
-    <View style={{ flex: 1, backgroundColor: '#1a1a1a' }}>
+    <View style={{ flex: 1, backgroundColor: '#1b1b1b' }}>
       <StatusBar barStyle="light-content" />
 
       {/* Header Skeleton */}
@@ -321,7 +321,7 @@ const IntakesScreen = () => {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#1a1a1a' }}>
+    <View style={{ flex: 1, backgroundColor: '#1b1b1b' }}>
       <StatusBar barStyle="light-content" />
 
       {/* Header */}
@@ -335,7 +335,7 @@ const IntakesScreen = () => {
             paddingBottom: 20,
           }),
           paddingHorizontal: isDesktop ? 24 : 20,
-          backgroundColor: '#1a1a1a',
+          backgroundColor: '#1b1b1b',
           borderBottomWidth: 1,
           borderBottomColor: '#2c2c2c',
         }}
@@ -384,7 +384,7 @@ const IntakesScreen = () => {
       <View style={{
         paddingHorizontal: isDesktop ? 24 : 20,
         paddingVertical: 16,
-        backgroundColor: '#1a1a1a',
+        backgroundColor: '#1b1b1b',
         ...(isDesktop && { maxWidth: 1400, alignSelf: 'center', width: '100%' })
       }}>
         <View style={{

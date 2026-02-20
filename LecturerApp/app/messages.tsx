@@ -51,6 +51,7 @@ interface ChatRoom {
       first_name: string;
       last_name: string;
       user_type: string;
+      username?: string;
     };
     created_at: string;
     profile_picture_url?: string;
@@ -71,7 +72,7 @@ interface ClassGroup {
 
 type ListItem = ChatRoom | ClassGroup;
 
-type FilterType = 'all' | 'class' | 'group' | 'direct';
+type FilterType = 'all' | 'class' | 'group' | 'direct' | 'dm';
 
 const MessagesScreen = () => {
   const { t, i18n } = useTranslation();
@@ -91,17 +92,17 @@ const MessagesScreen = () => {
       setError(null);
       // Removed manual token check - api interceptor handles it
 
+      let uId = null;
       // Get current user ID
       const userDataString = await AsyncStorage.getItem('user_data');
       if (userDataString) {
         const userData = JSON.parse(userDataString);
+        uId = userData.id;
         setCurrentUserId(userData.id);
       }
 
       // Use api instance with relative path. Interceptor handles baseURL and Authorization.
       const response = await api.get('rooms/');
-
-      console.log('Received chat rooms:', response.data);
 
       // Sort chat rooms by last updated time (newest first)
       const sortedRooms = response.data.sort((a: ChatRoom, b: ChatRoom) =>
@@ -150,7 +151,12 @@ const MessagesScreen = () => {
   const groupedList = useMemo(() => {
     let filtered = chatRooms;
     if (activeFilter !== 'all') {
-      filtered = chatRooms.filter(room => room.chat_type === activeFilter);
+      filtered = chatRooms.filter(room => {
+        if (activeFilter === 'direct') {
+          return room.chat_type === 'direct' || room.chat_type === 'dm';
+        }
+        return room.chat_type === activeFilter;
+      });
     }
 
     // if filter is active (except 'all'), maybe we don't want grouping? 
@@ -222,14 +228,15 @@ const MessagesScreen = () => {
     } else if (room.chat_type === 'group' && room.group_obj && room.group_obj.id) {
       // Assuming group-chat exists in Lecturer App as well
       router.push(`/group-chat/${room.group_obj.id}`);
-    } else if (room.chat_type === 'direct' && room.participants && currentUserId) {
+    } else if ((room.chat_type === 'direct' || room.chat_type === 'dm') && room.participants && currentUserId) {
       // For direct messages, we need to determine the other participant
       // and navigate to the direct message screen
-      const otherParticipant = room.participants.find(p => p.id !== currentUserId);
+      const others = room.participants.filter(p => String(p.id) !== String(currentUserId));
+      const otherParticipant = others.find(p => p.username !== 'admin' && p.user_type !== 'admin' && p.id !== 1) || others[0];
 
       if (otherParticipant) {
         router.push(`/direct-message/${otherParticipant.id}`);
-      } else if (room.participants.length > 0 && room.participants.some(p => p.id === currentUserId)) {
+      } else if (room.participants.length > 0 && room.participants.some(p => String(p.id) === String(currentUserId))) {
         // Handle Self-Chat (Note to Self) - participants only contains current user
         router.push(`/direct-message/${currentUserId}`);
       } else {
@@ -255,17 +262,26 @@ const MessagesScreen = () => {
   };
 
   const getChatName = (room: ChatRoom) => {
-    if (room.chat_type === 'direct' && room.participants && currentUserId) {
+    if ((room.chat_type === 'direct' || room.chat_type === 'dm') && room.participants && currentUserId) {
       // For direct messages, show the name of the other participant
-      const otherParticipant = room.participants.find(p => p.id !== currentUserId);
+      const others = room.participants.filter(p => String(p.id) !== String(currentUserId));
+      const otherParticipant = others.find(p => p.username !== 'admin' && p.user_type !== 'admin' && p.id !== 1) || others[0];
+
+      if (!otherParticipant && room.participants.length > 0) {
+        console.warn('Could not find other participant in DM room:', room.id, 'Participants:', room.participants, 'CurrentID:', currentUserId);
+      }
+
       if (otherParticipant) {
-        const name = `${otherParticipant.first_name} ${otherParticipant.last_name}`.trim();
-        if (!name || otherParticipant.username === 'admin') return "Taalomy Support";
+        const name = `${otherParticipant.first_name || ''} ${otherParticipant.last_name || ''}`.trim();
+        // Only label as Support if it's the only other participant and is an admin
+        const isAdmin = (otherParticipant.username === 'admin' || otherParticipant.user_type === 'admin' || otherParticipant.id === 1);
+        if (isAdmin && others.length === 1) return "Taalomy Support";
+        if (!name) return otherParticipant.username || "Student";
         return name;
-      } else if (room.participants.length > 0 && room.participants.some(p => p.id === currentUserId)) {
+      } else if (room.participants.length > 0 && room.participants.some(p => String(p.id) === String(currentUserId))) {
         // Self-chat
-        const me = room.participants.find(p => p.id === currentUserId);
-        return me ? `${me.first_name} ${me.last_name} (Me)` : room.name;
+        const me = room.participants.find(p => String(p.id) === String(currentUserId));
+        return me ? `${me.first_name || ''} ${me.last_name || ''} (Me)`.trim() || me.username || "Me" : room.name;
       }
     }
     return room.name;
@@ -276,6 +292,7 @@ const MessagesScreen = () => {
       case 'group':
         return 'people-outline';
       case 'direct':
+      case 'dm':
         return 'person-outline';
       default:
         return 'school-outline';
@@ -358,10 +375,11 @@ const MessagesScreen = () => {
         onPress={() => handleChatRoomPress(item)}
       >
         <View style={styles.avatarContainer}>
-          {item.chat_type === 'direct' && item.participants && currentUserId ? (
+          {(item.chat_type === 'direct' || item.chat_type === 'dm') && item.participants && currentUserId ? (
             (() => {
-              const other = item.participants.find(p => p.id !== currentUserId);
-              const isSupport = chatName === 'Taalomy Support';
+              const others = item.participants.filter(p => String(p.id) !== String(currentUserId));
+              const other = others.find(p => p.username !== 'admin' && p.user_type !== 'admin' && p.id !== 1) || others[0];
+              const isSupport = chatName === 'Taalomy Support' || (other?.username === 'admin' && others.length === 1);
 
               if (isSupport) {
                 return (
@@ -422,8 +440,10 @@ const MessagesScreen = () => {
               <>
                 <Text style={styles.senderName}>
                   {(() => {
-                    const senderName = `${lastMessage.sender.first_name} ${lastMessage.sender.last_name}`.trim();
-                    return senderName || "Taalomy Support";
+                    const sender = lastMessage.sender;
+                    const name = `${sender.first_name || ''} ${sender.last_name || ''}`.trim();
+                    if (sender.user_type === 'admin' || sender.id === 1) return "Taalomy Support";
+                    return name || sender.username || "User";
                   })()}:
                 </Text>
                 <Text style={styles.lastMessage} numberOfLines={1}>
@@ -609,7 +629,7 @@ const MessagesScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#1b1b1b',
   },
   header: {
     flexDirection: 'row',
@@ -620,7 +640,7 @@ const styles = StyleSheet.create({
       paddingBottom: 20,
     }),
     paddingHorizontal: 20,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#1b1b1b',
     borderBottomWidth: 1,
     borderBottomColor: '#2c2c2c',
   },
@@ -636,7 +656,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 16,
     gap: 12,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#1b1b1b',
   },
   statCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
@@ -669,7 +689,7 @@ const styles = StyleSheet.create({
   },
   filterContainer: {
     paddingVertical: 12,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#1b1b1b',
   },
   filterContent: {
     paddingHorizontal: 0,

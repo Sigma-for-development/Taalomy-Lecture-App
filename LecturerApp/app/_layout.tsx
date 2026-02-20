@@ -143,7 +143,7 @@ export default function Layout() {
           <Stack
             screenOptions={{
               headerShown: false,
-              contentStyle: { backgroundColor: '#0a0a0a' },
+              contentStyle: { backgroundColor: '#1b1b1b' },
               ...standardWebTransition, // Apply default web transition
             }}
           >

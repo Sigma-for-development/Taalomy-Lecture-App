@@ -48,6 +48,7 @@ class SocketIOManager {
   private errorCallbacks: ((error: string) => void)[] = [];
   private entityDeletedCallbacks: ((event: EntityDeletedEvent) => void)[] = [];
   private currentRoomId: string | null = null;
+  private secondaryRoomId: string | null = null;
 
   async connect() {
     try {
@@ -94,8 +95,16 @@ class SocketIOManager {
       this.socket.on('connect', () => {
         console.log('Socket.IO connected successfully, socket ID:', this.socket?.id);
         this.connectionCallbacks.forEach(callback => callback(true));
-        // User-specific room is automatically joined by the backend upon connection
-        // No need to explicitly join it here
+
+        // Auto-rejoin rooms if they were set before (handles reconnections)
+        if (this.currentRoomId) {
+          console.log('Auto-rejoining primary room:', this.currentRoomId);
+          this.socket?.emit('join_room', { room_id: this.currentRoomId });
+        }
+        if (this.secondaryRoomId) {
+          console.log('Auto-rejoining secondary room:', this.secondaryRoomId);
+          this.socket?.emit('join_room', { room_id: this.secondaryRoomId });
+        }
       });
 
       this.socket.on('disconnect', (reason) => {
@@ -182,29 +191,43 @@ class SocketIOManager {
       this.socket = null;
     }
     this.currentRoomId = null;
+    this.secondaryRoomId = null;
   }
 
-  async joinRoom(roomId: string) {
-    console.log('joinRoom called with roomId:', roomId);
+  async joinRoom(roomId: string, secondaryId?: string) {
+    console.log('joinRoom called with roomId:', roomId, 'secondaryId:', secondaryId);
+    this.currentRoomId = roomId;
+    this.secondaryRoomId = secondaryId || null;
+
     if (!this.socket || !this.socket.connected) {
       console.log('Socket not connected, connecting first...');
       await this.connect();
+      // The connect listener will handle the actual emission
+      return;
     }
 
     if (this.socket) {
-      console.log('Emitting join_room event');
-      this.currentRoomId = roomId;
+      console.log('Emitting join_room event for primary room');
       this.socket.emit('join_room', { room_id: roomId });
+      if (secondaryId) {
+        console.log('Emitting join_room event for secondary room');
+        this.socket.emit('join_room', { room_id: secondaryId });
+      }
     }
   }
 
   leaveRoom() {
-    console.log('leaveRoom called, currentRoomId:', this.currentRoomId);
-    if (this.socket && this.currentRoomId) {
-      console.log('Emitting leave_room event');
-      this.socket.emit('leave_room', { room_id: this.currentRoomId });
-      this.currentRoomId = null;
+    console.log('leaveRoom called, primary:', this.currentRoomId, 'secondary:', this.secondaryRoomId);
+    if (this.socket) {
+      if (this.currentRoomId) {
+        this.socket.emit('leave_room', { room_id: this.currentRoomId });
+      }
+      if (this.secondaryRoomId) {
+        this.socket.emit('leave_room', { room_id: this.secondaryRoomId });
+      }
     }
+    this.currentRoomId = null;
+    this.secondaryRoomId = null;
   }
 
   async sendMessage(message: string, metadata?: any) {
